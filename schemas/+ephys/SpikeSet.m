@@ -23,8 +23,7 @@ classdef SpikeSet < dj.Relvar & dj.AutoPopulate
             
             insert(this,tuple);
 	    
-	    maketuples(ephys.Spikes, key);
-
+    	    makeTuples(ephys.Spikes, key);
         end
     end
 end
