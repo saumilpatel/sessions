@@ -20,11 +20,12 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
         function makeTuples(self, key)
             detectPath = fetch1(detect.Sets(key), 'detect_set_path');
             sortMethod = fetch1(sort.Methods(key), 'sort_method_name');
-            key.sort_set_path = [detectPath '/' sortMethod];
-            self.insert(key);
+            tuple = key;
+            tuple.sort_set_path = [detectPath '/' sortMethod];
+            self.insert(tuple);
             
             % insert electrodes
-            electrodes = fetch(self * detect.Electrodes(key));
+            electrodes =  dj.utils.structJoin(key,fetch(detect.Electrodes(key)));
             insert(sort.Electrodes, electrodes);
         end
     end
