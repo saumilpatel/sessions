@@ -3,7 +3,8 @@ sort.TetrodesMoGFinalize (imported) # finalize clustering
 
 ->sort.TetrodesMoGManual
 ---
-finalize_sort_ts = CURRENT_TIMESTAMP : timestamp  # current timestamps
+final_sort_file                      : varchar(255) # name of file
+finalize_sort_ts = CURRENT_TIMESTAMP : timestamp    # current timestamps
 %}
 
 classdef TetrodesMoGFinalize < dj.Relvar
