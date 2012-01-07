@@ -1,26 +1,28 @@
 %{
-sort.Finalize (imported) # finalize clustering
+sort.TetrodesMoGFinalize (imported) # finalize clustering
 
-->sort.Manual
+->sort.TetrodesMoGManual
 ---
 finalize_sort_ts = CURRENT_TIMESTAMP : timestamp  # current timestamps
 %}
 
-classdef Finalize < dj.Relvar
+classdef TetrodesMoGFinalize < dj.Relvar
     properties(Constant)
-        table = dj.Table('sort.Finalize');
+        table = dj.Table('sort.TetrodesMoGFinalize');
     end
     
     methods 
-        function self = Finalize(varargin)
+        function self = TetrodesMoGFinalize(varargin)
             self.restrict(varargin{:})
         end
         
         function makeTuples(self, key)
             % do model refit
-            % TODO
+            error('TODO')
             
-            insert(self, key);
+            % insert(self, key);
+            
+            % insert single units into TetrodesMoGUnits
         end
     end
 end
