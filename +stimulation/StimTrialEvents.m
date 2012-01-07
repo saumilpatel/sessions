@@ -1,0 +1,38 @@
+%{
+stimulation.StimTrialEvents (imported) # Events for trials
+
+-> stimulation.StimValidTrials
+event_type      : enum('startTrial','showFixSpot','acquireFixation','showStimulus','response','reward','fixationTimeoutAbort','eyeAbort','noResponse','leverAbort','prematureAbort','clearScreen','saccade','endStimulus','pause','startTrialSound','eyeAbortSound','noResponseSound','leverAbortSound','rewardSound','prematureAbortSound','correctResponseSound','incorrectResponseSound')# Type of stimulation event
+event_time      : bigint unsigned       # Time of stimulation event (in ms relative to start of session)
+---
+event_info=null             : blob                          # Miscellaneous information attached to stimulation event (in ms)
+stimtrialevents_ts=CURRENT_TIMESTAMP: timestamp             # automatic timestamp. Do not edit
+%}
+
+classdef StimTrialEvents < dj.Relvar
+    properties(Constant)
+        table = dj.Table('stimulation.StimTrialEvents');
+    end
+    
+    methods 
+        function self = StimTrialEvents(varargin)
+            self.restrict(varargin{:})
+        end
+        
+        function makeTuples( this, key, events )
+            tuple = key;
+            for i = 1:length(events.types)
+                tuple.event_type = events.types{i}; % Type of stimulation event
+                tuple.event_time = events.times(i);
+                tuple.event_info = events.info{i};
+                
+                if isnan(tuple.event_time)
+                    % Time was not recorded
+                    continue;
+                end
+                
+                insert(this,tuple);
+            end
+        end
+    end
+end
