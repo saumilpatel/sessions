@@ -1,11 +1,10 @@
 %{
-ephys.SpikesAligned (computed) # Spikes aligned to an event
+ephys.SpikesAligned (computed) # Settings for computing the PSTH
 
--> ephys.StimTrialGroupAligned
--> stimulation.StimValidTrials
+-> ephys.SpikesAlignedSet
+-> ephys.Spikes
 ---
-spikes_aligned=null         : longblob                      # Set of trial spikes
-spikesaligned_ts=CURRENT_TIMESTAMP: timestamp               # automatic timestamp. Do not edit
+spikesaligned_ts=CURRENT_TIMESTAMP: timestamp       # automatic timestamp. Do not edit
 %}
 
 classdef SpikesAligned < dj.Relvar
@@ -19,23 +18,13 @@ classdef SpikesAligned < dj.Relvar
         end
         
         function makeTuples( this, key )
-            % Import all the aligned spikes for the trials for this key
+            % Trigger all the channels of spikes aligned to import
+            % JC 2011-10-12
+            tuple = key;
             
-            trials = fetch(stimulation.StimValidTrials(key));
-            spikes = fetch1(ephys.Spikes(key),'spike_times');
+            insert(this,tuple);
             
-            key.spikes_aligned = [];
-            tuples = dj.utils.structJoin(key,trials);
-            
-            for tuple = tuples'
-                alignTime = fetchn(stimulation.StimTrialEvents(tuple),'event_time');
-                endTime = fetch1(stimulation.StimTrialEvents(setfield(tuple,'event_type','endStimulus')),'event_time');
-                
-                tuple.spikes_aligned = spikes(spikes > (alignTime - tuple.pre_stim_time) & ...
-                    (spikes < (endTime + tuple.post_stim_time))) - alignTime;
-                
-                insert(this,tuple);
-            end
+            makeTuples(ephys.SpikesAlignedTrial, key);
         end
     end
 end
