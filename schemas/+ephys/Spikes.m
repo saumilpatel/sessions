@@ -22,25 +22,24 @@ classdef Spikes < dj.Relvar
         end
 	
 	function makeTuples(this, key)
-            type = fetch1(ephys.ClusterSet(key), 'clustering_method');
+        type = fetch1(sort.SetsCompleted(key) * sort.Methods, 'sort_method_name');
             
-            if strcmp(type,'MultiUnit')
-		accessor = sort.MultiUnit;
-            else
-		error('"Unimplemented"');
-            end
+        if strcmp(type,'MultiUnit')
+            accessor = sort.MultiUnit;
+        else
+            error('"Unimplemented"');
+        end
 
 	    keys = fetch(accessor(key));
-            disp(sprintf('Found %d spike files to import\n', length(de)));
-            for i = 1:length(keys)
-		tuple = key;
-		tuple.spike_id = i;
-		[tuple.spike_times, tuple.spike_waveforms, tuple.spike_file_path] = getSpikes(accessor(keys(i)));
-		tuple.electrode_num = keys(i).electrode_num;
+        disp(sprintf('Found %d spike files to import\n', length(de)));
+        for i = 1:length(keys)
+            tuple = key;
+            tuple.spike_id = i;
+            [tuple.spike_times, tuple.spike_waveforms, tuple.spike_file_path] = getSpikes(accessor(keys(i)));
+            tuple.electrode_num = keys(i).electrode_num;
 
-		% TODO: Add switch here which adds additional information in a method specific manner
-            end
-	    
+            % TODO: Add switch here which adds additional information in a method specific manner
         end
+	    
     end
 end

@@ -1,7 +1,7 @@
 %{
-ephys.SpikeSet (imported) # Detection methods
+ephys.SpikeSet (imported) # Import sets of spikes
 
--> ephys.ClusterSet
+-> sort.SetsCompleted 
 ---
 spikeset_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not edit
 %}
@@ -9,7 +9,7 @@ spikeset_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not
 classdef SpikeSet < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('ephys.SpikeSet');
-        popRel = ephys.ClusterSet;
+        popRel = sort.SetsCompleted;
     end
     
     methods 
@@ -22,17 +22,9 @@ classdef SpikeSet < dj.Relvar & dj.AutoPopulate
             tuple = key;
             
             insert(this,tuple);
-            type = fetch1(ephys.ClusterSet(key), 'clustering_method');
-            
-            if(strcmp(type,'Utah') == 1)
-                makeTuplesUtah(ephys.Spikes, key);
-            elseif strcmp(type,'Nonchronic Tetrode')
-                makeTuplesTetrode(ephys.Spikes, key);
-            elseif strcmp(type,'MultiUnit')
-                makeTuplesMultiUnit(ephys.Spikes, key);
-            else
-                error(sprintf('Unsupported ephys type %s',ephys_type));
-            end
+	    
+	    maketuples(ephys.Spikes, key);
+
         end
     end
 end
