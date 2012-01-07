@@ -6,19 +6,14 @@ sort.Electrodes (imported) # clustering for one electrode
 ---
 %}
 
-classdef Electrodes < dj.Relvar & dj.AutoPopulate
+classdef Electrodes < dj.Relvar
     properties(Constant)
         table = dj.Table('sort.Electrodes');
-        popRel = detect.Electrodes * sort.Sets;
     end
     
     methods 
         function self = Electrodes(varargin)
             self.restrict(varargin{:})
-        end
-        
-        function makeTuples(self, key)
-            self.insert(key);
         end
     end
 end

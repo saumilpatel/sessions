@@ -22,6 +22,10 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
             sortMethod = fetch1(sort.Methods(key), 'sort_method_name');
             key.sort_set_path = [detectPath '/' sortMethod];
             self.insert(key);
+            
+            % insert electrodes
+            electrodes = fetch(self * detect.Electrodes(key));
+            insert(sort.Electrodes, electrodes);
         end
     end
 end
