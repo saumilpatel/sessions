@@ -1,0 +1,177 @@
+########################################################
+######### DO NOT MODIFY ANYTHING IN THIS FILE ##########
+########################################################
+
+#!/bin/bash
+
+# Execute the 'prefs' file.  The environment variable was passed in via qsub command line with a '-v' argument
+. $PREFSFILE
+
+# Setup variables for execution
+MASTERVER=20091029
+JOBID=`echo $PBS_JOBID | awk -F"." '{print $1}'`
+SCRIPTLOGDIR=$JOBLOGDIR/$JOBID
+LOGFILE=$SCRIPTLOGDIR/mainlog.log
+NODEFILE=$PBS_NODEFILE
+PBSDSH=`which pbsdsh`
+
+declare -a CPUARRAY MASTERLIST NODEARRAAY
+
+# Create an array from a unique list of nodes - get length
+NODEARRAY=( $(sort -u "$NODEFILE") )
+NUMUNIQNODES=${#NODEARRAY[@]}
+INDEX=0
+
+
+
+function echod {
+	echo "[`date +%Y-%b-%d` % `date +%T`]: $*"
+}
+
+# This looks at the PBS nodefile and determines how many CPU's are requested per node
+# The values are stored in an array,  If the "SINGLEJOBPERNODE' flag is set, then default
+# to only assigning a single CPU to each node
+for (( n=0; n<$NUMUNIQNODES; n++ )); do
+	if [ "$SINGLEJOBPERNODE" == "true" -o "$SINGLEJOBPERNODE" == "t" ]; then
+		CPUARRAY[$n]=1
+	else
+		CPUARRAY[$n]=`grep ${NODEARRAY[$n]} $NODEFILE | wc -l`
+	fi
+done
+
+# This loop takes the array of nodes and array of CPU's, prints a sorted list, then assigns
+# it to the MASTERLIST as an array
+MASTERLIST=( $(
+	for (( n=0; n<$NUMUNIQNODES; n++ )); do
+		for (( i=0; i<${CPUARRAY[$n]}; i++ )); do
+			echo ${NODEARRAY[$n]}_$i
+		done
+	done | sort -t "_" -k 2) )
+
+TOTALCPUS=${#MASTERLIST[@]}
+
+# Create unique 'WORKER' directory
+mkdir -p $WORKERDIR/$JOBID
+
+# If the script logging directory doesn't exist, create it
+[ ! -e $SCRIPTLOGDIR ] && mkdir -p $SCRIPTLOGDIR
+
+# Output to the master logfile the environment information
+echod "Starting main log" >> $LOGFILE
+echod "Script version: $SCRIPTVER" >> $LOGFILE
+echod "Master running on node: `hostname`" >> $LOGFILE
+echod "PBS Nodefile: $PBS_NODEFILE" >> $LOGFILE
+echod "PBS DSH: $PBSDSH" >> $LOGFILE
+echod "Job ID: $PBS_JOBID" >> $LOGFILE
+echod "Nodes Requested: $NUMUNIQNODES" >> $LOGFILE
+echod "Total CPU's requested: $TOTALCPUS" >> $LOGFILE
+
+# If the necessary files cannot be found, abort
+if [ ! -e $LISTFILE ]; then
+        echod "$LISTFILE cannot be found!  Check the name and try again." >> $LOGFILE
+        exit 100
+else
+        echod "Listfile Located: $LISTFILE" >> $LOGFILE
+fi
+
+if [ ! -e $WORKERSCRIPT ]; then
+        echod "$WORKERSCRIPT cannot be found!  Check the name and try again." >> $LOGFILE
+        exit 100
+else
+        echod "Workscript Located: $WORKERSCRIPT" >> $LOGFILE
+fi
+
+# Copy all the scripts to worker directory for retention and execution
+cp -f $PBS_NODEFILE $COMMANDSCRIPT $WORKERDIR/$JOBID
+
+
+cp -f $WORKERSCRIPT $WORKERDIR/$JOBID
+TMPWORKERSCRIPT=$WORKERDIR/$JOBID/`echo $WORKERSCRIPT | rev | awk -F"/" '{print $1}' | rev`
+echod "Relocated workscript" >> $LOGFILE
+echod "  * $WORKERSCRIPT (`md5sum $WORKERSCRIPT | awk -F" " '{print $1}'`)" >> $LOGFILE
+echod "  * $TMPWORKERSCRIPT (`md5sum $TMPWORKERSCRIPT | awk -F" " '{print $1}'`)" >> $LOGFILE
+
+cp -f $PREFSFILE $WORKERDIR/$JOBID
+TMPPREFSFILE=$WORKERDIR/$JOBID/`echo $PREFSFILE | rev | awk -F"/" '{print $1}' | rev`
+echod "Relocated prefs file" >> $LOGFILE
+echod "  * $PREFSFILE (`md5sum $PREFSFILE | awk -F" " '{print $1}'`)" >> $LOGFILE
+echod "  * $TMPPREFSFILE (`md5sum $TMPPREFSFILE | awk -F" " '{print $1}'`)" >> $LOGFILE
+
+cp -f $LISTFILE $WORKERDIR/$JOBID
+TMPLISTFILE=$WORKERDIR/$JOBID/`echo $LISTFILE | rev | awk -F"/" '{print $1}' | rev`
+echod "Relocated list file" >> $LOGFILE
+echod "  * $LISTFILE (`md5sum $LISTFILE | awk -F" " '{print $1}'`)" >> $LOGFILE
+echod "  * $TMPLISTFILE (`md5sum $TMPLISTFILE | awk -F" " '{print $1}'`)" >> $LOGFILE
+
+cat $LISTFILE | tr -s "\n" "\0" | tr "\0" "\n" > $TMPLISTFILE.replaced
+LISTFILE=$TMPLISTFILE.replaced
+
+# Create an array from the provided list of directories to execute Matlab Script -- get length
+declare -a LISTARRAY
+LFLINENUM=0
+
+while read LFLINE; do
+
+	LISTARRAY[$LFLINENUM]=$LFLINE
+	LFLINENUM=$((LFLINENUM+1))
+
+done < $LISTFILE
+
+LISTNUM=${#LISTARRAY[@]}
+INDEX=0
+
+# Loop though the directories, breaking up the list based on number of nodes and cpu's allocated
+for (( i = 0; i < $LISTNUM; i++ )); do
+
+    echo ${LISTARRAY[i]} >> $WORKERDIR/$JOBID/${MASTERLIST[$INDEX]}
+
+    # If we reach the max number of nodes, start over -- and go to next CPU
+	if [ $INDEX -eq $((TOTALCPUS-1)) ]; then
+    	INDEX=0
+	else
+		INDEX=$((INDEX+1))
+	fi
+
+done
+
+# Reset JOBID (probably redundant and unnecessary since it's already done at the top)
+JOBID=`echo $PBS_JOBID | awk -F"." '{print $1}'`
+
+# Loop through the nodes and CPU's, spawning an SSH shell for each -- specifying the script to run (WORKERSCRIPT) upon login
+for (( n = 0; n < $TOTALCPUS; n++ )); do
+
+	NODE=`echo ${MASTERLIST[$n]} | awk -F"_" '{print $1}'`
+	CPUNUM=`echo ${MASTERLIST[$n]} | awk -F"_" '{print $2}'`
+
+	echod "Running: $PBSDSH -h $NODE $TMPWORKERSCRIPT $JOBID $TMPPREFSFILE $CPUNUM" >> $LOGFILE
+	$PBSDSH -h $NODE $TMPWORKERSCRIPT $JOBID $TMPPREFSFILE $CPUNUM 2>&1 >> /dev/null &
+
+	sleep 0.5
+
+done
+
+
+# This block of code just waits until all the nodes have returned (by checking a 'touch'ed file)
+# Once they've all returned, remove info in the temporary working directory and exit
+ALLDONE=false
+
+while ! $ALLDONE
+do
+	sleep 10
+	for (( nodeid = 0; nodeid < $TOTALCPUS; nodeid++ )); do
+		
+		NODECPU=${MASTERLIST[nodeid]}
+		if [ -e $WORKERDIR/$JOBID/$NODECPU.done -a ! -e $WORKERDIR/$JOBID/$NODECPU.done.ack ]; then
+			echod "Node returned: $NODECPU" >> $LOGFILE
+			touch $WORKERDIR/$JOBID/$NODECPU.done.ack
+		fi
+
+		sleep 0.5
+	done
+
+	if [ $TOTALCPUS -eq `ls -1 $WORKERDIR/$JOBID/*.done.ack 2>/dev/null | wc -l` ]; then
+		echod "All nodes completed, cleaning up and exiting" >> $LOGFILE
+		ALLDONE=true
+	fi
+
+done

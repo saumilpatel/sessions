@@ -1,0 +1,158 @@
+#!/bin/bash
+
+WORKSCRIPTVER=20090801
+
+# The 'prefs' file is passed in as argument #2, grab and execute that file so preferences are
+# exported correctly
+PREFSFILE=$2
+. $PREFSFILE
+
+# JobID is passed in as argument #1
+JOBID=$1
+
+# CPUID is passed in as argument #3
+CPUID=$3
+
+# Set the worker file variable (file which contains subset of list for individual nodes)
+WORKERFILE=$WORKERDIR/$JOBID/`hostname`_$CPUID
+
+# Set the logfile variable for *THIS NODE*
+LOGFILE=$JOBLOGDIR/$JOBID/`hostname`_$CPUID.log
+
+# Find path of relocated command script
+TMPCOMMANDSCRIPT=$WORKERDIR/$JOBID/`echo $COMMANDSCRIPT | rev | awk -F"/" '{print $1}' | rev`
+
+# This function prepend the date and time to a string for logfile output
+function echod {
+    echo "[`date +%Y-%b-%d` % `date +%T`]: $*"
+}
+
+# Start in the base directory (probably not necessary, but best to be safe)
+cd $BASEDIR
+
+# Write the following information to the logfile
+echod "Starting script for: `hostname`_$CPUID" >> $LOGFILE
+echod "Jobnumber: $JOBID" >> $LOGFILE
+echod "Prefs: $PREFSFILE" >> $LOGFILE
+echod "Command Script: $TMPCOMMANDSCRIPT" >> $LOGFILE
+
+
+declare -a args
+
+# Loop through WORKERFILE, reading each line into variable WF_LINE
+while read WORKF_LINE
+do
+	echod "Line: $WORKF_LINE" >> $LOGFILE
+ 	
+	NEXTARG=`expr index "$WORKF_LINE" ','`
+
+	if [ "$NEXTARG" -eq 0 ]; then
+		WF_LINE="$WORKF_LINE"
+	else
+		WF_LINE="${WORKF_LINE:0:$((NEXTARG-1))}"
+		WORKF_LINE="${WORKF_LINE:$NEXTARG}"
+	fi
+
+	NEXTARG=`expr index "$WORKF_LINE" ','`
+	ARGNUM=0
+
+	while [ $NEXTARG -ne 0 ]
+	do
+		args[$ARGNUM]="${WORKF_LINE:0:$((NEXTARG-1))}"
+		WORKF_LINE="${WORKF_LINE:$NEXTARG}"
+		NEXTARG=`expr index "$WORKF_LINE" ','`
+		ARGNUM=$((ARGNUM+1))
+	done
+
+	args[$ARGNUM]="$WORKF_LINE"
+
+	echod "Directory: $WF_LINE" >> $LOGFILE
+	echod "Args" >> $LOGFILE
+	for ((a = 0; a <= $ARGNUM; a++)); do
+		echod "   [$((a+1))]=${args[$a]} " >> $LOGFILE
+	done
+
+    # Change to data directory
+    cd $WF_LINE
+
+    if [ "$STAGEDATA" == "true" -o "$STAGEDATA" == "t" ]; then
+    
+        # Begin staging data
+        # Create unique space in scratch area
+        TEMPDIR=$JOBID-`date +%s`-$RANDOM
+        STAGEDIR=/scratch/$TEMPDIR
+        SUBID=`echo $WF_LINE | rev | awk -F"/" '{print $1}' | rev`
+        mkdir -p $STAGEDIR/$SUBID
+
+        echod "Staging $WF_LINE into $STAGEDIR/$SUBID" >> $LOGFILE
+
+        # Stage data from the network to the local drive of the cluster node
+        find $STAGEDIRIN -print | cpio -dump $STAGEDIR/$SUBID
+
+        cd $STAGEDIR
+        echod "Completed.  Staged: `du -sch | grep -i total | awk -F" " '{print $1}'`" >> $LOGFILE
+
+        WORKPATH=$STAGEDIR/$SUBID
+
+    else
+
+	SUBID=`echo $WF_LINE | rev | awk -F"/" '{print $1}' | rev`
+        WORKPATH=$WF_LINE
+
+    fi
+    
+    # If the output directory doesn't exist for some reason, create it
+    [ ! -e $OUTPUTPATH ] && mkdir -p $OUTPUTPATH
+
+    # Remove all '/' or  '~' from the WF_LINE variable. (example: ~/this/directory -> thisdirectory)
+    #1 This will allow us to create an output file for this directory being processed in MATLAB
+    CHANGE_DIR=${WF_LINE//\//}
+    CHANGE_DIR=${CHANGE_DIR//\~/}
+
+    # The full output file is stored here
+    OUTPUT_FILE="$JOBID.`hostname`_$CPUID.$CHANGE_DIR.log"
+
+    # Output to logfile that MATLAB is starting and where the output location is
+    echod "Starting command script. See ($OUTPUTPATH/$OUTPUT_FILE) for output." >> $LOGFILE
+
+
+    ##########################################################
+    #   RUN SCRIPT THAT CONTAINS MATLAB COMMAND TO EXECUTE   #
+    ##########################################################
+
+    . $TMPCOMMANDSCRIPT ${args[@]}
+
+
+    if [ "$STAGEDATA" == "true" -o "$STAGEDATA" == "t" ]; then 
+
+        # Destage data back to original location
+        cd $STAGEDIR/$SUBID
+        echod "De-staging back to $WF_LINE" >> $LOGFILE
+        find $STAGEDIROUT -print | cpio -dump $WF_LINE
+
+    fi 
+
+	unset ARGNUM
+	unset args
+	unset NEXTARG
+
+done < $WORKERFILE
+# End of LOOP
+
+
+# This block of code writes a temporary 'completed' file once all processes are finished
+B=false
+while ! $B; do
+
+    touch $WORKERFILE.done
+    if [ "$?" -eq "0" ]; then
+        B=true
+        echod "Finished: Wrote exit file: $WORKERFILE.done" >> $LOGFILE
+    else
+        echod "Finished: Exit file error - try again soon" >> $LOGFILE
+        sleep 1
+    fi
+
+done
+
+

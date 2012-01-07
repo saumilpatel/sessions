@@ -1,0 +1,59 @@
+BASEDIR=/home/toliaslab/users/alex/projects/acquisition/processing/cluster	#     (string) [xxxx] = Directory containing the cluster scripts
+NODES=20 			#      (integer) [##] = Nodes to reserve
+PPN=6				#      (integer) [##] = Processors per node
+WALLTIME=48:00:00		#   (time) [HH:MM:SS] = Hours, minutes, seconds to reserve the cluster nodes
+SINGLEJOBPERNODE=false		# (bool) [true|false] = Reserve all the processors, but only allocate a single job per node
+JOBNAME=AutoSorting	        #     (string) [xxxx] = Descriptive jobname (15-char max)
+LISTFILE=$BASEDIR/run120	#     (string) [xxxx] = File that contains list of paths to process
+
+### This contains the script that will get executed on each processor/node ###
+COMMANDSCRIPT=$BASEDIR/AutoSorting.cmd
+
+### Anything in this list gets added to the BEGINNING of the Matlab Path ###
+MATLABPATH=/home/toliaslab/users/alex/projects/acquisition/processing/cluster
+
+### Anything in this list gets added to the system path ###
+PATH=$PATH:/opt/afni/current:/opt/fsl/bin
+
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/toliaslab/usr/lib/mysql/:/home/toliaslab/libraries/mym
+
+umask 0000
+
+
+############## See below if you want to stage data ##############
+#---------------------------------------------------------------#
+# Explanation: The directories listed in STAGEDIRIN are the
+# directories within each directory listed in the list.txt file
+# that you want to stage to the local drive of the cluster node.
+# If you want to stage everything (usually not a good idea), you
+# can specify "." as the folder name
+#
+# The same holds true for STAGEDIROUT.  This is after the
+# processing is complete, what directories you want to
+# copy BACK to the network.  Specifying "." will copy
+# everything.  (Again, not a good idea unless you really
+# want all the intermediate data)
+#
+# NOTE: The staging variables can break pretty easily, so avoid
+# putting anything exotic in there.
+#
+# NOTE #2: MAKE SURE there are no spaces anywhere in assigning
+# a variable.  A space between the variable name and the equals
+# sign OR between the equals sign and the value with break things
+# 
+#---------------------------------------------------------------#
+STAGEDATA=false
+STAGEDIRIN="."
+STAGEDIROUT="."
+
+
+
+############## DO NOT MODIFY ###############
+export MATLABPATH
+SCRIPTVER=20090801
+WORKERDIR=$BASEDIR/.worker
+OUTPUTPATH=$BASEDIR/logs
+JOBLOGDIR=$BASEDIR/logs
+WORKERSCRIPT=$BASEDIR/workscript.$SCRIPTVER
+OVERRIDENODELIST=false
+############################################

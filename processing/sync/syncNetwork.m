@@ -1,0 +1,29 @@
+function [stimNet, rms] = syncNetwork(stim, key)
+
+params.maxRoundtrip = 5;
+
+if isempty(stim.events)
+    stimNet = stim;
+    rms = -1;
+    return  % empty file; nothing to do
+end
+
+sy = [stim.params.trials.sync];
+s = [sy.start];
+e = [sy.end];
+r = [sy.response];
+mid = (s + e) / 2; % these are the mac times
+mid = mid / 1000;  % sync times are in ms
+
+% to convert from mac time to pc counter use p(2) * mac + p(1)
+i = (e - s) < params.maxRoundtrip;
+assert(sum(i) / numel(i) > 0.8, 'Too many sync packets dropped')
+p = myrobustfit(mid(i), r(i));
+rms = sqrt(mean((p(2) * mid + p(1) - r).^2));
+
+% get the "zero" time of the counter that was used for network
+% sync relative to session time
+t0 = getHardwareStartTime(acq.BehaviorTraces(key));
+stimNet = convertStimTimes(stim, p, [0; 1]);
+stimNet = convertStimTimes(stimNet, [t0; 1], [t0; 1]);
+stimNet.synchronized = 'network';

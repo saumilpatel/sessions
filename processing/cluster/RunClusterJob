@@ -1,0 +1,135 @@
+
+#!/bin/bash
+
+function checkfile {
+
+	if [ ! -e "$1" ]; then
+		echo
+		echo "** ERROR: $2 missing ($1).  Check your prefs file"
+		echo
+		echo "Aborting ..."
+		exit 100
+	fi
+}
+
+# Get all the directories straight -- make sure we can locate the prefs file
+if [ -e "$(pwd)/prefs" ]; then
+    PREFSFILE=$(pwd)/prefs
+else
+    if [ "$1" == "" ]; then
+        echo "\n\nERROR: If you are not in the same directory as the 'prefs' file, you must specify it on the command line:"
+        echo -e "\n"
+        echo -e "   Ex: $0 /home/jking/scripts/prefs\n\n"
+        exit 100
+    else
+        if [ ! -e /$1 ]; then
+            echo -e "\n\nERROR: You must either specify the full path to the 'prefs' file\n              *OR*\n     execute this script from the same directory as the 'prefs' file\n\n"
+            echo -e "    Ex: $0 /home/jking/scripts/prefs\n\n"
+            exit 100
+        fi
+        PREFSFILE=$1
+    fi
+fi
+
+RUNCLUSVER=20090801
+
+# Execute the 'prefs' script to export environment variables
+. $PREFSFILE
+
+checkfile $LISTFILE "List file"
+checkfile $COMMANDSCRIPT "Command script"
+checkfile $WORKERSCRIPT "Worker script"
+
+# This is a simple backup so that I wouldn't keep losing my scripts when I accidentally rm -rf them
+if [ -e $BASEDIR/.backup ]; then
+    cp -f $BASEDIR/* $BASEDIR/.backup
+fi
+
+# More variables.  BADCHARLIST is a list of characters to strip out of the name when
+# assigning a name to the job.  PBSFILENAME is self-explantory
+############## DO NOT MODIFY #################
+BADCHARLIST="~!@#$%^&*()_+=|[]{};:<>/?,. -"
+PBSFILENAME=master.pbs
+##############################################
+
+# Debugging information -- sort of unnecessary
+([ "$1" == "-d" ] || [ "$2" == "-d" ]) && echo "Prefs: $PREFSFILE" && echo "Workdir: $WORKERDIR" && echo "Resources: nodes=$NODES:ppn=$PPN,walltime=$WALLTIME"
+
+# Verify that you actually want to run the script
+echo -e "\nAbout to run the preprocessing script in the following locations:\n"
+
+blanklines=false
+
+while read line
+do
+    if [ "x$line" == "x" ]; then
+	blanklines=true
+    fi
+    echo "   $line"
+done < $LISTFILE
+
+if [ $blanklines == true ]; then
+	echo -e "\n*** WARNING: You have blank lines in $LISTFILE. You SHOULD remove them ***"
+fi
+
+if [ "$OVERRIDENODELIST" == "true" -o "$OVERRIDENODELIST" == "t" ]; then
+	echo -n -e "\n** NODELIST OVERRIDE **\nNodes: $NODES"
+else
+
+	NUMLISTFILEDIRS=`cat $LISTFILE | wc -l`
+	if [ $SINGLEJOBPERNODE == true ]; then
+	   TMP_PPN=1
+	else
+	   TMP_PPN=$PPN
+	fi
+	NUMCPUS=$((NODES*TMP_PPN))
+
+	echo -n -e "\nNodes reserved: $NODES\nProcessors Per Node: $PPN "
+	if [ $SINGLEJOBPERNODE == true ]; then
+		echo -n "(One Job per Node)"
+	fi
+	echo -e "\nTime Reserved: $WALLTIME"
+
+	if [ $NUMCPUS -gt $((NUMLISTFILEDIRS+3)) ]; then
+	   echo
+	   echo "!!!!!!!!!!!!!!!!    You are reserving more nodes and CPU's than you probably need    !!!!!!!!!!!!!!!!"
+	   echo "!!!!!!!!!!!!   Your listfile has $NUMLISTFILEDIRS directories to process and you've reserved $NUMCPUS CPUs   !!!!!!!!!!!!"
+	   echo "!!! This is a shared resource - please ensure that you are not unnecessarily allocating resources !!!"
+	fi
+fi
+
+# Ask the question - wait for response
+echo -en "\nAre you sure you want to do this? [Y/N] "
+read -s -n 1 BEGIN_PP
+
+case "$BEGIN_PP" in
+    "Y" | "y" ) echo "Yes";;
+    * ) echo "No"; exit 1;
+esac
+
+# If the temporary 'working' directory doesn't exist, create it
+[ ! -e $WORKERDIR ] && mkdir -p $WORKERDIR;
+
+# If the working directory does exist and it has files in it -- abort
+#[ "$(ls $WORKERDIR)" != "" ] && echo -e "\n\nERROR: $WORKERDIR must be empty, please delete any files in directory" && exit 100
+
+# Create jobname - remove bad characters
+DUMMY=`echo -n $JOBNAME | tr -d "$BADCHARLIST"`
+if (( ${#DUMMY} > 15 )); then
+	PBSNAME=${DUMMY:1:15}
+else
+	PBSNAME=$DUMMY
+fi
+
+cd $BASEDIR
+
+echo "Submitting job for: $PBSNAME"
+echo  -n "JobID: "
+
+# Submit the job to the PBS system
+if [ "$OVERRIDENODELIST" == "true" -o "$OVERRIDENODELIST" == "t" ]; then
+	qsub -N "$PBSNAME" -l nodes=$NODES,walltime=$WALLTIME -o $OUTPUTPATH -e $OUTPUTPATH $PBSFILENAME -v "PREFSFILE=$PREFSFILE"
+else
+	qsub -N "$PBSNAME" -l nodes=$NODES:ppn=$PPN,walltime=$WALLTIME -o $OUTPUTPATH -e $OUTPUTPATH $PBSFILENAME -v "PREFSFILE=$PREFSFILE" 
+fi
+
