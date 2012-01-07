@@ -7,7 +7,8 @@ sort.SetsCompleted (imported) # Completed clustering sets
 classdef SetsCompleted < dj.Relvar
     properties(Constant)
         table = dj.Table('sort.SetsCompleted');
-        popRel = sort.Sets - (sort.Electrodes - sort.Finalize);
+        popRel = sort.Sets ...
+            - (sort.Electrodes * sort.Methods('sort_method_name = "TetrodesMoG"') - sort.FinalizeTetrodesMoG);
     end
     
     methods
