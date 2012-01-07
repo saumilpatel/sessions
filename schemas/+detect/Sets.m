@@ -1,0 +1,41 @@
+%{
+detect.Sets (imported) # Set of electrodes to detect spikes
+
+-> detect.Params
+---
+detect_set_path : VARCHAR(255) # folder containing spike files
+%}
+
+classdef Sets < dj.Relvar & dj.AutoPopulate
+    properties(Constant)
+        table = dj.Table('detect.Sets');
+        popRel = detect.Params;
+    end
+    
+    methods 
+        function self = Sets(varargin)
+            self.restrict(varargin{:})
+        end
+        
+        function makeTuples(~, key)
+            switch fetch1(detect.Params(key) * detect.Methods, 'detect_method_name')
+                case 'Tetrodes'
+                    spikesCb = @spikesTetrodes;
+                    spikesFile = 'Sc%d.Htt';
+                    lfpCb = @extractLfpTetrodes;
+                    muaCb = @extractMuaTetrodes;
+                    pathCb = @extractPath;
+                case 'SiliconProbes'
+                    spikesCb = @spikesSiliconProbes;
+                    spikesFile = 'Sc%d.Htt';
+%                     lfpCb = @extractLfpSiliconProbes;
+%                     muaCb = @extractMuaSiliconProbes;
+%                     pathCb = @extractPath;
+                    lfpCb = []; muaCb = []; pathCb = [];
+                case 'Utah'
+                    error('TODO')
+            end
+            processSet(key, spikesCb, spikesFile, lfpCb, muaCb, pathCb);
+        end
+    end
+end
