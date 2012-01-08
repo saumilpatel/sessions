@@ -6,8 +6,7 @@ cluster_number        : int unsigned               # The cluster number for this
 snr                   : double                     # SNR for this cluster
 fp                    : double                     # FP for this cluster
 fn                    : double                     # FN for this cluster
-spike_times=null      : LONGBLOB                   # Spike times
-spike_waveforms=null  : LONGBLOB                   # Spike waveforms
+mean_waveform=null    : LONGBLOB                   # Spike waveforms
 ---
 variationalclusteringsu_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not edit
 %}
@@ -53,8 +52,8 @@ classdef VariationalClusteringSU < dj.Relvar
                 
                 % 3. Insert a cluster element
                 tuple.cluster_number = su(j);
-                tuple.spike_times = model.SpikeTimes.data(model.ClusterAssignment.data{su(j)});
-                tuple.spike_waveforms = cellfun(@(x) mean(x,2), ...
+                %tuple.spike_times = model.SpikeTimes.data(model.ClusterAssignment.data{su(j)});
+                tuple.mean_waveform = cellfun(@(x) mean(x,2), ...
                     model.Waveforms.data, 'UniformOutput', false);
                 tuple.snr = snr(su(j));
                 tuple.fp = fp(su(j));
@@ -63,7 +62,21 @@ classdef VariationalClusteringSU < dj.Relvar
                 insert(sort.VariationalClusteringSU, tuple);                
             end
         end
-        
+
+        function [spikeTimes, waveform, spikeFile] = getSpikes(self)
+            assert(count(self) == 1, 'Relvar must be scalar!');
+            
+            cluster_number = fetch1(self,'cluster_number');
+            vc = fetch(sort.VariationalClusteringAutomatic(key));
+            
+            model = vc.model;
+            model.Waveforms = getWaveforms(sort.VariationalClusteringAutomatic(key));
+            
+            spikeTimes = model.SpikeTimes.data(model.ClusterAssignment.data{cluster_number});
+            waveform = fetch1(self,'mean_waveform');
+            spikeFile = fetch1(detect.Electrodes * self, 'detect_electrode_file');
+        end
+
         function plot( this )
             assert(count(this) == 1, 'Only can show one cluster');
             vsu = fetch(this, '*');
