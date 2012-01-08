@@ -42,8 +42,15 @@ classdef Spikes < dj.Relvar
                 
                 % Adds additional information in a method specific manner
                 if strcmp(type,'VariationalClustering') || strcmp(type,'Utah')
-                    tuple = dj.util.structJoin(tuple, keys(i));
-                    insert(sort.VariationalClusteringLink, tuple);
+                    tuple_link = dj.util.structJoin(tuple, keys(i));
+                    insert(sort.VariationalClusteringLink, tuple_link);
+                    
+                    vcsu = fetch(accessor & key, '*');
+                    tuple_su = tuple
+                    tuple_su.snr = vcsu.snr
+                    tuple_su.fp = vcsu.fp;
+                    tuple_su.fn = vcsu.fn;
+                    insert(ephys.SingleUnit, tuple_su);
                 end
             end
         end
