@@ -25,6 +25,8 @@ classdef Spikes < dj.Relvar
             
             if strcmp(type,'MultiUnit')
                 accessor = sort.MultiUnit;
+            else if strcmp(type,'VariationalClustering') || strcmp(type,'Utah')
+                accessor = sort.VariationalClusteringSU;
             else
                 error('"Unimplemented"');
             end
@@ -37,7 +39,12 @@ classdef Spikes < dj.Relvar
                 [tuple.spike_times, tuple.mean_waveform, tuple.spike_file_path] = getSpikes(accessor & keys(i));
                 tuple.electrode_num = keys(i).electrode_num;
                 insert(ephys.Spikes, tuple)
-                % TODO: Add switch here which adds additional information in a method specific manner
+                
+                % Adds additional information in a method specific manner
+                if strcmp(type,'VariationalClustering') || strcmp(type,'Utah')
+                    tuple = dj.util.structJoin(tuple, keys(i));
+                    insert(sort.VariationalClusteringLink, tuple);
+                end
             end
         end
     end
