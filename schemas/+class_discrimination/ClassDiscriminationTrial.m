@@ -3,7 +3,7 @@
 class_discrimination.ClassDiscriminationTrial (computed) # Contains information relavent for behavior classification
 
 -> class_discrimination.ClassDiscriminationExperiment
--> stimulation.StimValidTrials
+-> stimulation.StimTrials
 ---
 stimulus_class              : enum('A','B')                 # The stimulus class (A or B)
 selected_class              : enum('A','B')                 # The selected stimulus class (A or B)
@@ -29,8 +29,10 @@ classdef ClassDiscriminationTrial < dj.Relvar
             tuple = key;
             
             constants = fetch1(stimulation.StimTrialGroup(key),'stim_constants');
-            params = fetch1(stimulation.StimValidTrials(key),'trial_params');
+            params = fetch1(stimulation.StimTrials(key),'trial_params');
             condition = fetch1(stimulation.StimConditions(key),'condition_info');
+            
+            assert(fetch1(stimulation.StimTrials(key),'valid_trial') == 1, 'Only import valid trials');
             
             %% Determine cue class
             % cueClass 1: cue B
@@ -86,6 +88,5 @@ classdef ClassDiscriminationTrial < dj.Relvar
             
             insert(this,tuple);
         end
-        
     end
 end
