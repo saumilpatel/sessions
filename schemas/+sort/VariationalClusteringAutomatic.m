@@ -4,7 +4,7 @@ sort.VariationalClusteringAutomatic (computed) # Detection methods
 -> sort.Electrodes
 ---
 model: LONGBLOB # The fitted model
-variationalclustering_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not edit
+variationalclusteringautomatic_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not edit
 %}
 
 classdef VariationalClusteringAutomatic < dj.Relvar & dj.AutoPopulate
