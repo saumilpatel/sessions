@@ -1,22 +1,23 @@
 %{
-stimulation.StimValidTrials (imported) # Information about the valid trials
+stimulation.StimTrials (imported) # Information about the valid trials
 
--> stimulation.StimConditions
+-> stimulation.StimTrialGroup
 trial_num       : int unsigned          # Trial number
 ---
 start_time=0                : bigint unsigned               # Time trial trial started (in ms relative to session start)
 end_time=0                  : bigint unsigned               # Time trial trial ended (in ms relative to session start)
 trial_params=null           : longblob                      # Stimulation structure for all params
+valid_trial                 : boolean                       # If trial is valid or invalid
 stimvalidtrials_ts=CURRENT_TIMESTAMP: timestamp             # automatic timestamp. Do not edit
 %}
 
-classdef StimValidTrials < dj.Relvar
+classdef StimTrials < dj.Relvar
     properties(Constant)
-        table = dj.Table('stimulation.StimValidTrials');
+        table = dj.Table('stimulation.StimTrials');
     end
     
     methods 
-        function self = StimValidTrials(varargin)
+        function self = StimTrials(varargin)
             self.restrict(varargin{:})
         end
         
@@ -28,10 +29,9 @@ classdef StimValidTrials < dj.Relvar
             
             tuple = key;
             
-            idx = find([stim.params.trials.validTrial] ~= 0);
-            for i = idx
+            for i = 1:length(stim.params.trials);
                 tuple.trial_num = i;
-                tuple.condition_num = stim.params.trials(i).condition;
+                tuple.valid_trial = stim.params.trials(i).validTrial;
                 tuple.start_time = min(stim.events(i).times); % Time trial trial started (in ms)
                 tuple.end_time = max(stim.events(i).times); % Time trial trial ended (in ms)
                 tuple.trial_params = stim.params.trials(i); % Stimulation structure for all params
@@ -41,7 +41,6 @@ classdef StimValidTrials < dj.Relvar
                 events.types = arrayfun(@(x) stim.eventTypes(x), events.types);
                 
                 child = key;
-                child.condition_num = tuple.condition_num;
                 child.trial_num = tuple.trial_num;
                 makeTuples(stimulation.StimTrialEvents, child, events);
             end

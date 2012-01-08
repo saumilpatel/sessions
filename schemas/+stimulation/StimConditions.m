@@ -32,10 +32,6 @@ classdef StimConditions < dj.Relvar
                 
                 insert(this,tuple);
             end
-            
-            % Note this is called outside the loop and the makeTuples must use
-            % the same covention for condition_num
-            makeTuples(stimulation.StimValidTrials, key, stim);
         end
     end
 end

@@ -11,7 +11,8 @@ spikesalignedset_ts=CURRENT_TIMESTAMP: timestamp             # automatic timesta
 classdef SpikesAlignedSet < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('ephys.SpikesAlignedSet');
-        popRel = (ephys.SpikeSet .* ephys.Spikes) *stimulation.StimTrialGroup*ephys.SpikesAlignedConditions
+        popRel = (ephys.SpikeSet .* ephys.Spikes) * acq.EphysStimulationLink * ...
+            stimulation.StimTrialGroup * ephys.SpikesAlignedConditions;
     end
     
     methods 
