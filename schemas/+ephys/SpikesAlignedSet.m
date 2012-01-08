@@ -29,7 +29,7 @@ classdef SpikesAlignedSet < dj.Relvar & dj.AutoPopulate
             tuples = dj.utils.structJoin(key,fetch(ephys.Spikes(key)));
             for tuple = tuples'
                 disp(sprintf('Importing aligned spikes for spike id %d',tuple.spike_id));
-                makeTuples(ephys.StimTrialGroupAligned, tuple);
+                makeTuples(ephys.SpikesAligned, tuple);
             end
         end
     end
