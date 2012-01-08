@@ -2,7 +2,7 @@
 class_discrimination.ChoiceProbability (computed) # Multiple variable regression for decision and posterior
 
 -> class_discrimination.ClassDiscriminationExperiment
--> ephys.StimTrialGroupAligned
+-> ephys.SpikesAligned
 ---
 time_bins=null              : longblob     # Time bins for the regression
 modulation_decision=null    : longblob     # Spikes difference over time
@@ -13,7 +13,7 @@ visual_cp=null              : double       # Average choice probability in visua
 classdef ChoiceProbability < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('class_discrimination.ChoiceProbability');
-        popRel = class_discrimination.CDEType('distribution_type="Uncertain" OR distribution_type="Certain"')*ephys.StimTrialGroupAligned;
+        popRel = class_discrimination.CDEType('distribution_type="Uncertain" OR distribution_type="Certain"')*ephys.SpikesAligned;
         shuffles = 100;
     end
     
@@ -27,7 +27,7 @@ classdef ChoiceProbability < dj.Relvar & dj.AutoPopulate
             tuple = key;
             
             [cue_class selected_class posterior spikes orientation] = ...
-                fetchn(class_discrimination.ClassDiscriminationTrial(key) * ephys.SpikesAligned(key),...
+                fetchn(class_discrimination.ClassDiscriminationTrial(key) * ephys.SpikesAlignedTrial(key),...
                 'stimulus_class', 'selected_class', 'posterior_a', 'spikes_aligned', 'orientation');
             
             cueA = cellfun(@(x) x=='A', cue_class) - 0.5;

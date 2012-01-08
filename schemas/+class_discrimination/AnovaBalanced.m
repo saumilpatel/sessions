@@ -2,7 +2,7 @@
 class_discrimination.AnovaBalanced (computed) # Regress orientation over 90 degree range
 
 -> class_discrimination.ClassDiscriminationExperiment
--> ephys.StimTrialGroupAligned
+-> ephys.SpikesAligned
 -> class_discrimination.PeriodAnalysis
 ---
 a_samples                : double                 # Number of samples per bin for A regression
@@ -14,7 +14,7 @@ rsquared_b               : double                 # Rsquared of orientation on B
 classdef AnovaBalanced < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('class_discrimination.AnovaBalanced');
-        popRel = class_discrimination.CDEType('distribution_type="Uncertain" OR distribution_type="Certain"')*ephys.StimTrialGroupAligned*class_discrimination.PeriodAnalysis;
+        popRel = class_discrimination.CDEType('distribution_type="Uncertain" OR distribution_type="Certain"')*ephys.SpikesAligned*class_discrimination.PeriodAnalysis;
     end
     
     methods
@@ -27,7 +27,7 @@ classdef AnovaBalanced < dj.Relvar & dj.AutoPopulate
             tuple = key;
             
             [cue_class selected_class orientation posterior spikes] = ...
-                fetchn(class_discrimination.ClassDiscriminationTrial(key) * ephys.SpikesAligned(key),...
+                fetchn(class_discrimination.ClassDiscriminationTrial(key) * ephys.SpikesAlignedSet(key),...
                 'stimulus_class', 'selected_class', 'orientation', 'posterior_a', 'spikes_aligned');
             
             selectedA = cellfun(@(x) x=='A', selected_class);

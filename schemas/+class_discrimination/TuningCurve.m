@@ -2,7 +2,7 @@
 class_discrimination.TuningCurve (computed) # Multiple variable regression for decision and posterior
 
 -> class_discrimination.ClassDiscriminationExperiment
--> ephys.StimTrialGroupAligned
+-> ephys.SpikesAligned
 -> class_discrimination.PeriodAnalysis
 -> class_discrimination.TuningCurveParams
 ---
@@ -22,7 +22,7 @@ tuningcurve_ts=CURRENT_TIMESTAMP : timestamp                # automatic timestam
 classdef TuningCurve < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('class_discrimination.TuningCurve');
-        popRel = class_discrimination.ClassDiscriminationExperiment*ephys.StimTrialGroupAligned* ...
+        popRel = class_discrimination.ClassDiscriminationExperiment*ephys.SpikesAligned* ...
             class_discrimination.PeriodAnalysis*class_discrimination.TuningCurveParams;
     end
     
@@ -101,7 +101,7 @@ classdef TuningCurve < dj.Relvar & dj.AutoPopulate
             tuple = key;
             
             [selected_class orientation posterior spikes] = ...
-                fetchn(class_discrimination.ClassDiscriminationTrial(key) * ephys.SpikesAligned(key),...
+                fetchn(class_discrimination.ClassDiscriminationTrial(key) * ephys.SpikesAlignedTrial(key),...
                 'selected_class', 'orientation', 'posterior_a', 'spikes_aligned');
             
             selectedA = cellfun(@(x) x=='A', selected_class);

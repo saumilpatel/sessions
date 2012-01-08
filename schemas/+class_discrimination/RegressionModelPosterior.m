@@ -2,7 +2,7 @@
 class_discrimination.RegressionModelPosterior (computed) # Multiple variable regression for decision and posterior
 
 -> class_discrimination.ClassDiscriminationExperiment
--> ephys.StimTrialGroupAligned
+-> ephys.SpikesAligned
 -> class_discrimination.PeriodAnalysis
 ---
 baseline_firing         : double                 # The average firing rate
@@ -20,7 +20,7 @@ rsquare                 : double                 # Overall r-squared value
 classdef RegressionModelPosterior < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('class_discrimination.RegressionModelPosterior');
-        popRel = class_discrimination.ClassDiscriminationExperiment*ephys.StimTrialGroupAligned*class_discrimination.PeriodAnalysis;
+        popRel = class_discrimination.ClassDiscriminationExperiment*ephys.SpikesAligned*class_discrimination.PeriodAnalysis;
     end
     
     methods
@@ -33,7 +33,7 @@ classdef RegressionModelPosterior < dj.Relvar & dj.AutoPopulate
             tuple = key;
             
             [cue_class selected_class posterior spikes] = ...
-                fetchn(class_discrimination.ClassDiscriminationTrial(key) * ephys.SpikesAligned(key),...
+                fetchn(class_discrimination.ClassDiscriminationTrial(key) * ephys.SpikesAlignedTrial(key),...
                 'stimulus_class', 'selected_class', 'posterior_a', 'spikes_aligned');
             
             cueA = cellfun(@(x) x=='A', cue_class) - 0.5;

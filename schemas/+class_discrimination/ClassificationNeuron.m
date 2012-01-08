@@ -3,7 +3,7 @@
 class_discrimination.ClassificationNeuron (computed) # Contains information relavent for behavior classification
 
 -> class_discrimination.ClassDiscriminationExperiment
--> ephys.StimTrialGroupAligned
+-> ephys.SpikesAligned
 ---
 class_preference_visual     : enum('A','B')                 # The preference for the visual class
 class_preference_visual_sig : double                        # Significance
@@ -12,7 +12,7 @@ class_preference_visual_sig : double                        # Significance
 classdef ClassificationNeuron < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('class_discrimination.ClassificationNeuron');
-        popRel = (class_discrimination.ClassDiscriminationExperiment*ephys.StimTrialGroupAligned);
+        popRel = (class_discrimination.ClassDiscriminationExperiment*ephys.SpikesAligned);
     end
     
     methods
@@ -24,9 +24,9 @@ classdef ClassificationNeuron < dj.Relvar & dj.AutoPopulate
             % Compute the class tuning for this cell
             tuple = key;
             
-            saA = fetchn(ephys.SpikesAligned(key).*class_discrimination.ClassDiscriminationTrial('selected_class="A"'), ...
+            saA = fetchn(ephys.SpikesAlignedTrial(key).*class_discrimination.ClassDiscriminationTrial('selected_class="A"'), ...
                 'spikes_aligned');
-            saB = fetchn(ephys.SpikesAligned(key).*class_discrimination.ClassDiscriminationTrial('selected_class="B"'), ...
+            saB = fetchn(ephys.SpikesAlignedTrial(key).*class_discrimination.ClassDiscriminationTrial('selected_class="B"'), ...
                 'spikes_aligned');
             
             countA = cellfun(@(x) sum(x > 0 & x < 500), saA);
