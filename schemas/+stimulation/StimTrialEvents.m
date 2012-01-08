@@ -2,7 +2,8 @@
 stimulation.StimTrialEvents (imported) # Events for trials
 
 -> stimulation.StimTrials
-event_type      : enum('startTrial','showFixSpot','acquireFixation','showStimulus','response','reward','fixationTimeoutAbort','eyeAbort','noResponse','leverAbort','prematureAbort','clearScreen','saccade','endStimulus','pause','startTrialSound','eyeAbortSound','noResponseSound','leverAbortSound','rewardSound','prematureAbortSound','correctResponseSound','incorrectResponseSound') # Type of stimulation event
+event_type      : enum('startTrial','showFixSpot','acquireFixation','showStimulus','showSubStimulus','response','reward','fixationTimeoutAbort','endSubStimulus','eyeAbort','noResponse','leverAbort','prematureAbort','clearScreen','saccade','endStimulus','pause','startTrialSound','eyeAbortSound','noResponseSound','leverAbortSound','rewardSound','prematureAbortSound','correctResponseSound','incorrectResponseSound')
+# Type of stimulation event
 event_time      : bigint unsigned       # Time of stimulation event (in ms relative to start of session)
 ---
 event_info=null             : blob                          # Miscellaneous information attached to stimulation event (in ms)
