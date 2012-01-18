@@ -21,7 +21,7 @@ classdef SpikesAlignedTrial < dj.Relvar
         function makeTuples( this, key )
             % Import all the aligned spikes for the trials for this key
             
-            trials = fetch(stimulation.StimValidTrials(key));
+            trials = fetch(stimulation.StimTrials(key,'valid_trial=="TRUE"'));
             spikes = fetch1(ephys.Spikes(key),'spike_times');
             
             key.spikes_aligned = [];

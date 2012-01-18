@@ -28,7 +28,11 @@ classdef StimTrialGroup < dj.Relvar & dj.AutoPopulate
             tuple.stim_constants = stim.params.constants;
             insert(self, tuple);
 
+            % Insert conditions
             makeTuples(stimulation.StimConditions, key, stim);
+            % Insert trials
+            makeTuples(stimulation.StimTrials, key, stim);
+
         end
     end
 end

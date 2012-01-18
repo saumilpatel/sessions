@@ -3,7 +3,7 @@
 class_discrimination.ClassificationANOVA (computed) # Contains information relavent for behavior classification
 
 -> class_discrimination.ClassDiscriminationExperiment
--> ephys.StimTrialGroupAligned
+-> ephys.SpikesAligned
 ---
 visual_class_sig            : double           # Significance across orientation in visual
 visual_orientation_sig      : double           # Significance across orientation in visual
@@ -17,7 +17,7 @@ epoch_sig       : double                       # Significance when comparing acr
 classdef ClassificationANOVA < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('class_discrimination.ClassificationANOVA');
-        popRel = (class_discrimination.ClassDiscriminationExperiment*ephys.StimTrialGroupAligned);
+        popRel = (class_discrimination.ClassDiscriminationExperiment*ephys.SpikesAligned);
     end
     
     methods
@@ -29,7 +29,7 @@ classdef ClassificationANOVA < dj.Relvar & dj.AutoPopulate
             % Compute the class tuning for this cell
             tuple = key;
             
-            [selected sa orientation] = fetchn(ephys.SpikesAligned(key) * class_discrimination.ClassDiscriminationTrial, ...
+            [selected sa orientation] = fetchn(ephys.SpikesAlignedTrial(key) * class_discrimination.ClassDiscriminationTrial, ...
                 'selected_class','spikes_aligned','orientation');
             
             % Categorize orientations

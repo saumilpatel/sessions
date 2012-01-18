@@ -2,7 +2,7 @@
 class_discrimination.DORM90Balanced (computed) # Regress orientation over 90 degree range
 
 -> class_discrimination.ClassDiscriminationExperiment
--> ephys.StimTrialGroupAligned
+-> ephys.SpikesAligned
 -> class_discrimination.PeriodAnalysis
 ---
 baseline_firing_a        : double                 # The average firing rate when decided A
@@ -22,7 +22,7 @@ ttest_pval_b             : double                 # TTest PVal
 classdef DORM90Balanced < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('class_discrimination.DORM90Balanced');
-        popRel = class_discrimination.ClassDiscriminationExperiment*ephys.StimTrialGroupAligned*class_discrimination.PeriodAnalysis;
+        popRel = class_discrimination.ClassDiscriminationExperiment*ephys.SpikesAligned*class_discrimination.PeriodAnalysis;
     end
     
     methods
@@ -35,7 +35,7 @@ classdef DORM90Balanced < dj.Relvar & dj.AutoPopulate
             tuple = key;
             
             [cue_class selected_class orientation posterior spikes] = ...
-                fetchn(class_discrimination.ClassDiscriminationTrial(key) * ephys.SpikesAligned(key),...
+                fetchn(class_discrimination.ClassDiscriminationTrial(key) * ephys.SpikesAlignedTrial(key),...
                 'stimulus_class', 'selected_class', 'orientation', 'posterior_a', 'spikes_aligned');
             
             selectedA = cellfun(@(x) x=='A', selected_class);

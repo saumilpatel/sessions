@@ -1,7 +1,8 @@
 function obj = getSchema
 persistent schemaObject
 if isempty(schemaObject)
+    load('djuser');
     schemaObject = dj.Schema('ephys', 'at-storage.neusc.bcm.tmc.edu', ...
-        'james_ephys', 'jcotton', 'jcotton#1');
+        'ephys', user, pass);
 end
 obj = schemaObject;

@@ -2,7 +2,7 @@
 class_discrimination.MovingRegression (computed) # Multiple variable regression for decision and posterior
 
 -> class_discrimination.ClassDiscriminationExperiment
--> ephys.StimTrialGroupAligned
+-> ephys.SpikesAligned
 ---
 time_bins=null       : longblob          # Time bins for the regression
 modulation_a=null    : longblob            # Spikes difference over time
@@ -20,7 +20,7 @@ b_samples                 : int unsigned        # Number of bins for B regressio
 classdef MovingRegression < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('class_discrimination.MovingRegression');
-        popRel = class_discrimination.CDEType('distribution_type="Uncertain" OR distribution_type="Certain"')*ephys.StimTrialGroupAligned;
+        popRel = class_discrimination.CDEType('distribution_type="Uncertain" OR distribution_type="Certain"')*ephys.SpikesAligned;
         shuffles = 100;
         balancing_bins = 20;
     end
@@ -35,7 +35,7 @@ classdef MovingRegression < dj.Relvar & dj.AutoPopulate
             tuple = key;
             
             [cue_class selected_class posterior spikes orientation] = ...
-                fetchn(class_discrimination.ClassDiscriminationTrial(key) * ephys.SpikesAligned(key),...
+                fetchn(class_discrimination.ClassDiscriminationTrial(key) * ephys.SpikesAlignedTrial(key),...
                 'stimulus_class', 'selected_class', 'posterior_a', 'spikes_aligned', 'orientation');
             
             cueA = cellfun(@(x) x=='A', cue_class) - 0.5;

@@ -1,21 +1,20 @@
 %{
-clustering.VariationalClustering (computed) # Detection methods
+sort.VariationalClusteringAutomatic (computed) # Detection methods
 
--> ephys.ClusterSet
--> ephys.DetectionElectrode
-
+-> sort.Electrodes
 ---
 model: LONGBLOB # The fitted model
-variationalclustering_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not edit
+variationalclusteringautomatic_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not edit
 %}
 
-classdef VariationalClustering < dj.Relvar
+classdef VariationalClusteringAutomatic < dj.Relvar & dj.AutoPopulate
     properties(Constant)
-        table = dj.Table('clustering.VariationalClustering');
+        table = dj.Table('sort.VariationalClusteringAutomatic');
+	popRel = sort.Electrodes * sort.Methods('sort_method_name = "Utah");
     end
     
     methods 
-        function self = VariationalClustering(varargin)
+        function self = VariationalClusteringAutomatic(varargin)
             self.restrict(varargin{:})
         end
         
@@ -23,8 +22,8 @@ classdef VariationalClustering < dj.Relvar
             % Load the TT file
             assert(count(this) == 1, 'Only call this for one VC');
             
-            de = fetch(ephys.DetectionElectrode .* this, 'detection_electrode_filename');
-            fn = getLocalPath(de.detection_electrode_filename);
+            de = fetch(detect.Electrodes .* this, 'detect_electrode_file');
+            fn = getLocalPath(de.detect_electrode_file);
             
             tt = ah_readTetData(fn);
         end
@@ -49,15 +48,15 @@ classdef VariationalClustering < dj.Relvar
             
             tuple = key;
             
-            de_keys = fetch(ephys.DetectionElectrode(key));
+            de_keys = fetch(detect.Electrodes(key));
             
             for de_key = de_keys'
-                de = fetch(ephys.DetectionElectrode(de_key), 'detection_electrode_filename');
+                de = fetch(detect.Electrodes(de_key), 'detect_electrode_file');
             
                 tuple = dj.utils.structJoin(de_key, key)
                 
                 % Get spike file
-                fn = getLocalPath(de.detection_electrode_filename);
+                fn = getLocalPath(de.detect_electrode_file);
             
                 disp(sprintf('Clustering spikes from %s',fn));
             
@@ -67,7 +66,6 @@ classdef VariationalClustering < dj.Relvar
                 
                 insert(this,tuple);
             end
-            
         end
     end
 end

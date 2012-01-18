@@ -59,7 +59,7 @@ classdef ClassDiscriminationExperiment < dj.Relvar & dj.AutoPopulate
             
             
             insert(this,tuple);
-            tuples = dj.utils.structJoin(key, fetch(stimulation.StimValidTrials(key)));
+            tuples = dj.utils.structJoin(key, fetch(stimulation.StimTrials(key,'valid_trial="TRUE"')));
             
             for tuple = tuples'
                 makeTuples(class_discrimination.ClassDiscriminationTrial,tuple);
