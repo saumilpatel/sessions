@@ -4,21 +4,10 @@ function [stimDiode, rms, offset] = syncEphysProblems(stim, key)
 
 params.maxErr = 100;
 params.oldFile = false;
-params.maxPhotodiodeErr = 0.100;  % 100 us err allowed
+params.maxPhotodiodeErr = 0.250;  % 250 us err allowed
 params.maxBehDiodeErr = [1e-5 5]; % [slope offset] in ms
 params.diodeThreshold = 0.04;
 params.minNegTime = -100;  % 100 ms timing error
-
-% initial estimate for gain between diode and behavior (hardcoded setup
-% specific)
-switch fetch1(acq.Stimulation(key), 'setup')
-    case 1
-        gain = 1 + 2.6346e-05;
-    case 3
-        gain = 1 + 9.9735e-06;
-    otherwise
-        gain = 1 + 1e-5;
-end
 
 % Get photodiode swap times
 tstart = stim.params.trials(1).swapTimes(1) - 500;
@@ -31,7 +20,7 @@ close(br);
 % swap times recorded on the Mac
 macSwapTimes = cat(1, stim.params.trials.swapTimes);
 t0 = macSwapTimes(1);
-macSwapTimes = (macSwapTimes - t0) * gain;
+macSwapTimes = macSwapTimes - t0;
 
 % detect swaps
 da = abs(diff(peakAmps));
@@ -40,19 +29,32 @@ sd = sqrt(v);
 swaps = find(da > min(15 * sd(1), mean(mu))) + 1;
 diodeSwapTimes = peakTimes(swaps)' - t0;
 
-% Find optimal offset using cross-correlation. Treat each swaptime as a
-% delta peak. We can do this at relatively high sampling rate using sparse
-% arithmetic and then smooth the result to account for jitter in the
-% swaptimes
+% Find optimal gain by line search
+gains = 1 + 1e-06 * (1:40);
 Fs = 10;        % kHz
 k = 200;        % max offset (samples) in each direction
 smooth = 10;    % smoothing window for finding the peak (half-width);
 c = zeros(2 * k + 1, 1);
+s = zeros(1, numel(gains));
+for j = 1 : numel(gains)
+    gain = gains(j);
+    for i = -k:k
+        c(i + k + 1) = isectq(round(macSwapTimes * gain * Fs + i), round(diodeSwapTimes * Fs));
+    end
+    s(j) = skewness(c);
+end
+[maxs, maxj] = max(s);
+assert(maxs > 2, 'Could not determine correct clock rate!')
+
+% Find optimal offset using cross-correlation. Treat each swaptime as a
+% delta peak. We can do this at relatively high sampling rate using sparse
+% arithmetic and then smooth the result to account for jitter in the
+% swaptimes
+gain = gains(maxj);
+macSwapTimes = macSwapTimes * gain;
 for i = -k:k
     c(i + k + 1) = isectq(round(macSwapTimes * Fs + i), round(diodeSwapTimes * Fs));
-    % c(i + k + 1) = numel(intersect(round(macSwapTimes * Fs + i), round(diodeSwapTimes * Fs)));
 end
-assert(skewness(c) > 2, 'Could not determine correct clock rate!')
 win = gausswin(2 * smooth + 1); win = win / sum(win);
 c = conv2(c, win, 'same');
 [~, peak] = max(c);
@@ -131,7 +133,6 @@ while i <= min(numel(macSwapTimes), numel(diodeSwapTimes))
 end
 diodeSwapTimes(i:end) = [];
 macSwapTimes(i:end) = [];
-
 
 
 
