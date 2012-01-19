@@ -8,7 +8,6 @@ stim_stop_time = NULL   : bigint        # end of stimulation timestamp
 stim_path               : varchar(255)  # path to the stimulation data
 exp_type                : varchar(255)  # type of experiment
 total_trials = NULL     : int unsigned  # total number of trials completed
-valid_trials = NULL     : int unsigned  # number of valid trials
 correct_trials = NULL   : int unsigned  # number of correct trials
 incorrect_trials = NULL : int unsigned  # number of incorrect trials
 %}
