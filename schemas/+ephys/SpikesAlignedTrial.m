@@ -2,7 +2,7 @@
 ephys.SpikesAlignedTrial (computed) # Spikes aligned to an event
 
 -> ephys.SpikesAligned
--> stimulation.StimValidTrials
+-> stimulation.StimTrials
 ---
 spikes_aligned=null         : longblob                      # Set of trial spikes
 spikesalignedtrial_ts=CURRENT_TIMESTAMP: timestamp               # automatic timestamp. Do not edit
