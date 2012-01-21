@@ -19,41 +19,88 @@ close(br);
 
 % swap times recorded on the Mac
 macSwapTimes = cat(1, stim.params.trials.swapTimes);
-t0 = macSwapTimes(1);
-macSwapTimes = macSwapTimes - t0;
 
 % detect swaps
 da = abs(diff(peakAmps));
 [mu, v] = MoG1(da(:), 2, 'cycles', 50, 'mu', [0 median(da)]);
 sd = sqrt(v);
 swaps = find(da > min(15 * sd(1), mean(mu))) + 1;
-diodeSwapTimes = peakTimes(swaps)' - t0;
+diodeSwapTimes = peakTimes(swaps);
 
-% Find optimal gain by line search
-gains = 1 + 1e-06 * (1:40);
+% determine chunks of data to use (t ms but at least n points)
+N = numel(macSwapTimes);
+t = 20 * 60 * 1000; % length of segments (ms)
+n = 1000;           % unless we have less than 1000 points
+chunks = 0;
+while chunks(end) < N
+    ndx = chunks(end) + find(macSwapTimes(chunks(end)+1:end) > macSwapTimes(chunks(end)+1) + t, 1, 'first');
+    if isempty(ndx) || ndx > N - n
+        chunks(end+1) = N; %#ok
+    else
+        chunks(end+1) = max(chunks(end) + n, ndx);  %#ok
+    end
+end
+nChunks = numel(chunks) - 1;
+macSwapTimesMatched = cell(1, nChunks);
+diodeSwapTimesMatched = cell(1, nChunks);
+
+% initial rough estimate of regression parameters
+ndx = chunks(1)+1:chunks(2);
+[macPar, macSwapTimesMatched{1}, diodeSwapTimesMatched{1}] ...
+    = estimateRegPar(macSwapTimes(ndx), diodeSwapTimes(ndx));
+
+% update parameters in chunks
+macPar = [macPar, zeros(2, nChunks - 1)];
+for i = 2:nChunks
+    ndx = chunks(i)+1:chunks(i+1);
+    [macPar(:,i), macSwapTimesMatched{i}, diodeSwapTimesMatched{i}] ...
+        = updateRegPar(macSwapTimes(ndx), diodeSwapTimes(ndx), macPar(:,i-1));
+end
+
+% convert times in stim file
+stimDiode = convertStimTimesPiecewise(stim, macPar, macSwapTimes([1 chunks(2:end)]));
+stimDiode.synchronized = 'diode';
+
+% plot residuals
+figure
+N = sum(cellfun(@numel, macSwapTimesMatched));
+macSwapTimes = cat(1, stimDiode.params.trials.swapTimes);
+diodeSwapTimes = peakTimes(swaps)';
+[macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, [0 1]);
+assert(numel(macSwapTimes) >= N, 'Error during timestamp conversion. Number of timestamps don''t match!')
+res = macSwapTimes(:) - diodeSwapTimes(:);
+plot(diodeSwapTimes, res, '.k');
+rms = sqrt(mean(res.^2));
+assert(rms < params.maxPhotodiodeErr, 'Residuals too large after synchronization to photodiode!');
+
+fprintf('Relative rate between behavior timer and photodiode timer was %0.8g\n', macPar(2));
+fprintf('Residuals on photodiode regression had a range of %g and an RMS of %g ms\n', range(res), rms);
+
+offset = 3.5;  % hardcoded since there is no trivial way of getting it here
+
+
+function [b, x, y] = estimateRegPar(x, y)
+
+% rough estimate of gain
+gains = 1 + 1e-6 * (1:30);
 Fs = 10;        % kHz
 k = 200;        % max offset (samples) in each direction
-smooth = 10;    % smoothing window for finding the peak (half-width);
 c = zeros(2 * k + 1, 1);
 s = zeros(1, numel(gains));
 for j = 1 : numel(gains)
     gain = gains(j);
     for i = -k:k
-        c(i + k + 1) = isectq(round(macSwapTimes * gain * Fs + i), round(diodeSwapTimes * Fs));
+        c(i + k + 1) = isectq(round(x * gain * Fs + i), round(y * Fs));
     end
     s(j) = skewness(c);
 end
-[maxs, maxj] = max(s);
-assert(maxs > 2, 'Could not determine correct clock rate!')
-
-% Find optimal offset using cross-correlation. Treat each swaptime as a
-% delta peak. We can do this at relatively high sampling rate using sparse
-% arithmetic and then smooth the result to account for jitter in the
-% swaptimes
+[~, maxj] = max(s);
 gain = gains(maxj);
-macSwapTimes = macSwapTimes * gain;
+
+% rough estimate of offset
+smooth = 10;
 for i = -k:k
-    c(i + k + 1) = isectq(round(macSwapTimes * Fs + i), round(diodeSwapTimes * Fs));
+    c(i + k + 1) = isectq(round(x * gain * Fs + i), round(y * Fs));
 end
 win = gausswin(2 * smooth + 1); win = win / sum(win);
 c = conv2(c, win, 'same');
@@ -63,37 +110,17 @@ n = smooth + Fs;
 ndx = peak + (-n:n);
 offset = offsets(ndx) * c(ndx) / sum(c(ndx));
 
-% throw out swaps that don't have matches within one ms
-[macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, offset);
-N = numel(macSwapTimes);
+% find matches and do accurate regression
+[b, x, y] = updateRegPar(x, y, [offset gain]);
 
-% bring times back on their original clocks if they were manually adjusted
-macSwapTimes = macSwapTimes / gain + t0;
-diodeSwapTimes = diodeSwapTimes + t0;
 
-% exact correction using robust linear regression (undo manual gain
-% correction first)
-% macPar = myrobustfit(macSwapTimes / gain, diodeSwapTimes);
-macPar = regress(diodeSwapTimes', [ones(N, 1), macSwapTimes]);
-assert(abs(macPar(2) - gain) < params.maxBehDiodeErr(1) && abs(offset) < params.maxBehDiodeErr(2), 'Regression between behavior clock and photodiode clock outside system tolerances');
 
-% convert times in stim file
-stimDiode = convertStimTimes(stim, macPar, [0 1]);
-stimDiode.synchronized = 'diode';
 
-% plot residuals
-figure
-macSwapTimes = cat(1, stimDiode.params.trials.swapTimes);
-diodeSwapTimes = peakTimes(swaps)';
-[macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, 0);
-assert(N == numel(macSwapTimes), 'Error during timestamp conversion. Number of timestamps don''t match!')
-res = macSwapTimes(:) - diodeSwapTimes(:);
-plot(diodeSwapTimes, res, '.k');
-rms = sqrt(mean(res.^2));
-assert(rms < params.maxPhotodiodeErr, 'Residuals too large after synchronization to photodiode!');
+function [b, x, y] = updateRegPar(x, y, b)
+% Update regression parameters based on a good guess
 
-fprintf('Offset between behavior timer and photodiode timer was %g ms and the relative rate was %0.8g\n', offset, macPar(2));
-fprintf('Residuals on photodiode regression had a range of %g and an RMS of %g ms\n', range(res), rms);
+[x, y] = matchTimes(x, y, b);
+b = regress(y, [ones(numel(x), 1), x]);
 
 
 function n = isectq(a, b)
@@ -117,22 +144,19 @@ while ia <= na && ib <= nb
 end
 
 
-
-
-function [macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, offset)
+function [x, y] = matchTimes(x, y, b)
+% find matching pairs in x and y (match = within 1 ms)
 
 i = 1;
-while i <= min(numel(macSwapTimes), numel(diodeSwapTimes))
-    if macSwapTimes(i) + offset < diodeSwapTimes(i) - 1
-        macSwapTimes(i) = [];
-    elseif macSwapTimes(i) + offset > diodeSwapTimes(i) + 1
-        diodeSwapTimes(i) = [];
+while i <= min(numel(x), numel(y))
+    if x(i) * b(2) + b(1) < y(i) - 1
+        x(i) = [];
+    elseif x(i) * b(2) + b(1) > y(i) + 1
+        y(i) = [];
     else
         i = i + 1;
     end
 end
-diodeSwapTimes(i:end) = [];
-macSwapTimes(i:end) = [];
-
-
+y(i:end) = [];
+x(i:end) = [];
 
