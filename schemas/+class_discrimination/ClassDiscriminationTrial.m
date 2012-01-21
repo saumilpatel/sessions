@@ -30,7 +30,7 @@ classdef ClassDiscriminationTrial < dj.Relvar
             
             constants = fetch1(stimulation.StimTrialGroup(key),'stim_constants');
             params = fetch1(stimulation.StimTrials(key),'trial_params');
-            condition = fetch1(stimulation.StimConditions(key),'condition_info');
+            condition = fetch1(stimulation.StimConditions(key,sprintf('condition_num=%d',params.condition)),'condition_info');
             
             assert(fetch1(stimulation.StimTrials(key),'valid_trial') == 1, 'Only import valid trials');
             

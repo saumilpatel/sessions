@@ -2,7 +2,7 @@
 ephys.SpikesAlignedTrial (computed) # Spikes aligned to an event
 
 -> ephys.SpikesAligned
--> stimulation.StimValidTrials
+-> stimulation.StimTrials
 ---
 spikes_aligned=null         : longblob                      # Set of trial spikes
 spikesalignedtrial_ts=CURRENT_TIMESTAMP: timestamp               # automatic timestamp. Do not edit
@@ -21,7 +21,7 @@ classdef SpikesAlignedTrial < dj.Relvar
         function makeTuples( this, key )
             % Import all the aligned spikes for the trials for this key
             
-            trials = fetch(stimulation.StimTrials(key,'valid_trial=="TRUE"'));
+            trials = fetch(stimulation.StimTrials(key,'valid_trial=TRUE'));
             spikes = fetch1(ephys.Spikes(key),'spike_times');
             
             key.spikes_aligned = [];

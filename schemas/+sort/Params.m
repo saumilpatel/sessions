@@ -1,7 +1,7 @@
 %{
 sort.Params (manual) # parameters being used for spike sorting
 
--> detect.Methods
+-> detect.Params
 -> sort.Methods
 ---
 %}

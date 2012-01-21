@@ -2,6 +2,7 @@
 sort.Sets (imported) # Set of electrodes to cluster
 
 -> sort.Params
+-> detect.Sets
 ---
 sort_set_path : VARCHAR(255) # folder containing spike sorting files
 %}
@@ -9,7 +10,7 @@ sort_set_path : VARCHAR(255) # folder containing spike sorting files
 classdef Sets < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('sort.Sets');
-        popRel = sort.Params;
+        popRel = sort.Params * detect.Sets;
     end
     
     methods

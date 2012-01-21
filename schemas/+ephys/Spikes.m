@@ -25,7 +25,7 @@ classdef Spikes < dj.Relvar
             
             if strcmp(type,'MultiUnit')
                 accessor = sort.MultiUnit;
-            else if strcmp(type,'VariationalClustering') || strcmp(type,'Utah')
+            elseif strcmp(type,'VariationalClustering') || strcmp(type,'Utah')
                 accessor = sort.VariationalClusteringSU;
             else
                 error('"Unimplemented"');
