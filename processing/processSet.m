@@ -5,7 +5,7 @@ if nargin < 8
     useTempDir = true;
 end
 
-maxFiles = 95; % maximum number of files that fit on temp storage right now
+maxFiles = 200; % maximum number of files that fit on temp storage right now
 
 assert(isfield(key, 'setup') && isfield(key, 'session_start_time') && isfield(key, 'ephys_start_time'), isfield(key, 'detect_method_num'), 'Incomplete primary key!')
 assert(count(detect.Params(key)) == 1, 'Did not find a detection that matches this key!')
