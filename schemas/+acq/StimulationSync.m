@@ -12,7 +12,7 @@ diode_offset = NULL : float   # offset between photodiode and labview timer
 classdef StimulationSync < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('acq.StimulationSync');
-        popRel = acq.Stimulation('stim_stop_time IS NOT NULL');
+        popRel = (acq.Stimulation - acq.StimulationIgnore) & acq.SessionsCleanup;
     end
     
     methods
