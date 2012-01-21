@@ -78,7 +78,6 @@ for key = stimKeys'
         if isempty(stim.events)
             stimStopTime = key.stim_start_time;
             totalTrials = 0;
-            validTrials = 0;
             correctTrials = 0;
             incorrectTrials = 0;
         else
