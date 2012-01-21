@@ -17,7 +17,7 @@ classdef SessionsCleanup < dj.Relvar & dj.AutoPopulate
         end
         
         function makeTuples(self, key)
-            if strcmpi(fetch1(acq.Sessions(key), 'hammer'), 'false')
+            if ~fetch1(acq.Sessions(key), 'hammer')
                 cleanup(key);
             end
             insert(self, key);
