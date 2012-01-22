@@ -28,7 +28,7 @@ swaps = find(da > min(15 * sd(1), mean(mu))) + 1;
 diodeSwapTimes = peakTimes(swaps);
 
 % determine chunks of data to use (t ms but at least n points)
-N = numel(macSwapTimes);
+N = min(numel(diodeSwapTimes), numel(macSwapTimes));
 t = 20 * 60 * 1000; % length of segments (ms)
 n = 1000;           % unless we have less than 1000 points
 chunks = 0;
@@ -40,6 +40,7 @@ while chunks(end) < N
         chunks(end+1) = max(chunks(end) + n, ndx);  %#ok
     end
 end
+chunks(end) = max(numel(macSwapTimes), numel(diodeSwapTimes));
 nChunks = numel(chunks) - 1;
 macSwapTimesMatched = cell(1, nChunks);
 diodeSwapTimesMatched = cell(1, nChunks);
@@ -52,13 +53,14 @@ ndx = chunks(1)+1:chunks(2);
 % update parameters in chunks
 macPar = [macPar, zeros(2, nChunks - 1)];
 for i = 2:nChunks
-    ndx = chunks(i)+1:chunks(i+1);
+    macNdx = chunks(i)+1:min(numel(macSwapTimes), chunks(i+1));
+    diodeNdx = chunks(i)+1:min(numel(diodeSwapTimes), chunks(i+1));
     [macPar(:,i), macSwapTimesMatched{i}, diodeSwapTimesMatched{i}] ...
-        = updateRegPar(macSwapTimes(ndx), diodeSwapTimes(ndx), macPar(:,i-1));
+        = updateRegPar(macSwapTimes(macNdx), diodeSwapTimes(diodeNdx), macPar(:,i-1));
 end
 
 % convert times in stim file
-stimDiode = convertStimTimesPiecewise(stim, macPar, macSwapTimes([1 chunks(2:end)]));
+stimDiode = convertStimTimesPiecewise(stim, macPar, macSwapTimes([1 chunks(2:end-1) end]));
 stimDiode.synchronized = 'diode';
 
 % plot residuals
