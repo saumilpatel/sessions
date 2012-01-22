@@ -21,7 +21,7 @@ assert(strcmp(stim.synchronized, 'network'), 'Run network sync first!')
 % clocks (behavior, ephys) not being synched. This needs to be accounted
 % for separately
 % TODO: PUT CORRECT DATE WHEN THIS BUG WAS FIXED
-if datenum(stim.params.constants.date, 'yyyy-mm-dd_HH-MM-SS') < datenum('2012/01/01')
+if datenum(stim.params.constants.date, 'yyyy-mm-dd_HH-MM-SS') < datenum('2013/01/01')
     [stimDiode, rms, offset] = syncEphysProblems(stim, key);
     return
 end
