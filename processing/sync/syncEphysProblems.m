@@ -46,9 +46,10 @@ macSwapTimesMatched = cell(1, nChunks);
 diodeSwapTimesMatched = cell(1, nChunks);
 
 % initial rough estimate of regression parameters
-ndx = chunks(1)+1:chunks(2);
+macNdx = chunks(1)+1:min(numel(macSwapTimes), chunks(2));
+diodeNdx = chunks(1)+1:min(numel(diodeSwapTimes), chunks(2));
 [macPar, macSwapTimesMatched{1}, diodeSwapTimesMatched{1}] ...
-    = estimateRegPar(macSwapTimes(ndx), diodeSwapTimes(ndx));
+    = estimateRegPar(macSwapTimes(macNdx), diodeSwapTimes(diodeNdx));
 
 % update parameters in chunks
 macPar = [macPar, zeros(2, nChunks - 1)];
