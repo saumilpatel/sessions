@@ -36,9 +36,7 @@ end
 for behKey = behKeys'
     beh = fetch(BehaviorTraces(behKey), '*');
     t0 = getHardwareStartTime(sDb, behKey);
-    br = getBehFile(sDb,beh);
-    br = updateT0(br, t0);
-    close(br);
+    updateT0(getLocalPath(rawToSource(sDb, beh.beh_path)), t0);
     
     if isnan(beh.beh_stop_time)
         br = getBehFile(sDb,beh);
@@ -56,11 +54,10 @@ for ephysKey = ephysKeys'
     ephys = fetch(Ephys(ephysKey),'*');
         
     % TODO: Update T0
-    br = getEphysFile(sDb, ephys, 'Photodiode');
-    br = updateT0(br, getHardwareStartTime(sDb, ephysKey));
-    close(br);
+    t0 = getHardwareStartTime(sDb, ephysKey);
+    updateT0(getLocalPath(rawToSource(sDb, fetch1(sessions.Ephys(ephysKey),'ephys_path'))), t0);
 
-        % TODO: Check stop time
+    % TODO: Check stop time
     if isnan(ephys.ephys_stop_time)
         br = getEphysFile(sDb, ephys, 'Photodiode');
         duration = diff(br([1 end], 't'));
@@ -82,7 +79,7 @@ for ephysKey = ephysKeys'
     outPath(1:4) = []; % Strip out M:
     outPath = strrep(outPath, '\','/');
     outPath = ['/processed' outPath];
-    detectionSetParam.ephys_processed_directory = fileparts(outPath);
+    detectionSetParam.ephys_processed_path = fileparts(outPath);
 
     for stimKey = stimKeys'
         stim = fetch(Stimulation(stimKey),'*');
@@ -113,18 +110,16 @@ for ephysKey = ephysKeys'
                 success = synchronizeStim(sDb,ephys,stimKey);
 %            end
             
+            
             if success
                 % Because we found a linked stimulation insert this set
                 if ~foundStim
-                    detectionSetParam.detection_method = 'Utah';
-                    insert(DetectionSetParam, detectionSetParam);
+                    detectionSetParam.detect_method_num = fetch1(detect.Methods('detect_method_name="Utah"'),'detect_method_num');
+                    insert(detect.Params, detectionSetParam);
                     foundStim = true;
                 end
                 
-                % Create a link from the stimulation to this ephys set
-                ephysStimLink = ephysKey;
-                ephysStimLink.stim_start_time = stim.stim_start_time;
-                insert(EphysStimLink, ephysStimLink);
+                populate(acq.EphysStimulationLink,stimKey);
             end
         end
     end    

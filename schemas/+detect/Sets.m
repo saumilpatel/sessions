@@ -33,7 +33,9 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
 %                     pathCb = @extractPath;
                     lfpCb = []; muaCb = []; pathCb = [];
                 case 'Utah'
-                    error('TODO')
+                    spikesCb = @spikesUtah;
+                    spikesFile = 'Sc%03u.Hsp';
+                    lfpCb = []; muaCb = []; pathCb = [];
             end
             processSet(key, spikesCb, spikesFile, lfpCb, muaCb, pathCb);
         end
