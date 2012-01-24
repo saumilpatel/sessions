@@ -1,50 +1,43 @@
-function stim = convertStimTimesPiecewise(stim, macPar, segments)
+function stim = convertStimTimesPiecewise(stim, par, offset, segments)
 % Converts times in stimulation structure to global reference clock.
-%   stim = convertStimTimes(stim, macPar, segments) converts the times to
-%   the global reference clock using a linear mapping. Times are converted
-%   using
-%       t_global = macPar(1) + macPar(2) * t_mac
-%   where t_mac are timestamps acquired by the Mac
+%   stim = convertStimTimes(stim, par, offset, segments) converts the times
+%   to the ephys clock using a linear mapping. Times are
+%   converted using
+%       t_ephys = par(1) + par(2) * t_mac
+%       t_ephys = par(1) - offset + par(2) * t_beh
+%   where t_mac are timestamps acquired by the Mac and t_beh timestamps
+%   acquired by Behavior. offset is the time offset between behavior and
+%   Mac times after network synchronization (if the hardware clocks were
+%   phase-locked this would be the only thing that we would have to
+%   corrrect using the photodiode).
 %
-% AE 2012-01-19
+% AE 2012-01-23
 
 % extrapolate if necessary
 segments(1) = -Inf;
 segments(end) = Inf;
 
 % events
-trial = 1;
-seg = 1;
-while trial < numel(stim.events) && seg < numel(segments)
-    macEvents = find(~stim.eventSites(stim.events(trial).types));
-    macEventTimes = stim.events(trial).times(macEvents);
-    inSegment = macEventTimes > segments(seg) & macEventTimes <= segments(seg+1);
-    stim.events(trial).times(macEvents(inSegment)) = macPar(1,seg) + macPar(2,seg) * macEventTimes(inSegment);
-    if inSegment(end)
-        trial = trial + 1;
-    else
-        seg = seg + 1;
-    end
+for trial = 1:numel(stim.events)
+    macEvents = ~stim.eventSites(stim.events(trial).types);
+    stim.events(trial).times(macEvents) = convertTimes(stim.events(trial).times(macEvents), par, 0, segments);
+    stim.events(trial).times(~macEvents) = convertTimes(stim.events(trial).times(~macEvents), par, offset, segments);
 end
 
 % buffer swaps
-trial = 1;
-seg = 1;
-while trial < numel(stim.events) && seg < numel(segments)
-    macSwapTimes = stim.params.trials(trial).swapTimes;
-    inSegment = macSwapTimes > segments(seg) & macSwapTimes <= segments(seg+1);
-    stim.params.trials(trial).swapTimes(inSegment) = macPar(1,seg) + macPar(2,seg) * macSwapTimes(inSegment);
-    if inSegment(end)
-        trial = trial + 1;
-    else
-        seg = seg + 1;
-    end
+for trial = 1:numel(stim.events)
+    stim.params.trials(trial).swapTimes = convertTimes(stim.params.trials(trial).swapTimes, par, 0, segments);
 end
 
 % start & end time
-tstart = stim.params.constants.startTime;
-seg = tstart > segments(1:end-1) & tstart <= segments(2:end);
-stim.params.constants.startTime = macPar(1,seg) + macPar(2,seg) * tstart;
-tend = stim.params.constants.endTime;
-seg = tend > segments(1:end-1) & tend <= segments(2:end);
-stim.params.constants.endTime = macPar(1,seg) + macPar(2,seg) * tend;
+stim.params.constants.startTime = convertTimes(stim.params.constants.startTime, par, 0, segments);
+stim.params.constants.endTime = convertTimes(stim.params.constants.endTime, par, 0, segments);
+
+
+
+function t = convertTimes(t, par, offset, segments)
+
+for i = 1:numel(t)
+    seg = find(t(i) > segments, 1);
+    t(i) = par(1,seg) - offset + par(2,seg) * t(i);
+end

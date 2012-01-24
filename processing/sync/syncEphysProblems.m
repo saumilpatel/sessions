@@ -19,16 +19,18 @@ close(br);
 
 % swap times recorded on the Mac
 macSwapTimes = cat(1, stim.params.trials.swapTimes);
+t0 = macSwapTimes(1);
+macSwapTimes = macSwapTimes - t0;
 
 % detect swaps
 da = abs(diff(peakAmps));
 [mu, v] = MoG1(da(:), 2, 'cycles', 50, 'mu', [0 median(da)]);
 sd = sqrt(v);
 swaps = find(da > min(15 * sd(1), mean(mu))) + 1;
-diodeSwapTimes = peakTimes(swaps);
+diodeSwapTimes = peakTimes(swaps) - t0;
 
 % determine chunks of data to use (t ms but at least n points)
-N = min(numel(diodeSwapTimes), numel(macSwapTimes));
+N = numel(macSwapTimes);
 t = 20 * 60 * 1000; % length of segments (ms)
 n = 1000;           % unless we have less than 1000 points
 chunks = 0;
@@ -40,28 +42,33 @@ while chunks(end) < N
         chunks(end+1) = max(chunks(end) + n, ndx);  %#ok
     end
 end
-chunks(end) = max(numel(macSwapTimes), numel(diodeSwapTimes));
 nChunks = numel(chunks) - 1;
 macSwapTimesMatched = cell(1, nChunks);
 diodeSwapTimesMatched = cell(1, nChunks);
 
-% initial rough estimate of regression parameters
-macNdx = chunks(1)+1:min(numel(macSwapTimes), chunks(2));
+% initial estimate of regression parameters
+macNdx = chunks(1)+1:chunks(2);
 diodeNdx = chunks(1)+1:min(numel(diodeSwapTimes), chunks(2));
-[macPar, macSwapTimesMatched{1}, diodeSwapTimesMatched{1}] ...
-    = estimateRegPar(macSwapTimes(macNdx), diodeSwapTimes(diodeNdx));
+b = estimateRegPar(macSwapTimes(macNdx), diodeSwapTimes(diodeNdx));
+offset = b(1);
+
+% put timestamps back on session clock
+macSwapTimes = macSwapTimes + t0;
+diodeSwapTimes = diodeSwapTimes + t0;
+b(1) = b(1) - (b(2) - 1) * t0;
 
 % update parameters in chunks
-macPar = [macPar, zeros(2, nChunks - 1)];
-for i = 2:nChunks
-    macNdx = chunks(i)+1:min(numel(macSwapTimes), chunks(i+1));
-    diodeNdx = chunks(i)+1:min(numel(diodeSwapTimes), chunks(i+1));
-    [macPar(:,i), macSwapTimesMatched{i}, diodeSwapTimesMatched{i}] ...
-        = updateRegPar(macSwapTimes(macNdx), diodeSwapTimes(diodeNdx), macPar(:,i-1));
+macPar = [b, zeros(2, nChunks)];
+for i = 1:nChunks
+    macNdx = chunks(i)+1:chunks(i+1);
+    t = (diodeSwapTimes - macPar(1,i)) / macPar(2,i);
+    diodeNdx = t > macSwapTimes(macNdx(1)+1) - 1 & t < macSwapTimes(macNdx(end)) + 1;
+    [macPar(:,i+1), macSwapTimesMatched{i}, diodeSwapTimesMatched{i}] ...
+        = updateRegPar(macSwapTimes(macNdx), diodeSwapTimes(diodeNdx), macPar(:,i));
 end
 
 % convert times in stim file
-stimDiode = convertStimTimesPiecewise(stim, macPar, macSwapTimes([1 chunks(2:end-1) end]));
+stimDiode = convertStimTimesPiecewise(stim, macPar(:,2:end), offset, macSwapTimes([1 chunks(2:end-1) end]));
 stimDiode.synchronized = 'diode';
 
 % plot residuals
@@ -76,13 +83,12 @@ plot(diodeSwapTimes, res, '.k');
 rms = sqrt(mean(res.^2));
 assert(rms < params.maxPhotodiodeErr, 'Residuals too large after synchronization to photodiode!');
 
-fprintf('Relative rate between behavior timer and photodiode timer was %0.8g\n', macPar(2));
+fprintf('Offset between behavior timer and photodiode timer was %.5g and the relative rate was  %0.8g\n', offset, macPar(2));
 fprintf('Residuals on photodiode regression had a range of %g and an RMS of %g ms\n', range(res), rms);
 
-offset = 3.5;  % hardcoded since there is no trivial way of getting it here
 
 
-function [b, x, y] = estimateRegPar(x, y)
+function b = estimateRegPar(x, y)
 
 % rough estimate of gain
 gains = 1 + 1e-6 * (1:30);
@@ -114,7 +120,7 @@ ndx = peak + (-n:n);
 offset = offsets(ndx) * c(ndx) / sum(c(ndx));
 
 % find matches and do accurate regression
-[b, x, y] = updateRegPar(x, y, [offset gain]);
+b = updateRegPar(x, y, [offset gain]);
 
 
 
