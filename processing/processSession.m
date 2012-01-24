@@ -29,7 +29,7 @@ for i = 1:n
     fprintf('Process session %d of %d (duration: %d:%d h)? [Y/n] ', i, n, hours, mins);
     answer = input('', 's');
     if lower(answer(1)) == 'y'
-        detectKey = createDetectSet(ephysKey, detectMethod);
+        detectKey = createDetectSet(ephysKeys(i), detectMethod);
         createSortSet(detectKey, sortMethod);
     end
 end
