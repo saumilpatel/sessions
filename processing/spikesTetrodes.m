@@ -11,7 +11,7 @@ matlabpool
 
 % for i = 1:numel(tetrodes)
 parfor i = 1:numel(tetrodes)
-    fprintf('Extracting spikes from tetrode %d\n', i);
+    fprintf('Extracting spikes from tetrode %d\n', tetrodes(i));
     outFile = sprintf(strrep(spikesFile, '\', '\\'), tetrodes(i));
     detectSpikesTetrodes(sourceFile, tetrodes(i), outFile);
 end
