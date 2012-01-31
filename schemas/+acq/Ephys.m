@@ -38,7 +38,7 @@ classdef Ephys < dj.Relvar
         function time = getHardwareStartTime(self)
             % Get the hardware start time for the tuple in relvar
             %   time = getHardwareStartTime(self)
-            cond = sprintf('ABS(timestamper_time - %ld) < 3000', fetch1(self, 'ephys_start_time'));
+            cond = sprintf('ABS(timestamper_time - %ld) < 5000', fetch1(self, 'ephys_start_time'));
             rel = acq.SessionTimestamps(cond) & acq.TimestampSources('source = "Ephys"') & (acq.Sessions * self);
             time = acq.SessionTimestamps.getRealTimes(rel);
         end
