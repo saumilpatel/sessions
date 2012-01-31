@@ -38,6 +38,6 @@ stim.params.constants.endTime = convertTimes(stim.params.constants.endTime, par,
 function t = convertTimes(t, par, offset, segments)
 
 for i = 1:numel(t)
-    seg = find(t(i) > segments, 1);
+    seg = find(t(i) > segments, 1, 'last');
     t(i) = par(1,seg) - offset + par(2,seg) * t(i);
 end
