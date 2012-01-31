@@ -17,7 +17,7 @@ classdef SessionsCleanup < dj.Relvar & dj.AutoPopulate
         end
         
         function makeTuples(self, key)
-            if ~fetch1(acq.Sessions(key), 'hammer')
+            if count(acq.Sessions(key) & 'recording_software = "Acquisition2.0"')
                 cleanup(key);
             end
             insert(self, key);
