@@ -12,6 +12,7 @@ params.minNegTime = -100;  % 100 ms timing error
 if isempty(stim.events)
     stimDiode = stim;
     rms = -1;
+    offset = 0;
     return  % empty file; nothing to do
 end
 

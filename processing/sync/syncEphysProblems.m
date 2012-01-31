@@ -95,15 +95,15 @@ gains = 1 + 1e-6 * (1:30);
 Fs = 10;        % kHz
 k = 200;        % max offset (samples) in each direction
 c = zeros(2 * k + 1, 1);
-s = zeros(1, numel(gains));
+m = zeros(1, numel(gains));
 for j = 1 : numel(gains)
     gain = gains(j);
     for i = -k:k
         c(i + k + 1) = isectq(round(x * gain * Fs + i), round(y * Fs));
     end
-    s(j) = skewness(c);
+    m(j) = max(c);
 end
-[~, maxj] = max(s);
+[~, maxj] = max(m);
 gain = gains(maxj);
 
 % rough estimate of offset
