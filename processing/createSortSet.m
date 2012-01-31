@@ -10,7 +10,8 @@ function sortKeys = createSortSet(detectKeys, sortMethod)
 
 sortKeys = fetch(detect.Params(detectKeys));
 if nargin < 2 || isempty(sortMethod)
-    [sortKeys.sort_method_num] = deal(fetchn(acq.Ephys(detectKeys) * acq.EphysTypes, 'default_sort_method'));
+    sortMethods = num2cell(fetchn(acq.Ephys(detectKeys) * acq.EphysTypes, 'default_sort_method'));
+    [sortKeys.sort_method_num] = deal(sortMethods{:});
 else
     [sortKeys.sort_method_num] = deal(fetch1(sort.Methods(struct('sort_method_name', sortMethod)), 'sort_method_num'));
 end
