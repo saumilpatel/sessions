@@ -1,24 +1,25 @@
-function backupSubjectData(subjectId)
+function restoreSubjectData()
 
 tables = {'Sessions', 'SessionsIgnore', 'SessionsCleanup', 'Ephys', ...
     'EphysIgnore', 'Stimulation', 'StimulationIgnore', 'EphysTasks', ...
     'EphysStimulationLink', 'StimulationSync', 'BehaviorTraces'};
-backupTables('acq', tables, subjectId);
+restoreTables('acq', tables);
    
 tables = {'Mua', 'Lfp'};
-backupTables('cont', tables, subjectId);
+restoreTables('cont', tables);
 
 tables = {'Params', 'Sets', 'Electrodes'};
-backupTables('detect', tables, subjectId);
+restoreTables('detect', tables);
 
 tables = {'Params', 'Sets', 'SetsCompleted', 'Electrodes'};
-backupTables('sort', tables, subjectId);
+restoreTables('sort', tables);
 
 
-function backupTables(schema, tables, subjectId)
+function restoreTables(schema, tables)
 
+load(schema);
 for i = 1:numel(tables)
-    eval(sprintf('%s = fetch(%s.%s(''subject_id = %d''), ''*'');', ...
-        tables{i}, schema, tables{i}, subjectId));
+    eval(sprintf('insert(%s.%s, %s);', ...
+        schema, tables{i}, tables{i}));
 end
 save(schema, tables{:})
