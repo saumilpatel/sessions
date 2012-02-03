@@ -10,7 +10,7 @@ variationalclusteringautomatic_ts=CURRENT_TIMESTAMP: timestamp           # autom
 classdef VariationalClusteringAutomatic < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('sort.VariationalClusteringAutomatic');
-	popRel = sort.Electrodes * sort.Methods('sort_method_name = "Utah");
+	popRel = sort.Electrodes * sort.Methods('sort_method_name = "Utah"');
     end
     
     methods 
