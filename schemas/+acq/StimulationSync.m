@@ -39,6 +39,9 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
             
             save(getFileName(acq.Stimulation(key), 'Synched'), 'stim');
             insert(self, tuple);
+            if tuple.sync_diode
+                insert(acq.StimulationSyncDiode, key);
+            end
         end
     end
 end
