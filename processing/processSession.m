@@ -15,9 +15,6 @@ populate(acq.SessionsCleanup, sessKey);
 % find stimulation sessions that were recorded
 populate(acq.EphysStimulationLink, sessKey);
 
-% synchronize stimualtions
-populate(acq.StimulationSync, sessKey);
-
 % process ephys recordings
 ephysKeys = fetch(acq.Ephys(sessKey));
 n = numel(ephysKeys);
@@ -33,3 +30,6 @@ for i = 1:n
         createSortSet(detectKey, sortMethod);
     end
 end
+
+% synchronize stimualtions
+populate(acq.StimulationSync, sessKey);
