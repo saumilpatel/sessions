@@ -25,7 +25,7 @@ for key = ephysKeys'
     ephysStopTime = fetch1(ephys, 'ephys_stop_time');
     if isnan(ephysStopTime)
         br = getFile(ephys);
-        duration = diff(br([1 end], 't'));
+        duration = 1000 * length(br) / getSamplingRate(br);
         close(br);
         ephysStopTime = key.ephys_start_time + fix(duration);
         mym(sprintf(['UPDATE `%s`.`ephys` SET `ephys`.`ephys_stop_time` = %16.16g WHERE ' ...
@@ -51,7 +51,7 @@ for key = behKeys'
     behStopTime = fetch1(beh, 'beh_stop_time');
     if isnan(behStopTime)
         br = getFile(beh);
-        duration = diff(br([1 end], 't'));
+        duration = 1000 * length(br) / getSamplingRate(br);
         close(br);
         behStopTime = key.beh_start_time + fix(duration);
         mym(sprintf(['UPDATE `%s`.`behavior_traces` SET `behavior_traces`.`beh_stop_time` = %16.16g WHERE ' ...
