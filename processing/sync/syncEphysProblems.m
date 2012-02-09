@@ -156,16 +156,22 @@ end
 function [x, y] = matchTimes(x, y, b)
 % find matching pairs in x and y (match = within 1 ms)
 
-i = 1;
-while i <= min(numel(x), numel(y))
-    if x(i) * b(2) + b(1) < y(i) - 1
-        x(i) = [];
-    elseif x(i) * b(2) + b(1) > y(i) + 1
-        y(i) = [];
+i = 1; j = 1;
+keepx = true(size(x));
+keepy = true(size(y));
+while i <= numel(x) && j <= numel(y)
+    if x(i) * b(2) + b(1) < y(j) - 1
+        keepx(i) = false;
+        i = i + 1;
+    elseif x(i) * b(2) + b(1) > y(j) + 1
+        keepy(j) = false;
+        j = j + 1;
     else
         i = i + 1;
+        j = j + 1;
     end
 end
-y(i:end) = [];
-x(i:end) = [];
-
+keepx(i:end) = false;
+keepy(j:end) = false;
+y = y(keepy);
+x = x(keepx);

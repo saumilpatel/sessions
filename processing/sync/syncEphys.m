@@ -2,10 +2,10 @@ function [stimDiode, rms, offset] = syncEphys(stim, key)
 % Synchronize a stimulation file to an ephys recording
 % AE 2011-10-25
 
-params.maxErr = 100;
 params.oldFile = false;
 params.maxPhotodiodeErr = 0.100;  % 100 us err allowed
-params.maxBehDiodeErr = [1e-10 5]; % [slope offset] in ms
+params.behDiodeOffset = [3 4]; % [min max] in ms
+params.behDiodeSlopeErr = 1e-7;   % max deviation from 1
 params.diodeThreshold = 0.04;
 params.minNegTime = -100;  % 100 ms timing error
 
@@ -22,7 +22,7 @@ assert(strcmp(stim.synchronized, 'network'), 'Run network sync first!')
 % clocks (behavior, ephys) not being synched. This needs to be accounted
 % for separately
 % TODO: PUT CORRECT DATE WHEN THIS BUG WAS FIXED
-if datenum(stim.params.constants.date, 'yyyy-mm-dd_HH-MM-SS') < datenum('2013/01/01')
+if datenum(stim.params.constants.date, 'yyyy-mm-dd_HH-MM-SS') < datenum('2012/02/08 18:00:00')
     [stimDiode, rms, offset] = syncEphysProblems(stim, key);
     return
 end
@@ -55,7 +55,6 @@ smooth = 10;    % smoothing window for finding the peak (half-width);
 c = zeros(2 * k + 1, 1);
 for i = -k:k
     c(i + k + 1) = isectq(round(macSwapTimes * Fs + i), round(diodeSwapTimes * Fs));
-    % c(i + k + 1) = numel(intersect(round(macSwapTimes * Fs + i), round(diodeSwapTimes * Fs)));
 end
 win = gausswin(2 * smooth + 1); win = win / sum(win);
 c = conv2(c, win, 'same');
@@ -73,7 +72,9 @@ N = numel(macSwapTimes);
 % correction first)
 % macPar = myrobustfit(macSwapTimes / params.gain, diodeSwapTimes);
 macPar = regress(diodeSwapTimes', [ones(N, 1), macSwapTimes]);
-assert(abs(macPar(2) - 1) < params.maxBehDiodeErr(1) && abs(macPar(1)) < params.maxBehDiodeErr(2), 'Regression between behavior clock and photodiode clock outside system tolerances');
+assert(abs(macPar(2) - 1) < params.behDiodeSlopeErr ...
+    && macPar(1) > params.behDiodeOffset(1) && macPar(1) < params.behDiodeOffset(2), ...
+    'Regression between behavior clock and photodiode clock outside system tolerances');
 
 % convert times in stim file
 stimDiode = convertStimTimes(stim, macPar, [0 1]);
@@ -115,23 +116,24 @@ while ia <= na && ib <= nb
 end
 
 
+function [x, y] = matchTimes(x, y, offset)
 
-
-function [macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, offset)
-
-i = 1;
-while i <= min(numel(macSwapTimes), numel(diodeSwapTimes))
-    if macSwapTimes(i) + offset < diodeSwapTimes(i) - 1
-        macSwapTimes(i) = [];
-    elseif macSwapTimes(i) + offset > diodeSwapTimes(i) + 1
-        diodeSwapTimes(i) = [];
+i = 1; j = 1;
+keepx = true(size(x));
+keepy = true(size(y));
+while i <= numel(x) && j <= numel(y)
+    if x(i) + offset < y(j) - 1
+        keepx(i) = false;
+        i = i + 1;
+    elseif x(i) + offset > y(j) + 1
+        keepy(j) = false;
+        j = j + 1;
     else
         i = i + 1;
+        j = j + 1;
     end
 end
-diodeSwapTimes(i:end) = [];
-macSwapTimes(i:end) = [];
-
-
-
-
+keepx(i:end) = false;
+keepy(j:end) = false;
+y = y(keepy);
+x = x(keepx);
