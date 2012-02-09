@@ -3,11 +3,11 @@ sort.VariationalClusteringSU (computed) # Links a spikes to the variational clus
 
 -> sort.VariationalClusteringAutomatic
 cluster_number        : int unsigned               # The cluster number for this unit
+---
 snr                   : double                     # SNR for this cluster
 fp                    : double                     # FP for this cluster
 fn                    : double                     # FN for this cluster
 mean_waveform=null    : LONGBLOB                   # Spike waveforms
----
 variationalclusteringsu_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not edit
 %}
 
