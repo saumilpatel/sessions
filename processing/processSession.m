@@ -1,12 +1,19 @@
 function processSession(sessKey, detectMethod, sortMethod)
 % Process an acquisition session
 %   processSession(sessKey)
+%   processSession(folder)
 %   processSession(sessKey, detectMethod, sortMethod)
 %
 % AE 2011-11-11
 
 if nargin < 2, detectMethod = []; end
 if nargin < 3, sortMethod = []; end
+
+% if session is specified by folder, obtain the primary key
+if ischar(sessKey)
+    folder = strrep(sessKey, '\', '/');
+    sessKey = fetch(acq.Sessions(sprintf('session_path LIKE "%%%s%%"', folder(3:end))));
+end
 
 % do a cleanup before processing 
 % fixes missing stop_times and updates the t0 in the raw data files
