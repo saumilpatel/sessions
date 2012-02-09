@@ -8,6 +8,9 @@ else
     addpath(getLocalPath('/lab/libraries/mym'))
 end
 
+% This will use Alex' credentials to access the database
+addpath(getLocalPath('/lab/users/alex'))
+
 base = fileparts(mfilename('fullpath'));
 addpath(fullfile(base, 'processing'))
 addpath(fullfile(base, 'processing/sync'))
