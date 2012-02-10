@@ -35,7 +35,7 @@ classdef AodScan < dj.Relvar
         function fn = getFileName(self)
             % Return name of data file matching the tuple in relvar self.
             %   fn = getFileName(self)
-            aodPath = fetch1(acq.Sessions * self, 'aod_volume_filename');
+            aodPath = fetch1(self, 'aod_scan_filename');
             fn = findFile(RawPathMap, aodPath);
         end
         
