@@ -8,8 +8,16 @@ else
     addpath(getLocalPath('/lab/libraries/mym'))
 end
 
-% This will use Alex' credentials to access the database
-addpath(getLocalPath('/lab/users/alex'))
+% user specific DJ connection parameters (uses Alex' credentials)
+host = 'at-storage.neusc.bcm.tmc.edu';
+user = 'aecker';
+setenv('DJ_HOST', host)
+setenv('DJ_USER', user)
+setenv('DJ_PASS', 'aecker#1')
+fprintf('Datajoint connection\n')
+fprintf('--------------------\n')
+fprintf('host: %s\n', host)
+fprintf('user: %s\n\n', user)
 
 base = fileparts(mfilename('fullpath'));
 addpath(fullfile(base, 'processing'))
