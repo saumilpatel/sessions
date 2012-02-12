@@ -1,8 +1,7 @@
 function obj = getSchema
 persistent schemaObject
 if isempty(schemaObject)
-    load('djuser');
-    schemaObject = dj.Schema('ephys', 'at-storage.neusc.bcm.tmc.edu', ...
-        'ephys', user, pass);
+    sort.getSchema();
+    schemaObject = dj.Schema(dj.conn, 'ephys', 'ephys');
 end
 obj = schemaObject;
