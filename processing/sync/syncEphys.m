@@ -18,20 +18,10 @@ end
 
 assert(strcmp(stim.synchronized, 'network'), 'Run network sync first!')
 
-% check date: in early sessions we had problems with the two hardware
-% clocks (behavior, ephys) not being synched. This needs to be accounted
-% for separately
-% TODO: PUT CORRECT DATE WHEN THIS BUG WAS FIXED
-if datenum(stim.params.constants.date, 'yyyy-mm-dd_HH-MM-SS') < datenum('2012/02/08 18:00:00')
-    [stimDiode, rms, offset] = syncEphysProblems(stim, key);
-    return
-end
-
 % Get photodiode swap times
 tstart = stim.params.trials(1).swapTimes(1) - 500;
 tend = stim.params.trials(end).swapTimes(end) + 500;
 br = getFile(acq.Ephys(key), 'Photodiode');
-assert(br(1, 't') ~= 0, 'Update t0 in ephys file first!')
 [peakTimes, peakAmps] = detectPhotodiodePeaks(br, tstart, tend);
 close(br);
 

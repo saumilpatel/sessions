@@ -76,6 +76,7 @@ for i = 1:numel(d)
     files = dir(fullfile(stimFolder, d(i).name));
     [~, ndx] = max(arrayfun(@(x) length(x.name), files));
     expType = strrep(files(ndx).name, 'Synched', '');
+    expType = strrep(expType, '.mat', '');
     load(fullfile(stimFolder, d(i).name, expType))
     
     stimulation(i).stim_start_time = dateToLabviewTime(d(i).name, format) + clockOffset;

@@ -23,18 +23,35 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
         
         function makeTuples(self, key)
             tuple = key;
-            tuple.sync_diode = false;
+            tuple.sync_network = false;
             stim = getStim(acq.Stimulation(key));
-            
-            % network sync
-            [stim, tuple.residual_rms] = syncNetwork(stim, key);
-            tuple.sync_network = true;
-            
-            % was the session recorded? -> sync to photodiode
+
+            % check if session was recorded
             ephysKey = fetch(acq.EphysStimulationLink(key));
-            if ~isempty(ephysKey)
-                [stim, tuple.residual_rms, tuple.diode_offset] = syncEphys(stim, ephysKey); %#ok
-                tuple.sync_diode = true;
+            tuple.sync_diode = ~isempty(ephysKey);
+            
+            % catch Blackrock recordings (no network, different method for
+            % photodiode sync)
+            if tuple.sync_diode && strcmp(fetch1(acq.Sessions(ephysKey), 'recording_software'), 'Blackrock')
+                [stim, tuple.residual_rms, tuple.diode_offset] = syncEphysBlackrock(stim, ephysKey); %#ok
+            else
+            
+                % network sync
+                [stim, tuple.residual_rms] = syncNetwork(stim, key);
+                tuple.sync_network = true;
+
+                % was the session recorded? -> sync to photodiode
+                if ~isempty(ephysKey)
+                    % catch old sessions where hardware clocks weren't phase locked
+                    if fetch1(acq.Ephys(ephysKey), 'ephys_start_time') < dateToLabviewTime('2012-02-08 18:00')
+                        [stim, rms, offset] = syncEphysProblems(stim, ephysKey); %#ok
+                    else
+                        [stim, rms, offset] = syncEphys(stim, ephysKey); %#ok
+                    end
+                    tuple.residual_rms = rms;
+                    tuple.diode_offset = offset;
+                    tuple.sync_diode = true;
+                end
             end
             
             save(getFileName(acq.Stimulation(key), 'Synched'), 'stim');
