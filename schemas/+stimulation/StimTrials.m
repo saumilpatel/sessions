@@ -16,7 +16,7 @@ classdef StimTrials < dj.Relvar
         table = dj.Table('stimulation.StimTrials');
     end
     
-    methods 
+    methods
         function self = StimTrials(varargin)
             self.restrict(varargin{:})
         end
@@ -44,6 +44,33 @@ classdef StimTrials < dj.Relvar
                 child.trial_num = tuple.trial_num;
                 makeTuples(stimulation.StimTrialEvents, child, events);
             end
+        end
+        
+        function val = getParam(self, field, varargin)
+            assert(count(stimulation.StimTrialGroup & self) == 1, ...
+                'Vector inputs only valid if from the same session!')
+            % try trial parameter
+            trials = fetchn(self, 'trial_params', 1);
+            if isfield(trials{1}, field)
+                trials = fetchn(self, 'trial_params');
+                val = cellfun(@(x) x.(field), trials, varargin{:});
+                return
+            end
+            % try condition parameter
+            conditions = fetchn(stimulation.StimConditions & self, 'condition_info');
+            if isfield(conditions, field)
+                trials = fetchn(self, 'trial_params');
+                cond = cellfun(@(x) x.condition, trials);
+                val = cellfun(@(x) x.(field), conditions(cond), varargin{:});
+                return
+            end
+            % try session constant
+            constants = fetch1(stimulation.StimTrialGroup & self, 'stim_constants');
+            if isfield(constants, field)
+                val = arrayfun(@(x) x.(field), repmat(constants, count(self), 1), varargin{:});
+                return
+            end
+            error('Parameter %s not found!', field)
         end
     end
 end

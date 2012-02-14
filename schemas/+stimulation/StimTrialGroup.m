@@ -34,5 +34,10 @@ classdef StimTrialGroup < dj.Relvar & dj.AutoPopulate
             makeTuples(stimulation.StimTrials, key, stim);
 
         end
+        
+        function val = getConstant(self, field, varargin)
+            constants = fetchn(self, 'stim_constants');
+            val = cellfun(@(x) x.(field), constants, varargin{:});
+        end
     end
 end
