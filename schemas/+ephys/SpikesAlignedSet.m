@@ -20,15 +20,14 @@ classdef SpikesAlignedSet < dj.Relvar & dj.AutoPopulate
             self.restrict(varargin{:})
         end
         
-        function makeTuples( this, key )
+        function makeTuples(this, key)
             tuple = key;
-            
-            insert(this,tuple);
+            insert(this, tuple);
             
             % Insert a StimTrialGroupBinned for each neuron
-            tuples = dj.utils.structJoin(key,fetch(ephys.Spikes(key)));
+            tuples = dj.utils.structJoin(key, fetch(ephys.Spikes(key)));
             for tuple = tuples'
-                disp(sprintf('Importing aligned spikes for spike id %d',tuple.unit_id));
+                fprintf('Importing aligned spikes for unit id %d', tuple.unit_id);
                 makeTuples(ephys.SpikesAligned, tuple);
             end
         end

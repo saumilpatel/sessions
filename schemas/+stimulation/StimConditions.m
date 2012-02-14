@@ -33,5 +33,16 @@ classdef StimConditions < dj.Relvar
                 insert(this,tuple);
             end
         end
+        
+        function val = getConditionParam(self, field, varargin)
+            assert(count(stimulation.StimTrialGroup & self) == 1, 'Conditions must be from the same session!')
+            % try conditions
+            conditions = fetchn(self, 'condition_info');
+            if isfield(conditions{1}, field)
+                val = cellfun(@(x) x.(field), conditions, varargin{:});
+            else % try constants
+                val = repmat(getConstant(stimulation.StimTrialGroup & self, field), count(self), 1);
+            end
+        end
     end
 end

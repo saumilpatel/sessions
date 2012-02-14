@@ -20,36 +20,49 @@ classdef Spikes < dj.Relvar
             self.restrict(varargin{:})
         end
         
-        function makeTuples(this, key)
+        function makeTuples(~, key)
             type = fetch1(sort.SetsCompleted(key) * sort.Methods, 'sort_method_name');
             
-            if strcmp(type,'MultiUnit')
-                accessor = sort.MultiUnit;
-            elseif strcmp(type,'VariationalClustering') || strcmp(type,'Utah')
-                accessor = sort.VariationalClusteringSU;
-            else
-                error('"Unimplemented"');
+            switch type
+                case 'MultiUnit'
+                    accessor = sort.MultiUnit;
+                    link = [];
+                case {'VariationalClustering', 'Utah'}
+                    accessor = sort.VariationalClusteringSU;
+                    link = sort.VariationalClusteringLink;
+                case 'TetrodesMoG'
+                    accessor = sort.TetrodesMoGUnits;
+                    link = sort.TetrodesMoGLink;
+                otherwise
+                    error('"Unimplemented"');
             end
             
             keys = fetch(accessor & key);
-            disp(sprintf('Found %d spike files to import\n', length(keys)));
+            fprintf('Found %d units to import\n', length(keys));
             for i = 1:length(keys)
                 tuple = key;
                 tuple.unit_id = i;
-                [tuple.spike_times, tuple.mean_waveform, tuple.spike_file_path] = getSpikes(accessor & keys(i));
+                [tuple.spike_times, tuple.mean_waveform, tuple.spike_fqile_path] = getSpikes(accessor & keys(i));
                 tuple.electrode_num = keys(i).electrode_num;
                 insert(ephys.Spikes, tuple)
                 
+                % link to method specific clustering table
+                if numel(link)
+                    tuple = key;
+                    tuple.unit_id = i;
+                    tuple.electrode_num = keys(i).electrode_num;
+                    tuple.cluster_number = keys(i).cluster_number;
+                    insert(link, tuple);
+                end
+                
                 % Adds additional information in a method specific manner
                 if strcmp(type,'VariationalClustering') || strcmp(type,'Utah')
-                    tuple_link = dj.util.structJoin(tuple, keys(i));
-                    insert(sort.VariationalClusteringLink, tuple_link);
-                    
                     vcsu = fetch(accessor & key, '*');
-                    tuple_su = tuple
-                    tuple_su.snr = vcsu.snr
+                    tuple_su = tuple;
+                    tuple_su.snr = vcsu.snr;
                     tuple_su.fp = vcsu.fp;
                     tuple_su.fn = vcsu.fn;
+                    disp(tuple_su)
                     insert(ephys.SingleUnit, tuple_su);
                 end
             end

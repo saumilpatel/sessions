@@ -1,7 +1,7 @@
 function obj = getSchema
 persistent schemaObject
 if isempty(schemaObject)
-    load('djuser.mat');
-    schemaObject = dj.Schema('cont', host, 'cont', user, pass);
+    acq.getSchema();
+    schemaObject = dj.Schema(dj.conn, 'cont', 'cont');
 end
 obj = schemaObject;
