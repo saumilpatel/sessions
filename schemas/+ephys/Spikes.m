@@ -42,7 +42,7 @@ classdef Spikes < dj.Relvar
             for i = 1:length(keys)
                 tuple = key;
                 tuple.unit_id = i;
-                [tuple.spike_times, tuple.mean_waveform, tuple.spike_fqile_path] = getSpikes(accessor & keys(i));
+                [tuple.spike_times, tuple.mean_waveform, tuple.spike_file_path] = getSpikes(accessor & keys(i));
                 tuple.electrode_num = keys(i).electrode_num;
                 insert(ephys.Spikes, tuple)
                 
