@@ -43,7 +43,8 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
                 % was the session recorded? -> sync to photodiode
                 if ~isempty(ephysKey)
                     % catch old sessions where hardware clocks weren't phase locked
-                    if fetch1(acq.Ephys(ephysKey), 'ephys_start_time') < dateToLabviewTime('2012-02-08 18:00')
+                    if fetch1(acq.Ephys(ephysKey), 'ephys_start_time') < dateToLabviewTime('2012-02-08 18:00') || ...
+                        fetch1(acq.Ephys(ephysKey),'setup') == 2
                         [stim, rms, offset] = syncEphysProblems(stim, ephysKey); %#ok
                     else
                         [stim, rms, offset] = syncEphys(stim, ephysKey); %#ok
