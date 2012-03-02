@@ -14,7 +14,7 @@ classdef SpikesAlignedTrial < dj.Relvar
     end
     
     methods 
-        function self = SpikesAligned(varargin)
+        function self = SpikesAlignedTrial(varargin)
             self.restrict(varargin{:})
         end
         

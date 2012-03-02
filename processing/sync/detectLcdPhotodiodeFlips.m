@@ -28,7 +28,7 @@ flipSign = sign(x);
 x = abs(x);
 % select flips
 flips = spaced_max(x,0.45*T);
-thresh = 0.3*quantile( x(flips), 0.99);
+thresh = 0.3*quantile( x(flips), 0.999);
 idx = x(flips)>thresh;
 qratio = quantile(x(flips(idx)),0.01)/quantile(x(flips(~idx)),0.99);
 flips = flips(idx)';

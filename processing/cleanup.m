@@ -13,7 +13,7 @@ schema = acq.Sessions.table.schema.dbname;
 assert(count(acq.Sessions(sessKeys)) == 1, ...
     'Updated the session stop time fails for multiple keys');
 
-aodScansKeys = fetch(acq.AodScan(sessKeys)) % - acq.EphysIgnore);
+aodScansKeys = fetch(acq.AodScan(sessKeys)); % - acq.EphysIgnore);
 for key = aodScansKeys'
     % update t0 in raw data file
     aod = acq.AodScan(key);
