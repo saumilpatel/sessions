@@ -39,6 +39,9 @@ for key = aodScansKeys'
     sessionStopTime = max(sessionStopTime, aodStopTime);
 end
 
+% TODO: In the case that ephys is recorded on setup four a regression must
+% be performed against something else because the sampling rate is
+% imperfect
 ephysKeys = fetch(acq.Ephys(sessKeys) - acq.EphysIgnore);
 for key = ephysKeys'
     % update t0 in raw data file
