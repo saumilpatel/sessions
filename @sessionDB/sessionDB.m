@@ -17,7 +17,7 @@ end
 % db.conHandle = mym('open', db.hostname, db.user, db.pass);
 % mym(db.conHandle, ['use ' db.db]);
 
-db.source = {'E:', 'K:', 'L:', 'M:'};
+db.source = {'E:', 'K:', 'L:', 'G:', 'M:'};
 db.scratch = 'F:';
 db.destination = 'C:';
 db = class(db,'sessionDB');
