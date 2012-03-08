@@ -59,7 +59,7 @@ classdef DORM90 < dj.Relvar & dj.AutoPopulate
             stats = regstats(count(~selectedA & ~A_orientation), orientation(~selectedA & ~A_orientation),'linear',{'beta','rsquare','fstat','tstat'});            
             tuple.baseline_firing_b = stats.beta(1);
             tuple.orientation_modulation_b = stats.beta(2); 
-            tuple.rsquared_b = stats.rsquare
+            tuple.rsquared_b = stats.rsquare;
             tuple.fstat_pval_b = stats.fstat.pval;
             tuple.ttest_pval_b = stats.tstat.pval(2);
 

@@ -57,7 +57,8 @@ classdef Spikes < dj.Relvar
                 
                 % Adds additional information in a method specific manner
                 if strcmp(type,'VariationalClustering') || strcmp(type,'Utah')
-                    vcsu = fetch(accessor & key, '*');
+                    vcsu = fetch(accessor & keys(i), '*');
+                    tuple = rmfield(tuple,'electrode_num');
                     tuple_su = tuple;
                     tuple_su.snr = vcsu.snr;
                     tuple_su.fp = vcsu.fp;
