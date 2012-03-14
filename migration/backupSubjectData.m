@@ -8,10 +8,10 @@ backupTables('acq', tables, subjectId);
 tables = {'Mua', 'Lfp'};
 backupTables('cont', tables, subjectId);
 
-tables = {'Params', 'Sets', 'Electrodes'};
+tables = {'Methods', 'Params', 'Sets', 'Electrodes'};
 backupTables('detect', tables, subjectId);
 
-tables = {'Params', 'Sets', 'SetsCompleted', 'Electrodes', ...
+tables = {'Methods', 'Params', 'Sets', 'SetsCompleted', 'Electrodes', ...
     'TetrodesMoGAutomatic', 'TetrodesMoGManual', 'TetrodesMoGFinalize', ...
     'TetrodesMoGUnits', 'TetrodesMoGLink', 'MultiUnit'};
 backupTables('sort', tables, subjectId);
