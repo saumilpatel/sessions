@@ -42,7 +42,7 @@ classdef AodScan < dj.Relvar
         function br = getFile(self, varargin)
             % Open a reader for the ephys file matching the tuple in self.
             %   br = getFile(self)
-            br = baseReader(getFileName(self), varargin{:});
+            br = aodReader(getFileName(self), 'Temporal', varargin{:});
         end
         
         function time = getHardwareStartTime(self)

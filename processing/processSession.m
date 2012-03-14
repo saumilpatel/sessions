@@ -22,6 +22,9 @@ populate(acq.SessionsCleanup, sessKey);
 % find stimulation sessions that were recorded
 populate(acq.EphysStimulationLink, sessKey);
 
+% find stimulation sessions that were recorded
+populate(acq.AodStimulationLink, sessKey);
+
 % process ephys recordings
 ephysKeys = fetch(acq.Ephys(sessKey));
 n = numel(ephysKeys);

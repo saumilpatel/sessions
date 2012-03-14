@@ -28,6 +28,8 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
 
             % check if session was recorded
             ephysKey = fetch(acq.EphysStimulationLink(key));
+            aodKey = fetch(acq.AodStimulationLink(key));
+
             tuple.sync_diode = ~isempty(ephysKey);
             
             % catch Blackrock recordings (no network, different method for
@@ -41,9 +43,15 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
                 tuple.sync_network = true;
 
                 % was the session recorded? -> sync to photodiode
-                if ~isempty(ephysKey)
+                if ~isempty(aodKey)
+                    [stim, rms, offset] = syncAod(stim, aodKey); %#ok
+                    tuple.residual_rms = rms;
+                    tuple.diode_offset = offset;
+                    tuple.sync_diode = true;
+                elseif ~isempty(ephysKey)
                     % catch old sessions where hardware clocks weren't phase locked
-                    if fetch1(acq.Ephys(ephysKey), 'ephys_start_time') < dateToLabviewTime('2012-02-08 18:00')
+                    if fetch1(acq.Ephys(ephysKey), 'ephys_start_time') < dateToLabviewTime('2012-02-08 18:00') || ...
+                        fetch1(acq.Ephys(ephysKey),'setup') == 2
                         [stim, rms, offset] = syncEphysProblems(stim, ephysKey); %#ok
                     else
                         [stim, rms, offset] = syncEphys(stim, ephysKey); %#ok
@@ -56,7 +64,9 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
             
             save(getFileName(acq.Stimulation(key), 'Synched'), 'stim');
             insert(self, tuple);
-            if tuple.sync_diode
+            if tuple.sync_diode && ~isempty(aodKey)
+                insert(acq.AodStimulationSyncDiode, fetch(acq.AodStimulationLink(key)));
+            elseif tuple.sync_diode && ~isempty(ephysKey)
                 insert(acq.StimulationSyncDiode, fetch(acq.EphysStimulationLink(key)));
             end
         end

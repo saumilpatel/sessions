@@ -8,16 +8,24 @@ else
     addpath(getLocalPath('/lab/libraries/mym'))
 end
 
+% user specific DJ connection parameters (uses Alex' credentials)
+host = 'at-storage.neusc.bcm.tmc.edu';
+user = 'jcotton';
+setenv('DJ_HOST', host)
+setenv('DJ_USER', user)
+setenv('DJ_PASS', 'jcotton#1')
+fprintf('Datajoint connection\n')
+fprintf('--------------------\n')
+fprintf('host: %s\n', host)
+fprintf('user: %s\n\n', user)
+
 base = fileparts(mfilename('fullpath'));
-addpath(base);
 addpath(fullfile(base, 'processing'))
-%addpath(fullfile(base, 'processing/sync'))
-%addpath(fullfile(base, 'processing/utils'))
+addpath(fullfile(base, 'processing/sync'))
+addpath(fullfile(base, 'processing/utils'))
 addpath(fullfile(base, 'recovery'))
 addpath(fullfile(base, 'schemas'))
 addpath(fullfile(base, 'migration'))
-addpath(fullfile(base, 'sync'));
-
 % DataJoint library is assumed to be in the same directory as the base
 % diretory
 addpath(getLocalPath('/lab/libraries/datajoint2'))

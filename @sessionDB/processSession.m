@@ -26,7 +26,7 @@ import sessions.*;
 import ephys.*;
 
 ephysKeys = fetch(Ephys(sessKey));
-stimKeys = fetch(Stimulation(sessKey));
+stimKeys = fetch(Stimulation(sessKey,'correct_trials > 100'));
 behKeys = fetch(BehaviorTraces(sessKey));
 
 for stimKey = stimKeys'
@@ -103,7 +103,7 @@ for ephysKey = ephysKeys'
         end
         
         
-        if(stim.stim_start_time > ephys.ephys_start_time & stim.stim_stop_time < ephys.ephys_stop_time)
+        if(stim.stim_start_time > ephys.ephys_start_time & stim.stim_stop_time < (ephys.ephys_stop_time + 1000))
 %            if labviewTimeToDate(sDb, stim.stim_start_time) <= datenum('July 17 2011')
 %                success = synchronizeOldStim(sDb,ephys,stim);
 %            else
