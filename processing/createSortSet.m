@@ -1,7 +1,7 @@
 function sortKeys = createSortSet(detectKeys, sortMethod)
 % Create clustering sets for given detection set.
 %   sortKeys = createSortSet(detectKeys) creates clustering sets for all
-%   detectKeys. The default_sort_method from EphysTypes is used.
+%   detectKeys. The sort_method_num from EphysTypes is used.
 %
 %   sortKeys = createSortSet(detectKeys, sortMethod) creates clustering
 %   sets with a non-default sort method.
@@ -10,7 +10,7 @@ function sortKeys = createSortSet(detectKeys, sortMethod)
 
 sortKeys = fetch(detect.Params(detectKeys));
 if nargin < 2 || isempty(sortMethod)
-    sortMethods = num2cell(fetchn(acq.Ephys(detectKeys) * acq.EphysTypes, 'default_sort_method'));
+    sortMethods = num2cell(fetchn(acq.Ephys(detectKeys) * acq.EphysTypes, 'sort_method_num'));
     [sortKeys.sort_method_num] = deal(sortMethods{:});
 else
     [sortKeys.sort_method_num] = deal(fetch1(sort.Methods(struct('sort_method_name', sortMethod)), 'sort_method_num'));
