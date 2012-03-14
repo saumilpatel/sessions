@@ -42,28 +42,25 @@ classdef Spikes < dj.Relvar
             for i = 1:length(keys)
                 tuple = key;
                 tuple.unit_id = i;
-                [tuple.spike_times, tuple.mean_waveform, tuple.spike_fqile_path] = getSpikes(accessor & keys(i));
+                [tuple.spike_times, tuple.mean_waveform, tuple.spike_file_path] = getSpikes(accessor & keys(i));
                 tuple.electrode_num = keys(i).electrode_num;
                 insert(ephys.Spikes, tuple)
                 
-                % link to method specific clustering table
                 if numel(link)
+                    % link to method specific clustering table
                     tuple = key;
                     tuple.unit_id = i;
                     tuple.electrode_num = keys(i).electrode_num;
                     tuple.cluster_number = keys(i).cluster_number;
                     insert(link, tuple);
-                end
                 
-                % Adds additional information in a method specific manner
-                if strcmp(type,'VariationalClustering') || strcmp(type,'Utah')
-                    vcsu = fetch(accessor & key, '*');
-                    tuple_su = tuple;
-                    tuple_su.snr = vcsu.snr;
-                    tuple_su.fp = vcsu.fp;
-                    tuple_su.fn = vcsu.fn;
-                    disp(tuple_su)
-                    insert(ephys.SingleUnit, tuple_su);
+                    % add single units
+                    su = fetch(accessor & tuple, 'snr', 'fp', 'fn');
+                    tuple.snr = su.snr;
+                    tuple.fp = su.fp;
+                    tuple.fn = su.fn;
+                    tuple = rmfield(tuple, 'electrode_num');
+                    insert(ephys.SingleUnit, tuple);
                 end
             end
         end
