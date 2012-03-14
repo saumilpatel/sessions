@@ -12,6 +12,7 @@ experimenter \
 session_path             : varchar(255)      # path to the data
 session_datetime = NULL  : datetime          # readable format of session start
 recording_software = 'Acquisition2.0' : ENUM('Acquisition2.0','Hammer','Blackrock') # software used to record the data
+hammer                   : boolean           # recorded by Hammer? (remove this)
 %}
 
 classdef Sessions < dj.Relvar
