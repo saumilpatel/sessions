@@ -11,7 +11,9 @@ backupTables('cont', tables, subjectId);
 tables = {'Params', 'Sets', 'Electrodes'};
 backupTables('detect', tables, subjectId);
 
-tables = {'Params', 'Sets', 'SetsCompleted', 'Electrodes'};
+tables = {'Params', 'Sets', 'SetsCompleted', 'Electrodes', ...
+    'TetrodesMoGAutomatic', 'TetrodesMoGManual', 'TetrodesMoGFinalize', ...
+    'TetrodesMoGUnits', 'TetrodesMoGLink', 'MultiUnit'};
 backupTables('sort', tables, subjectId);
 
 
