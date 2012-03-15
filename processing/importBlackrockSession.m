@@ -59,10 +59,11 @@ d = dir(fullfile(baseFolder, sessionFolder, '*-*-*_*-*-*'));
 ephys = repmat(key, numel(d), 1);
 for i = 1:numel(d)
     file = dir(fullfile(baseFolder, sessionFolder, d(i).name, '*.ns5'));
-    br = baseReader([baseFolder '/' sessionFolder '/' d(i).name '/' file.name]);
+    fileName = strrep(file.name, 'ns5', '*');
+    br = baseReader([baseFolder '/' sessionFolder '/' d(i).name '/' fileName]);
     ephys(i).ephys_start_time = dateToLabviewTime(d(i).name, format);
     ephys(i).ephys_stop_time = ephys(i).ephys_start_time + 1000 * (getNbSamples(br) / getSamplingRate(br) + 30);
-    ephys(i).ephys_path = ['/raw/' sessionFolder '/' d(i).name '/' file.name];
+    ephys(i).ephys_path = ['/raw/' sessionFolder '/' d(i).name '/' fileName];
     ephys(i).ephys_task = ephysTask;
     close(br);
     session.session_stop_time = max(session.session_stop_time, ephys(i).ephys_stop_time);
@@ -75,8 +76,11 @@ stimulation = repmat(key, numel(d), 1);
 for i = 1:numel(d)
     files = dir(fullfile(stimFolder, d(i).name));
     [~, ndx] = max(arrayfun(@(x) length(x.name), files));
-    expType = strrep(files(ndx).name, 'Synched', '');
+    [~, expType] = fileparts(strrep(files(ndx).name, 'Synched', ''));
     load(fullfile(stimFolder, d(i).name, expType))
+    if isempty(stim.params.trials)
+        stim = recover(StimulationData(stim), fullfile(stimFolder, d(i).name));
+    end
     
     stimulation(i).stim_start_time = dateToLabviewTime(d(i).name, format) + clockOffset;
     stimulation(i).stim_stop_time = stimulation(i).stim_start_time + uint64(ceil(1000 * (stim.params.constants.endTime - stim.params.constants.startTime)));
