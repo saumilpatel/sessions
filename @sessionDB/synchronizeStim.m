@@ -51,11 +51,11 @@ diodeSwapTimes = peakTimes(swaps)';
 macSwapTimes = cat(1,stimFileOut.params.trials.swapTimes);
 idx = find(diodeSwapTimes >= macSwapTimes(1) & diodeSwapTimes <= macSwapTimes(end));
 %[macSwapTimes diodeSwapTimes] = matchCloseEvents(macSwapTimes, diodeSwapTimes(idx));
-[macSwapTimes diodeSwapTimes] = matchEvents(macSwapTimes, diodeSwapTimes(idx));
+[macSwapTimes diodeSwapTimes] = matchEventsGoodData(macSwapTimes, diodeSwapTimes(idx));
 
 % exact correction using robust linear regression
 macPar = robustfit(macSwapTimes, diodeSwapTimes);
-assert(abs(macPar(2) - 1) < 1e-5  & (abs(macPar(1)) < 5), 'Regression between behavior clock and photodiode clock outside system tolerances');
+assert(abs(macPar(2) - 1) < 2e-5  & (abs(macPar(1)) < 5), 'Regression between behavior clock and photodiode clock outside system tolerances');
 
 % convert times in stim file
 stimFileDiode = convertStimTimes(stimFileOut, macPar, [0 1]);
@@ -70,7 +70,7 @@ figure;
 macSwapTimes = cat(1,stimFileDiode.params.trials.swapTimes);
 diodeSwapTimes = peakTimes(swaps)';
 idx = find(diodeSwapTimes >= macSwapTimes(1) & diodeSwapTimes <= macSwapTimes(end));
-[macSwapTimes diodeSwapTimes] = matchEvents(macSwapTimes, diodeSwapTimes(idx));
+[macSwapTimes diodeSwapTimes] = matchEventsGoodData(macSwapTimes, diodeSwapTimes(idx));
 res = macSwapTimes-diodeSwapTimes;
 plot(diodeSwapTimes,res,'.');
 assert(std(res) < params.maxPhotodiodeErr);

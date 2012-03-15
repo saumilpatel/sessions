@@ -1,6 +1,6 @@
 function restoreSubjectData()
 
-tables = {'Sessions', 'SessionsIgnore', 'SessionsCleanup', 'EphysTypes', ...
+tables = {'Subjects', 'Sessions', 'SessionsIgnore', 'SessionsCleanup', 'EphysTypes', ...
     'Ephys', 'EphysIgnore', 'Stimulation', 'StimulationIgnore', ...
     'EphysStimulationLink', 'StimulationSync', 'BehaviorTraces'};
 restoreTables('acq', tables);
@@ -8,10 +8,12 @@ restoreTables('acq', tables);
 tables = {'Mua', 'Lfp'};
 restoreTables('cont', tables);
 
-tables = {'Params', 'Sets', 'Electrodes'};
+tables = {'Methods', 'Params', 'Sets', 'Electrodes'};
 restoreTables('detect', tables);
 
-tables = {'Params', 'Sets', 'SetsCompleted', 'Electrodes'};
+tables = {'Methods', 'Params', 'Sets', 'SetsCompleted', 'Electrodes', ...
+    'TetrodesMoGAutomatic', 'TetrodesMoGManual', 'TetrodesMoGFinalize', ...
+    'TetrodesMoGUnits', 'TetrodesMoGLink', 'MultiUnit'};
 restoreTables('sort', tables);
 
 

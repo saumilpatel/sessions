@@ -1,7 +1,7 @@
 function obj = getSchema
 persistent schemaObject
 if isempty(schemaObject)
-    schemaObject = dj.Schema('class_discrimination', 'at-storage.neusc.bcm.tmc.edu', ...
-        'james_ephys', 'jcotton', 'jcotton#1');
+    acq.getSchema();
+    schemaObject = dj.Schema(dj.conn, 'class_discrimination', 'james_ephys');
 end
 obj = schemaObject;

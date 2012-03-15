@@ -10,6 +10,38 @@ function cleanup(sessKeys)
 sessionStopTime = 0;
 schema = acq.Sessions.table.schema.dbname;
 
+assert(count(acq.Sessions(sessKeys)) == 1, ...
+    'Updated the session stop time fails for multiple keys');
+
+aodScansKeys = fetch(acq.AodScan(sessKeys)); % - acq.EphysIgnore);
+for key = aodScansKeys'
+    % update t0 in raw data file
+    aod = acq.AodScan(key);
+    try
+        updateT0(getFileName(aod), getHardwareStartTime(aod));
+    catch err
+        warning('Could not update t0 in file %s\nError message: %s\n', getFileName(aod), err.message) %#ok
+        continue
+    end
+    
+    % create stop_time entries if missing
+    aodStopTime = fetch1(aod, 'aod_scan_stop_time');
+    if isnan(aodStopTime)
+        br = getFile(aod);
+        duration = 1000 * length(br) / getSamplingRate(br);
+        close(br);
+        aodStopTime = key.aod_scan_start_time + fix(duration);
+        mym(sprintf(['UPDATE `%s`.`aod_scan` SET `aod_scan`.`aod_scan_stop_time` = %16.16g WHERE ' ...
+            '`aod_scan`.`aod_scan_start_time` = %16.16g AND `aod_scan`.`session_start_time` = %16.16g AND ' ...
+            '`aod_scan`.`setup` = %u'], schema, aodStopTime, key.aod_scan_start_time, key.session_start_time, key.setup));
+        fprintf('Updated aod_scan_stop_time field (aod_scan_start_time = %ld)\n', key.aod_scan_start_time)
+    end
+    sessionStopTime = max(sessionStopTime, aodStopTime);
+end
+
+% TODO: In the case that ephys is recorded on setup four a regression must
+% be performed against something else because the sampling rate is
+% imperfect
 ephysKeys = fetch(acq.Ephys(sessKeys) - acq.EphysIgnore);
 for key = ephysKeys'
     % update t0 in raw data file
@@ -25,7 +57,7 @@ for key = ephysKeys'
     ephysStopTime = fetch1(ephys, 'ephys_stop_time');
     if isnan(ephysStopTime)
         br = getFile(ephys);
-        duration = diff(br([1 end], 't'));
+        duration = 1000 * length(br) / getSamplingRate(br);
         close(br);
         ephysStopTime = key.ephys_start_time + fix(duration);
         mym(sprintf(['UPDATE `%s`.`ephys` SET `ephys`.`ephys_stop_time` = %16.16g WHERE ' ...
@@ -51,7 +83,7 @@ for key = behKeys'
     behStopTime = fetch1(beh, 'beh_stop_time');
     if isnan(behStopTime)
         br = getFile(beh);
-        duration = diff(br([1 end], 't'));
+        duration = 1000 * length(br) / getSamplingRate(br);
         close(br);
         behStopTime = key.beh_start_time + fix(duration);
         mym(sprintf(['UPDATE `%s`.`behavior_traces` SET `behavior_traces`.`beh_stop_time` = %16.16g WHERE ' ...

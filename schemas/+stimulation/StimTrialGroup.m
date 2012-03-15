@@ -1,7 +1,7 @@
 %{
 stimulation.StimTrialGroup (imported) # Set of imported trials
 
--> sessions.Stimulation
+-> acq.StimulationSync
 ---
 stim_constants                     : longblob               # A structure with all the stimulation constants
 stimtrialgroup_ts=CURRENT_TIMESTAMP: timestamp              # automatic timestamp. Do not edit
@@ -9,7 +9,7 @@ stimtrialgroup_ts=CURRENT_TIMESTAMP: timestamp              # automatic timestam
 classdef StimTrialGroup < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('stimulation.StimTrialGroup');
-        popRel = sessions.Stimulation('(correct_trials + incorrect_trials) > 400')  .* sessions.Ephys;
+        popRel = acq.StimulationSync;
     end
     
     methods 
@@ -21,9 +21,9 @@ classdef StimTrialGroup < dj.Relvar & dj.AutoPopulate
             tuple = key;
             
             try
-                [fn stim] = getStimFile(sessions.Stimulation(key),'Synced');
-            catch
-                [fn stim] = getStimFile(sessions.Stimulation(key),'Synched');
+                stim = getStim(acq.Stimulation(key),'Synced');
+            catch %#ok
+                stim = getStim(acq.Stimulation(key),'Synched');
             end
             tuple.stim_constants = stim.params.constants;
             insert(self, tuple);
@@ -33,6 +33,11 @@ classdef StimTrialGroup < dj.Relvar & dj.AutoPopulate
             % Insert trials
             makeTuples(stimulation.StimTrials, key, stim);
 
+        end
+        
+        function val = getConstant(self, field, varargin)
+            constants = fetchn(self, 'stim_constants');
+            val = cellfun(@(x) x.(field), constants, varargin{:});
         end
     end
 end

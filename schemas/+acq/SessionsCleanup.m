@@ -8,7 +8,7 @@ acq.SessionsCleanup (computed) # cleanup before processing can be done
 classdef SessionsCleanup < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('acq.SessionsCleanup');
-        popRel = acq.Sessions('subject_id > 0') - acq.SessionsIgnore;
+        popRel = acq.Sessions - acq.SessionsIgnore;
     end
     
     methods

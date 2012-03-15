@@ -1,4 +1,4 @@
-function setPath
+function alex_setPath
 
 warning off MATLAB:dispatcher:nameConflict
 
@@ -7,6 +7,17 @@ if isequal(computer, 'PCWIN64')
 else
     addpath(getLocalPath('/lab/libraries/mym'))
 end
+
+% user specific DJ connection parameters (uses Alex' credentials)
+host = 'at-storage.neusc.bcm.tmc.edu';
+user = 'aecker';
+setenv('DJ_HOST', host)
+setenv('DJ_USER', user)
+setenv('DJ_PASS', 'aecker#1')
+fprintf('Datajoint connection\n')
+fprintf('--------------------\n')
+fprintf('host: %s\n', host)
+fprintf('user: %s\n\n', user)
 
 base = fileparts(mfilename('fullpath'));
 addpath(fullfile(base, 'processing'))
@@ -31,7 +42,7 @@ run(fullfile(base(1:ndx-1), 'detection/setPath.m'))
 addpath(fullfile(base(1:ndx-1), 'lfp'))
 
 % spike sorting
-addpath(fullfile(base(1:ndx-1),'clustering'))
-run(getLocalPath('/lab/libraries/various/spider/use_spider'))
+% addpath(fullfile(base(1:ndx-1),'clustering'))
+% run(getLocalPath('/lab/libraries/various/spider/use_spider'))
 
 warning on MATLAB:dispatcher:nameConflict

@@ -1,11 +1,11 @@
-function [stimDiode, rms, offset] = syncEphys(stim, key)
-% Synchronize a stimulation file to an ephys recording
-% AE 2011-10-25
+function [stimDiode, rms, offset] = syncAod(stim, key)
+% Synchronize a stimulation file to an aod recording
+% JC 2012-03-01
 
 params.oldFile = false;
-params.maxPhotodiodeErr = 0.100;  % 100 us err allowed
-params.behDiodeOffset = [3 4]; % [min max] in ms
-params.behDiodeSlopeErr = 1e-7;   % max deviation from 1
+params.maxPhotodiodeErr = 1.00;  % 100 us err allowed
+params.behDiodeOffset = [3 8]; % [min max] in ms
+params.behDiodeSlopeErr = 1e-5;   % max deviation from 1
 params.diodeThreshold = 0.04;
 params.minNegTime = -100;  % 100 ms timing error
 
@@ -21,16 +21,11 @@ assert(strcmp(stim.synchronized, 'network'), 'Run network sync first!')
 % Get photodiode swap times
 tstart = stim.params.trials(1).swapTimes(1) - 500;
 tend = stim.params.trials(end).swapTimes(end) + 500;
-br = getFile(acq.Ephys(key), 'Photodiode');
-[peakTimes, peakAmps] = detectPhotodiodePeaks(br, tstart, tend);
-close(br);
 
-% detect swaps
-da = abs(diff(peakAmps));
-[mu, v] = MoG1(da(:), 2, 'cycles', 50, 'mu', [0 median(da)]);
-sd = sqrt(v);
-swaps = find(da > min(15 * sd(1), mean(mu))) + 1;
-diodeSwapTimes = peakTimes(swaps)';
+br = getFile(acq.AodScan(key));
+[flips,flipSign,qratio] = detectLcdPhotodiodeFlips(br(:,1), getSamplingRate(br), 30);
+diodeSwapTimes = br(flips,'t');
+close(br);
 
 % swap times recorded on the Mac
 macSwapTimes = cat(1, stim.params.trials.swapTimes);
@@ -55,6 +50,7 @@ ndx = peak + (-n:n);
 offset = offsets(ndx) * c(ndx) / sum(c(ndx));
 
 % throw out swaps that don't have matches within one ms
+originalDiodeSwapTimes = diodeSwapTimes;
 [macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, offset);
 N = numel(macSwapTimes);
 
@@ -73,9 +69,9 @@ stimDiode.synchronized = 'diode';
 % plot residuals
 figure
 macSwapTimes = cat(1, stimDiode.params.trials.swapTimes);
-diodeSwapTimes = peakTimes(swaps)';
+diodeSwapTimes = originalDiodeSwapTimes;
 [macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, 0);
-assert(N == numel(macSwapTimes), 'Error during timestamp conversion. Number of timestamps don''t match!')
+%assert(N == numel(macSwapTimes), 'Error during timestamp conversion. Number of timestamps don''t match!')
 res = macSwapTimes(:) - diodeSwapTimes(:);
 plot(diodeSwapTimes, res, '.k');
 rms = sqrt(mean(res.^2));

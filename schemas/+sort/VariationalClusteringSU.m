@@ -3,11 +3,11 @@ sort.VariationalClusteringSU (computed) # Links a spikes to the variational clus
 
 -> sort.VariationalClusteringAutomatic
 cluster_number        : int unsigned               # The cluster number for this unit
+---
 snr                   : double                     # SNR for this cluster
 fp                    : double                     # FP for this cluster
 fn                    : double                     # FN for this cluster
 mean_waveform=null    : LONGBLOB                   # Spike waveforms
----
 variationalclusteringsu_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not edit
 %}
 
@@ -32,12 +32,12 @@ classdef VariationalClusteringSU < dj.Relvar
             % isolated clusters there are
             
             % 1. Get the clusters
-            vc = fetch(sort.VariationalClusteringAutomatic(key));
+            vc = fetch(sort.VariationalClusteringAutomatic(key), '*');
             
             model = vc.model;
             model.Model = MOS(model.Model);
             model.Model = uncompress(model.Model, model);
-            model.Waveforms = getWaveforms(sort.VariationalClusteringAutomatic(vc_key));
+            model.Waveforms = getWaveforms(sort.VariationalClusteringAutomatic(key));
             
             [fp, fn, snr, ~] = Clustering.getStats(model);
             
@@ -58,7 +58,7 @@ classdef VariationalClusteringSU < dj.Relvar
                 tuple.snr = snr(su(j));
                 tuple.fp = fp(su(j));
                 tuple.fn = fn(su(j));
-                tuple.electrode_num = vc.electrode_number;
+                tuple.electrode_num = vc.electrode_num;
                 insert(sort.VariationalClusteringSU, tuple);                
             end
         end
@@ -67,10 +67,10 @@ classdef VariationalClusteringSU < dj.Relvar
             assert(count(self) == 1, 'Relvar must be scalar!');
             
             cluster_number = fetch1(self,'cluster_number');
-            vc = fetch(sort.VariationalClusteringAutomatic(key));
+            vc = fetch(sort.VariationalClusteringAutomatic & self, 'model');
             
             model = vc.model;
-            model.Waveforms = getWaveforms(sort.VariationalClusteringAutomatic(key));
+            model.Waveforms = getWaveforms(sort.VariationalClusteringAutomatic & self);
             
             spikeTimes = model.SpikeTimes.data(model.ClusterAssignment.data{cluster_number});
             waveform = fetch1(self,'mean_waveform');

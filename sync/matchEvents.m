@@ -92,7 +92,8 @@ while n < min(nx,ny)
     n = sum(matchedX);
     b = myrobustfit(x(1:n),y(1:n));
 end
-x(ny+1:end) = [];
+x(n+1:end) = [];
+y(n+1:end) = [];
 
 % since above is modulo-based we might still have missed some unmatched
 % events. Thus, test residuals

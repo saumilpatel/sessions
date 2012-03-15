@@ -16,7 +16,7 @@ classdiscriminationexperiment_ts=CURRENT_TIMESTAMP: timestamp# automatic timesta
 classdef ClassDiscriminationExperiment < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('class_discrimination.ClassDiscriminationExperiment');
-        popRel = sessions.Stimulation('exp_type="ClassDiscrimination" AND correct_trials > 400')*stimulation.StimTrialGroup
+        popRel = acq.Stimulation('exp_type="ClassDiscrimination" AND correct_trials > 400')*stimulation.StimTrialGroup
     end
     
     methods 

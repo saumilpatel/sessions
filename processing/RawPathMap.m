@@ -25,7 +25,7 @@ classdef RawPathMap < handle
             loc = [self.search, {getLocalPath('/at_scratch')}];
             for i = 1:numel(loc)
                 outFile = strrep([loc{i}, file(5:end)], '\', '/');
-                if exist(sprintf(strrep(outFile, filesep, '/'), 0), 'file')  % sprintf in case of HDF5 family file
+                if numel(dir(sprintf(strrep(outFile, filesep, '/'), 0)))  % sprintf in case of HDF5 family file
                     return
                 end
             end

@@ -20,19 +20,25 @@ classdef Spikes < dj.Relvar
             self.restrict(varargin{:})
         end
         
-        function makeTuples(this, key)
+        function makeTuples(~, key)
             type = fetch1(sort.SetsCompleted(key) * sort.Methods, 'sort_method_name');
             
-            if strcmp(type,'MultiUnit')
-                accessor = sort.MultiUnit;
-            elseif strcmp(type,'VariationalClustering') || strcmp(type,'Utah')
-                accessor = sort.VariationalClusteringSU;
-            else
-                error('"Unimplemented"');
+            switch type
+                case 'MultiUnit'
+                    accessor = sort.MultiUnit;
+                    link = [];
+                case {'VariationalClustering', 'Utah'}
+                    accessor = sort.VariationalClusteringSU;
+                    link = sort.VariationalClusteringLink;
+                case 'TetrodesMoG'
+                    accessor = sort.TetrodesMoGUnits;
+                    link = sort.TetrodesMoGLink;
+                otherwise
+                    error('"Unimplemented"');
             end
             
             keys = fetch(accessor & key);
-            disp(sprintf('Found %d spike files to import\n', length(keys)));
+            fprintf('Found %d units to import\n', length(keys));
             for i = 1:length(keys)
                 tuple = key;
                 tuple.unit_id = i;
@@ -40,17 +46,21 @@ classdef Spikes < dj.Relvar
                 tuple.electrode_num = keys(i).electrode_num;
                 insert(ephys.Spikes, tuple)
                 
-                % Adds additional information in a method specific manner
-                if strcmp(type,'VariationalClustering') || strcmp(type,'Utah')
-                    tuple_link = dj.util.structJoin(tuple, keys(i));
-                    insert(sort.VariationalClusteringLink, tuple_link);
-                    
-                    vcsu = fetch(accessor & key, '*');
-                    tuple_su = tuple
-                    tuple_su.snr = vcsu.snr
-                    tuple_su.fp = vcsu.fp;
-                    tuple_su.fn = vcsu.fn;
-                    insert(ephys.SingleUnit, tuple_su);
+                if numel(link)
+                    % link to method specific clustering table
+                    tuple = key;
+                    tuple.unit_id = i;
+                    tuple.electrode_num = keys(i).electrode_num;
+                    tuple.cluster_number = keys(i).cluster_number;
+                    insert(link, tuple);
+                
+                    % add single units
+                    su = fetch(accessor & tuple, 'snr', 'fp', 'fn');
+                    tuple.snr = su.snr;
+                    tuple.fp = su.fp;
+                    tuple.fn = su.fn;
+                    tuple = rmfield(tuple, 'electrode_num');
+                    insert(ephys.SingleUnit, tuple);
                 end
             end
         end

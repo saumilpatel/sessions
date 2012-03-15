@@ -6,8 +6,8 @@ setup                 : tinyint unsigned   # setup number
 ephys_task            : varchar(63)        # name of the task
 ---
 ephys_type            : enum("Utah", "Tetrodes", "SiliconProbes") # type of ephys recording
-->detect.Methods
-->sort.Methods
+detect_method_num     : tinyint unsigned   # default detect method
+sort_method_num       : tinyint unsigned   # default spike sorting method
 %}
 
 classdef EphysTypes < dj.Relvar

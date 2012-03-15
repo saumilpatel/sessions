@@ -39,8 +39,8 @@ tuple = key;
 tuple.setup = setup;
 tuple.ephys_task = ephysTask;
 tuple.ephys_type = 'Tetrodes';
-tuple.default_detect_method = fetch1(detect.Methods('detect_method_name = "Tetrodes"'), 'detect_method_num');
-tuple.default_sort_method = fetch1(sort.Methods('sort_method_name = "TetrodesMoG"'), 'sort_method_num');
+tuple.detect_method_num = fetch1(detect.Methods('detect_method_name = "Tetrodes"'), 'detect_method_num');
+tuple.sort_method_num = fetch1(sort.Methods('sort_method_name = "TetrodesMoG"'), 'sort_method_num');
 inserti(acq.EphysTypes, tuple);
 
 % Sessions
@@ -76,7 +76,8 @@ stimulation = repmat(key, numel(d), 1);
 for i = 1:numel(d)
     files = dir(fullfile(stimFolder, d(i).name));
     [~, ndx] = max(arrayfun(@(x) length(x.name), files));
-    [~, expType] = fileparts(strrep(files(ndx).name, 'Synched', ''));
+    expType = strrep(files(ndx).name, 'Synched', '');
+    expType = strrep(expType, '.mat', '');
     load(fullfile(stimFolder, d(i).name, expType))
     if isempty(stim.params.trials)
         stim = recover(StimulationData(stim), fullfile(stimFolder, d(i).name));

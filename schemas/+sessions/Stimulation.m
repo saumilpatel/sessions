@@ -1,7 +1,7 @@
 %{
 sessions.Stimulation (manual) # Stimulation tables
 
--> sessions.Sessions
+-> acq.Sessions
 stim_start_time : bigint                #
 ---
 stim_stop_time=null         : bigint                        #
@@ -14,7 +14,7 @@ incorrect_trials=null       : int                           #
 
 classdef Stimulation < dj.Relvar
     properties(Constant)
-        table = dj.Table('sessions.Stimulation');
+        table = dj.Table('acq.Stimulation');
     end
     
     methods
