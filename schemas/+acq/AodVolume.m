@@ -38,24 +38,20 @@ classdef AodVolume < dj.Relvar
             self.restrict(varargin{:})
         end
         
-        function fileName = getFileName(self, varargin)
-            % Get name of stimulation file for tuple in relvar
-            %   fileName = getStimFile(self, [variant]) returns the file
-            %   name matching the tuple in self. If the string variant is
-            %   passed as second input it is appended at the end of the
-            %   file name (e.g. 'Synched').
-            [stimPath, expType] = fetch1(self, 'stim_path', 'exp_type');
-            fileName = getLocalPath([stimPath '/' expType varargin{:} '.mat']);
+        function fn = getFileName(self)
+            % Return name of data file matching the tuple in relvar self.
+            %   fn = getFileName(self)
+            aodPath = fetch1(self, 'aod_volume_filename');
+            fn = findFile(RawPathMap, aodPath);
         end
         
-        function [stim, fileName] = getStim(self, varargin)
-            % Load stimulation file for tuple in relvar
-            %   [stim, fileName] = getStimFile(self, [variant]) returns the
-            %   stimulation structure matching the tuple in self. If the
-            %   string variant is passed as second input it is appended at
-            %   the end of the file name (e.g. 'Synched').
-            fileName = getFileName(self, varargin{:});
-            stim = getfield(load(fileName), 'stim'); %#ok
+        function br = getFile(self, varargin)
+            % Open a reader for the ephys file matching the tuple in self.
+            %   br = getFile(self)
+            params.data = 'Functional';  % Temporal / Motion
+            params = parseVarArgs(params, varargin{:});
+            
+            br = aodReader(getFileName(self), params.data, varargin{:});
         end
     end
 end
