@@ -20,10 +20,18 @@ classdef Lfp < dj.Relvar & dj.AutoPopulate
         
         function makeTuples(self, key)
             tuple = key;
-            
-            % TODO
-            error('TODO')
-            
+            switch fetch1(acq.Ephys(key) * acq.EphysTypes, 'ephys_type')
+                case 'Tetrodes'
+                    sourceFile = fetch1(acq.Ephys(key), 'ephys_path');
+                    ephysFolder = fileparts(sourceFile);
+                    tuple.lfp_file = to(RawPathMap, [ephysFolder '/lfp/lfp%d'], '/processed');
+                    outFile = getLocalPath(tuple.lfp_file);
+                    mkdir(fileparts(outFile))
+                    sourceFile = findFile(RawPathMap, sourceFile);
+                    extractLfpTetrodes(sourceFile, outFile)
+                otherwise
+                    error('Not implemented yet')
+            end
             self.insert(tuple);
         end
     end

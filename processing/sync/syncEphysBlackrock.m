@@ -19,7 +19,7 @@ macSwapTimes = cat(1, stim.params.trials.swapTimes);
 macSwapTimes(1) = []; % for some reason the first swap doesn't seem to happen
 
 % iteratively compute refresh rate
-N = 100;
+N = 50;
 ms = macSwapTimes;
 ds = diodeSwapTimes;
 done = false;
