@@ -26,7 +26,7 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
             self.insert(tuple);
             
             % insert electrodes
-            electrodes =  dj.utils.structJoin(key,fetch(detect.Electrodes(key)));
+            electrodes =  dj.struct.join(key,fetch(detect.Electrodes(key)));
             insert(sort.Electrodes, electrodes);
         end
     end
