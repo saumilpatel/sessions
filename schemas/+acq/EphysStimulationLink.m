@@ -12,7 +12,7 @@ classdef EphysStimulationLink < dj.Relvar & dj.AutoPopulate
         table = dj.Table('acq.EphysStimulationLink');
         popRel = acq.Ephys * acq.Stimulation ...
             & acq.SessionsCleanup ...
-            & 'ephys_start_time < stim_start_time AND ephys_stop_time > stim_stop_time';
+            & 'ephys_start_time <= stim_start_time AND ephys_stop_time >= stim_stop_time';
     end
     
     methods
