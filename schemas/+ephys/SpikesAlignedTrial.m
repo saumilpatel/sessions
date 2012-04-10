@@ -23,9 +23,9 @@ classdef SpikesAlignedTrial < dj.Relvar
             
             trials = fetch(stimulation.StimTrials(key,'valid_trial=TRUE'));
             spikes = fetch1(ephys.Spikes(key),'spike_times');
-            
+
             key.spikes_aligned = [];
-            tuples = dj.utils.structJoin(key,trials);
+            tuples = dj.struct.join(key,trials);
             
             for tuple = tuples'
                 alignTime = fetchn(stimulation.StimTrialEvents(tuple),'event_time');
