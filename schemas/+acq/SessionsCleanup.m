@@ -15,7 +15,9 @@ classdef SessionsCleanup < dj.Relvar & dj.AutoPopulate
         function self = SessionsCleanup(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)        
         function makeTuples(self, key)
             if count(acq.Sessions(key) & 'recording_software = "Acquisition2.0"')
                 cleanup(key);

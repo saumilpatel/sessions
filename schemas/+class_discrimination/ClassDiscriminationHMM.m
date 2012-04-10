@@ -23,7 +23,9 @@ classdef ClassDiscriminationHMM< dj.Relvar & dj.AutoPopulate
         function self = ClassDiscriminationHMM(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)        
         function makeTuples( this, key )
             tuple = key;
             

@@ -19,7 +19,9 @@ classdef ClassificationPreference < dj.Relvar & dj.AutoPopulate
         function self = ClassificationPreference(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)
         function makeTuples( this, key )
             % Compute the class tuning for this cell
             tuple = key;

@@ -29,7 +29,9 @@ classdef RegressionModel < dj.Relvar & dj.AutoPopulate
         function self = RegressionModel(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)        
         function makeTuples( this, key )
             % Compute the class tuning for this cell
             tuple = key;
