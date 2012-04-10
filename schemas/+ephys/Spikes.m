@@ -21,7 +21,7 @@ classdef Spikes < dj.Relvar
         end
         
         function makeTuples(~, key)
-            type = fetch1(sort.SetsCompleted(key) * sort.Methods, 'sort_method_name');
+            type = fetch1(sort.SetsCompleted * sort.Methods & key, 'sort_method_name');
             
             switch type
                 case 'MultiUnit'
