@@ -20,10 +20,18 @@ classdef Mua < dj.Relvar & dj.AutoPopulate
         
         function makeTuples(self, key)
             tuple = key;
-            
-            % TODO
-            error('TODO')
-            
+            switch fetch1(acq.Ephys(key) * acq.EphysTypes, 'ephys_type')
+                case 'Tetrodes'
+                    sourceFile = fetch1(acq.Ephys(key), 'ephys_path');
+                    ephysFolder = fileparts(sourceFile);
+                    tuple.mua_file = to(RawPathMap, [ephysFolder '/lfp/mua%d'], '/processed');
+                    outFile = getLocalPath(tuple.mua_file);
+                    mkdir(fileparts(outFile))
+                    sourceFile = findFile(RawPathMap, sourceFile);
+                    extractMuaTetrodes(sourceFile, outFile)
+                otherwise
+                    error('Not implemented yet')
+            end
             self.insert(tuple);
         end
     end
