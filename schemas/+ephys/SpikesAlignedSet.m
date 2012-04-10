@@ -27,7 +27,7 @@ classdef SpikesAlignedSet < dj.Relvar & dj.AutoPopulate
             insert(this, tuple);
             
             % Insert a StimTrialGroupBinned for each neuron
-            tuples = dj.utils.structJoin(key, fetch(ephys.Spikes(key)));
+            tuples = dj.struct.join(key, fetch(ephys.Spikes(key)));
             for tuple = tuples'
                 fprintf('Importing aligned spikes for unit id %d\n', tuple.unit_id);
                 makeTuples(ephys.SpikesAligned, tuple);
