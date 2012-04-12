@@ -19,9 +19,8 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
         function self = StimulationSync(varargin)
             self.restrict(varargin{:})
         end
-    end
-
-    methods (Access=protected)
+        
+        
         function makeTuples(self, key)
             tuple = key;
             tuple.sync_network = false;

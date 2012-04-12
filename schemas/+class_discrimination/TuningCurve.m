@@ -95,9 +95,7 @@ classdef TuningCurve < dj.Relvar & dj.AutoPopulate
             xlabel('p(A | \theta)');
             ylabel('Mean normalized firing rate');
         end
-    end
-    
-    methods (Access=protected)
+
         function makeTuples( this, key )
             % Compute the class tuning for this cell
             tuple = key;

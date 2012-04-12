@@ -16,9 +16,8 @@ classdef Lfp < dj.Relvar & dj.AutoPopulate
         function self = Lfp(varargin)
             self.restrict(varargin{:})
         end
-    end
-    
-    methods (Access=protected)
+        
+        
         function makeTuples(self, key)
             tuple = key;
             switch fetch1(acq.Ephys(key) * acq.EphysTypes, 'ephys_type')

@@ -40,9 +40,7 @@ classdef VariationalClusteringAutomatic < dj.Relvar & dj.AutoPopulate
             
             wf = struct('data',{wf},'meta',struct('units', 'muV'));
         end
-    end
-    
-    methods (Access=protected)
+
         function makeTuples( this, key )
             % Cluster spikes
             %

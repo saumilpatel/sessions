@@ -23,9 +23,7 @@ classdef ClassDiscriminationExperiment < dj.Relvar & dj.AutoPopulate
         function self = ClassDiscriminationExperiment(varargin)
             self.restrict(varargin{:})
         end
-    end
-    
-    methods (Access=protected)        
+        
         function makeTuples( this, key )
             % Get additional information for each trial
             tuple = key;
