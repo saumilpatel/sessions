@@ -12,7 +12,7 @@ base = fileparts(mfilename('fullpath'));
 addpath(base)
 
 % user specific DJ connection parameters (uses Alex' credentials)
-host = alex_getHost();
+host = getHost();
 user = 'aecker';
 setenv('DJ_HOST', host)
 setenv('DJ_USER', user)
