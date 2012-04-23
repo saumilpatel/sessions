@@ -29,6 +29,18 @@ classdef MovingRegression < dj.Relvar & dj.AutoPopulate
         function self = MovingRegression(varargin)
             self.restrict(varargin{:})
         end
+        
+        function [rsquare] = plotMean (this)
+            mr = fetch(this, '*');
+            
+            dat = [cat(1,mr.rsquared_a); cat(1,mr.rsquared_b)];
+            rsquare = abs(dat);
+            sem = nanstd(dat,[],1) / sqrt(size(dat,1));
+            null = abs([cat(1,mr.null_rsquared_a); cat(1,mr.null_rsquared_b)]);
+            rsquare = errorbar(mr(1).time_bins, nanmean(rsquare,1),sem); %,mr(1).time_bins,nanmean(null,1));
+            
+        end
+
     end
     
     methods (Access=protected)
@@ -128,18 +140,6 @@ classdef MovingRegression < dj.Relvar & dj.AutoPopulate
             end
 
             insert(this,tuple);
-        end
-        
-        
-        function [rsquare] = plotMean (this)
-            mr = fetch(this, '*');
-            
-            dat = [cat(1,mr.rsquared_a); cat(1,mr.rsquared_b)];
-            rsquare = abs(dat);
-            sem = nanstd(dat,[],1) / sqrt(size(dat,1));
-            null = abs([cat(1,mr.null_rsquared_a); cat(1,mr.null_rsquared_b)]);
-            rsquare = errorbar(mr(1).time_bins, nanmean(rsquare,1),sem); %,mr(1).time_bins,nanmean(null,1));
-            
-        end
+        end 
     end
 end
