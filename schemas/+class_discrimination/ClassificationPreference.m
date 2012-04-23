@@ -31,8 +31,8 @@ classdef ClassificationPreference < dj.Relvar & dj.AutoPopulate
             saB = fetchn(ephys.SpikesAlignedTrial(key).*class_discrimination.ClassDiscriminationTrial('selected_class="B" AND ABS(orientation-180) < 10'), ...
                 'spikes_aligned');
             
-            countA = cellfun(@(x) sum(x > 150 & x < 1000), saA);
-            countB = cellfun(@(x) sum(x > 150 & x < 1000), saB);
+            countA = cellfun(@(x) sum(x > 150 & x < 650), saA);
+            countB = cellfun(@(x) sum(x > 150 & x < 650), saB);
             
             if mean(countA) > mean(countB)
                 tuple.class_preference_visual = 'A';
