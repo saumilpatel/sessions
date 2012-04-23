@@ -16,7 +16,9 @@ classdef StimTrialGroup < dj.Relvar & dj.AutoPopulate
         function self = StimTrialGroup(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)        
         function self = makeTuples(self, key)
             tuple = key;
             

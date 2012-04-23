@@ -19,7 +19,9 @@ classdef AodStimulationLink < dj.Relvar & dj.AutoPopulate
         function self = AodStimulationLink(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)
         function makeTuples(self, key)
             insert(self, key);
         end

@@ -27,7 +27,9 @@ classdef DORM90 < dj.Relvar & dj.AutoPopulate
         function self = DORM90(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)        
         function makeTuples( this, key )
             % Compute the class tuning for this cell
             tuple = key;

@@ -17,7 +17,9 @@ classdef SetsCompleted < dj.Relvar & dj.AutoPopulate
         function self = SetsCompleted(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)        
         function makeTuples(self, key)
             self.insert(key);
         end
