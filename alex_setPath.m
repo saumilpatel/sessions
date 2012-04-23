@@ -8,8 +8,11 @@ else
     addpath(getLocalPath('/lab/libraries/mym'))
 end
 
+base = fileparts(mfilename('fullpath'));
+addpath(base)
+
 % user specific DJ connection parameters (uses Alex' credentials)
-host = 'at-storage.neusc.bcm.tmc.edu';
+host = getHost();
 user = 'aecker';
 setenv('DJ_HOST', host)
 setenv('DJ_USER', user)
@@ -19,7 +22,6 @@ fprintf('--------------------\n')
 fprintf('host: %s\n', host)
 fprintf('user: %s\n\n', user)
 
-base = fileparts(mfilename('fullpath'));
 addpath(fullfile(base, 'processing'))
 addpath(fullfile(base, 'processing/sync'))
 addpath(fullfile(base, 'processing/utils'))
@@ -42,7 +44,7 @@ run(fullfile(base(1:ndx-1), 'detection/setPath.m'))
 addpath(fullfile(base(1:ndx-1), 'lfp'))
 
 % spike sorting
-% addpath(fullfile(base(1:ndx-1),'clustering'))
-% run(getLocalPath('/lab/libraries/various/spider/use_spider'))
+addpath(fullfile(base(1:ndx-1),'clustering'))
+run(getLocalPath('/lab/libraries/various/spider/use_spider'))
 
 warning on MATLAB:dispatcher:nameConflict
