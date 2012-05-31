@@ -39,10 +39,15 @@ classdef AodScan < dj.Relvar
             fn = findFile(RawPathMap, aodPath);
         end
         
-        function br = getFile(self, varargin)
+        function br = getFile(self, dataType)
             % Open a reader for the ephys file matching the tuple in self.
             %   br = getFile(self)
-            br = aodReader(getFileName(self), 'Functional', varargin{:});
+            
+            if nargin < 2
+                dataType = 'Functional';
+            end
+            
+            br = aodReader(getFileName(self), dataType);
         end
         
         function time = getHardwareStartTime(self)

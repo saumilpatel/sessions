@@ -45,6 +45,11 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
 
                 % was the session recorded? -> sync to photodiode
                 if ~isempty(aodKey)
+                    if length(aodKey) > 1
+                        len = fetchn(pro(acq.AodScan(aodKey),'(aod_scan_stop_time - aod_scan_start_time)->x'),'x');
+                        [~,idx] = max(len);
+                        aodKey = aodKey(idx);
+                    end
                     [stim, rms, offset] = syncAod(stim, aodKey); %#ok
                     tuple.residual_rms = rms;
                     tuple.diode_offset = offset;

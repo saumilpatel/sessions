@@ -4,7 +4,7 @@ function [stimDiode, rms, offset] = syncAod(stim, key)
 
 params.oldFile = false;
 params.maxPhotodiodeErr = 1.00;  % 100 us err allowed
-params.behDiodeOffset = [3 8]; % [min max] in ms
+params.behDiodeOffset = [2 8]; % [min max] in ms
 params.behDiodeSlopeErr = 1e-5;   % max deviation from 1
 params.diodeThreshold = 0.04;
 params.minNegTime = -100;  % 100 ms timing error
@@ -22,8 +22,8 @@ assert(strcmp(stim.synchronized, 'network'), 'Run network sync first!')
 tstart = stim.params.trials(1).swapTimes(1) - 500;
 tend = stim.params.trials(end).swapTimes(end) + 500;
 
-br = getFile(acq.AodScan(key));
-[flips,flipSign,qratio] = detectLcdPhotodiodeFlips(br(:,1), getSamplingRate(br), 30);
+br = getFile(acq.AodScan(key),'Temporal');
+[flips,flipSign,qratio] = detectLcdPhotodiodeFlips(br(:,1), getSamplingRate(br), 80);
 diodeSwapTimes = br(flips,'t');
 close(br);
 
