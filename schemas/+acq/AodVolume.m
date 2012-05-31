@@ -45,13 +45,10 @@ classdef AodVolume < dj.Relvar
             fn = findFile(RawPathMap, aodPath);
         end
         
-        function br = getFile(self, varargin)
+        function br = getFile(self)
             % Open a reader for the ephys file matching the tuple in self.
             %   br = getFile(self)
-            params.data = 'Functional';  % Temporal / Motion
-            params = parseVarArgs(params, varargin{:});
-            
-            br = aodReader(getFileName(self), params.data, varargin{:});
+            br = aodReader(getFileName(self), 'Volume');
         end
     end
 end

@@ -4,9 +4,9 @@ aod.Traces (imported) # A scan site
 ->aod.TraceSet
 cell_num        : int unsigned      # The cell number
 ---
-x               : int               # X coordinate
-y               : int               # Y coordinate
-z               : int               # Z coordinate
+x               : float             # X coordinate
+y               : float             # Y coordinate
+z               : float             # Z coordinate
 trace           : longblob          # The unfiltered trace
 t0              : double            # The starting time
 fs              : double            # Sampling rate
@@ -15,6 +15,7 @@ fs              : double            # Sampling rate
 classdef Traces < dj.Relvar
     properties(Constant)
         table = dj.Table('aod.Traces');
+        offset = -800 * 600;
     end
     
     methods 
@@ -25,7 +26,7 @@ classdef Traces < dj.Relvar
         function makeTuples( this, key, asr )
             % Import a spike set
             
-            disp(sprintf('Importing traces from %s cells', size(asr,2)));
+            disp(sprintf('Importing traces from %d cells', size(asr,2)));
 
             dat = asr(:,:);
             coordinates = asr.coordinates;
@@ -33,10 +34,10 @@ classdef Traces < dj.Relvar
                 tuple = key;
                 
                 tuple.cell_num = i;
-                tuple.x = double(coordinates(i,1)) / 146000000;
-                tuple.y = double(coordinates(i,2)) / 146000000;
-                tuple.z = double(coordinates(i,3)) / 146000000;
-                tuple.trace = dat(:,i);
+                tuple.x = double(coordinates(i,1)) / 146000000 * 100;
+                tuple.y = double(coordinates(i,2)) / 146000000 * 100;
+                tuple.z = double(coordinates(i,3)) / 70000 * 100;
+                tuple.trace = dat(:,i) - this.offset;
                 tuple.t0 = asr(1,'t');
                 tuple.fs = getSamplingRate(asr);
             

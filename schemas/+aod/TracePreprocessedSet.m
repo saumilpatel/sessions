@@ -22,7 +22,7 @@ classdef TracePreprocessedSet < dj.Relvar & dj.AutoPopulate
                        
             insert(this,tuple);           
             
-            makeTuples( this, key )
+            makeTuples( aod.TracePreprocessed, key )
         end
     end
 end
