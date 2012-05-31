@@ -9,7 +9,11 @@ function processSession(sessKey, detectMethod, sortMethod)
 % Ensure that we are working with struct key and not relvar or later won't
 % sync
 
-sessKey = fetch(acq.Sessions(sessKey));
+if isstruct(sessKey)
+    sessKey = fetch(acq.Sessions(sessKey));
+else
+    sessKey = fetch(sessKey)
+end
 
 if nargin < 2, detectMethod = []; end
 if nargin < 3, sortMethod = []; end
