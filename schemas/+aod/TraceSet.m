@@ -23,10 +23,14 @@ classdef TraceSet < dj.Relvar & dj.AutoPopulate
             tuple = key;
 
             asr = getFile(acq.AodScan(key), 'Functional');
-            amr = getFile(acq.AodScan(key), 'Motion');
+            try
+                amr = getFile(acq.AodScan(key), 'Motion');
+                tuple.num_planes = amr.planes;
+            catch
+                tuple.num_planes = 0;
+            end
             
             tuple.num_cells = size(asr,2);
-            tuple.num_planes = 0;
             insert(this,tuple);
             
             makeTuples(aod.Traces, key, asr);

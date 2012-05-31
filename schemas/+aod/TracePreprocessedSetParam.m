@@ -1,7 +1,7 @@
 %{
 aod.TracePreprocessedSetParam (manual) # A preprocessing method
 
-->acq.TraceSet
+->aod.TraceSet
 ->aod.TracePreprocessedSetMethod
 ---
 %}
