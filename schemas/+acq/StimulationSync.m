@@ -37,7 +37,11 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
             if tuple.sync_diode && strcmp(fetch1(acq.Sessions(ephysKey), 'recording_software'), 'Blackrock')
                 [stim, tuple.residual_rms, tuple.diode_offset] = syncEphysBlackrock(stim, ephysKey); %#ok
             else
-            
+                
+                if numel(stim.params.trials) <= 10
+                    return;
+                end
+
                 % network sync
                 [stim, tuple.residual_rms] = syncNetwork(stim, key);
                 tuple.sync_network = true;
