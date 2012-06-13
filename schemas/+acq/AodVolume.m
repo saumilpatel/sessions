@@ -50,5 +50,42 @@ classdef AodVolume < dj.Relvar
             %   br = getFile(self)
             br = aodReader(getFileName(self), 'Volume');
         end
+
+        function time = getHardwareStartTime(self)
+            % Get the hardware start time for the tuple in relvar
+            %   time = getHardwareStartTime(self)
+            cond = sprintf('ABS(timestamper_time - %ld) < 5000', fetch1(self, 'aod_volume_start_time'));
+            rel = acq.SessionTimestamps(cond) & acq.TimestampSources('source = "AOD"') & (acq.Sessions * self);
+            time = acq.SessionTimestamps.getRealTimes(rel);
+        end
+        
+        function updateVolumeInformation(self)
+            av = fetch(self);
+            
+            for i = 1:length(av)
+                tuple = av(i);
+                avr = getFile(acq.AodVolume(tuple));
+                
+                attr.x_range = range(avr.x);
+                attr.y_range = range(avr.y);
+                attr.z_range = range(avr.z);
+                
+                attr.x_resolution = length(avr.x);
+                attr.y_resolution = length(avr.y);
+                attr.z_resolution = length(avr.z);
+                
+                f = fields(attr);
+                for j = 1:length(f)
+                    val = fetch1(self & tuple, f{j});
+                    if val == 0
+                        update(self & tuple, f{j}, attr.(f{j}));
+                    elseif val == attr.(f{j})
+                    else
+                        disp('Value set but does not match file');
+                    end
+                end
+            end
+        end
+
     end
 end

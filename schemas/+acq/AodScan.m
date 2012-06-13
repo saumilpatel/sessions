@@ -27,6 +27,12 @@ classdef AodScan < dj.Relvar
         table = dj.Table('acq.AodScan');
     end
     
+    properties(Constant,Access=public)
+        x_step = 100 / 146000000;
+        y_step = 100 / 146000000;
+        z_step = 100 / 70000;
+    end
+    
     methods 
         function self = AodScan(varargin)
             self.restrict(varargin{:})
