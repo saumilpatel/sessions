@@ -29,6 +29,11 @@ classdef Stimulation < dj.Relvar
             %   passed as second input it is appended at the end of the
             %   file name (e.g. 'Synched').
             [stimPath, expType] = fetch1(self, 'stim_path', 'exp_type');
+            switch(expType)
+                case 'MouseMultiDim'
+                    expType = 'MultDimExperiment';
+                otherwise
+            end
             fileName = getLocalPath([stimPath '/' expType varargin{:} '.mat']);
         end
         
