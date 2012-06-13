@@ -34,9 +34,9 @@ classdef Traces < dj.Relvar
                 tuple = key;
                 
                 tuple.cell_num = i;
-                tuple.x = double(coordinates(i,1)) / 146000000 * 100;
-                tuple.y = double(coordinates(i,2)) / 146000000 * 100;
-                tuple.z = double(coordinates(i,3)) / 70000 * 100;
+                tuple.x = double(coordinates(i,1));
+                tuple.y = double(coordinates(i,2));
+                tuple.z = double(coordinates(i,3));
                 tuple.trace = dat(:,i) - this.offset;
                 tuple.t0 = asr(1,'t');
                 tuple.fs = getSamplingRate(asr);
