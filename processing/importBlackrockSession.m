@@ -11,6 +11,14 @@ function importBlackrockSession(baseFolder, sessionFolder, subject, setup, exper
 %   clockOffset=0, estimate it based on the offset between
 %   ephys_start_times and stim_start_times (the latter should alsways be
 %   slightly after the former), and then re-import with the correct value.
+%
+%   e.g. for AcuteGratingExperiment
+%   importBlackrockSession('/Volumes/recordings/raw', 'Albert/2012-02-16_00-00-00', 'Albert', 100, 'Alex', 160000)
+%
+%   for all others, clockOffset = 0 should work
+%
+%   You may have to put a break point before the inserts at the end of this
+%   function and insert only the part you want
 %   
 % AE 2012-01-24
 
@@ -94,6 +102,6 @@ for i = 1:numel(d)
     session.session_stop_time = max(session.session_stop_time, stimulation(i).stim_stop_time);
 end
 
-insert(acq.Sessions, session);
-insert(acq.Ephys, ephys);
-insert(acq.Stimulation, stimulation);
+inserti(acq.Sessions, session);
+inserti(acq.Ephys, ephys);
+inserti(acq.Stimulation, stimulation);
