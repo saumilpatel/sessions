@@ -32,7 +32,7 @@ classdef QualitySet < dj.Relvar & dj.AutoPopulate
                 disp('Found pre scan');
 
                 %% Checks over the volumes
-                if (as.aod_scan_start_time - pre.aod_volume_start_time) > (4 * 60000)
+                if (as.aod_scan_start_time - pre.aod_volume_start_time) > (6 * 60000)
                     warning('Pre scan volume stale')
                 end
 
@@ -51,7 +51,7 @@ classdef QualitySet < dj.Relvar & dj.AutoPopulate
                 % Process the cell position in the preceding volume
                 [original_coordinates cell_coordinates] = ...
                     aod.QualitySet.processCellPositions(key, pre_vol);
-                cellPosPre = fetch(acq.AodVolume(post_vol) * aod.Traces(key));
+                cellPosPre = fetch(acq.AodVolume(pre_vol) * aod.Traces(key));
                 cellPosPre = dj.struct.sort(cellPosPre,'cell_num');
                 for i = 1:length(cellPosPre)
                     idx = cellPosPre(i).cell_num;
@@ -125,7 +125,7 @@ classdef QualitySet < dj.Relvar & dj.AutoPopulate
             insert(this,tuple);
             insert(aod.TraceQuality, traceQualityTuple);
             if exist('cellPosPost','var'), insert(aod.CellPos, cellPosPost); end
-            if exist('cellPrePost','var'), insert(aod.CellPos, cellPrePost); end
+            if exist('cellPosPre','var'), insert(aod.CellPos, cellPosPre); end
         end
     end
 

@@ -16,4 +16,18 @@ classdef TracePreprocessedSetParam < dj.Relvar
             self.restrict(varargin{:})
         end
     end
+    
+    methods (Static)
+        function createSets(key ,method)
+            assert(count(key) > 0, 'No sets to attach to found');
+            preprocess_method_num = fetch1(aod.TracePreprocessedMethod & ...
+                ['preprocessed_method_name=' method], 'preprocessed_method_num');
+            ts = fetch(aod.TraceSet & key);
+            for i = 1:length(ts)
+                tuple = ts(i);
+                tuple.preprocessed_method_num = preprocess_method_num;
+                insert(aod.TracePreprocessedSetParam, tuple);
+            end
+        end
+    end
 end
