@@ -29,7 +29,20 @@ classdef Traces < dj.Relvar
             disp(sprintf('Importing traces from %d cells', size(asr,2)));
 
             dat = asr(:,:);
+            dat = dat - this.offset;
             coordinates = asr.coordinates;
+            
+            m = mean(dat,1);
+            v = var(dat,[],1);
+            r = robustfit(m,v);
+            
+            % Make sure the parameters are something reasonable
+            if abs(r(2) - 500) > 200 || abs(r(1) / r(2)^2) > 50
+                r = [0 500];
+            end
+            
+            dat  =( dat + r(1)/r(2) ) / r(2);
+                        
             for i = 1:size(dat,2)
                 tuple = key;
                 
@@ -37,7 +50,7 @@ classdef Traces < dj.Relvar
                 tuple.x = double(coordinates(i,1));
                 tuple.y = double(coordinates(i,2));
                 tuple.z = double(coordinates(i,3));
-                tuple.trace = dat(:,i) - this.offset;
+                tuple.trace = dat(:,i); % - this.offset;
                 tuple.t0 = asr(1,'t');
                 tuple.fs = getSamplingRate(asr);
             
