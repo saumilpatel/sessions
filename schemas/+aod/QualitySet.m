@@ -105,7 +105,8 @@ classdef QualitySet < dj.Relvar & dj.AutoPopulate
             t = dj.struct.sort(t,'cell_num');
             for i = 1:length(t)
                 traceQualityTuple(i) = dj.struct.join(dj.struct.join(key,t(i)), ...
-                    struct('pre_position_distance',1e6,'post_position_distance',1e6,'snr',0));
+                    struct('pre_position_distance',1e6,'post_position_distance',1e6, ...
+                    'snr',mean(fetch1(aod.Traces & t(i), 'trace'))));
                 if exist('cellPosPre','var')
                     traceQualityTuple(i).pre_position_distance = sqrt( ...
                         (cellPosPre(i).cell_center_x - cellPosPre(i).cell_location_x).^2 + ...
@@ -167,7 +168,7 @@ classdef QualitySet < dj.Relvar & dj.AutoPopulate
                 subplot(236); imagesc(p3'); colormap gray
                 
                 drawnow
-                pause(0.5)
+                %pause(0.5)
             end
             
             original_coordinates = seg.click_coordinates;
