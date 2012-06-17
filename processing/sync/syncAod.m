@@ -4,7 +4,7 @@ function [stimDiode, rms, offset] = syncAod(stim, key)
 
 params.oldFile = false;
 params.maxPhotodiodeErr = 1.00;  % 100 us err allowed
-params.behDiodeOffset = [2 8]; % [min max] in ms
+params.behDiodeOffset = [1 8]; % [min max] in ms
 params.behDiodeSlopeErr = 1e-5;   % max deviation from 1
 params.diodeThreshold = 0.04;
 params.minNegTime = -100;  % 100 ms timing error
@@ -54,12 +54,24 @@ originalDiodeSwapTimes = diodeSwapTimes;
 [macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, offset);
 N = numel(macSwapTimes);
 
-% exact correction using robust linear regression (undo manual gain
-% correction first)
-% macPar = myrobustfit(macSwapTimes / params.gain, diodeSwapTimes);
-macPar = regress(diodeSwapTimes', [ones(N, 1), macSwapTimes]);
+% exact correction using robust linear regression.  Remove an offset to
+% increase precision of slope calculation
+t0 = diodeSwapTimes(1);
+macPar = regress(diodeSwapTimes' - t0, [ones(N, 1), macSwapTimes - t0]);
+macPar(1) = macPar(1) - (t0 * macPar(2) - t0)
+
+% Compute the shift of the average swap time
+t = mean(macSwapTimes);
+shift = macPar(2) * t - t + macPar(1);
+
+if(~(abs(macPar(2) - 1) < params.behDiodeSlopeErr ...
+    && shift > params.behDiodeOffset(1) && shift < params.behDiodeOffset(2)))
+    disp('Sync failed');
+    keyboard
+end
+
 assert(abs(macPar(2) - 1) < params.behDiodeSlopeErr ...
-    && macPar(1) > params.behDiodeOffset(1) && macPar(1) < params.behDiodeOffset(2), ...
+    && shift > params.behDiodeOffset(1) && shift < params.behDiodeOffset(2), ...
     'Regression between behavior clock and photodiode clock outside system tolerances');
 
 % convert times in stim file
