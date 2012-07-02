@@ -35,6 +35,9 @@ classdef KalmanFinalize < dj.Relvar & dj.AutoPopulate
             
             tuple.final_model = saveStructure(compress(m));
             insert(this,tuple);
+           
+            % Insert entries for the single units
+            makeTuples(sort.KalmanUnits, key, m);
         end
     end
 end

@@ -22,7 +22,6 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
             % Cluster spikes
             %
             % JC 2011-10-21
-            close all
             tuple = key;
             
             de_key = fetch(detect.Electrodes(key));
@@ -31,7 +30,7 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
             if length(m.Waveforms.data) > 1
                 m = getFeatures(m,'PCA');
             else
-                m = getFeatures(m,'Points');
+                m = getFeatures(m,'PCA');
             end
             clustCosts = 0.05; %[0.01 0.03 0.05];
             for i = 1:length(clustCosts)
