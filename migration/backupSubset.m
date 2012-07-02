@@ -22,5 +22,6 @@ data = cell(size(tables));
 for iTable = 1 : numel(tables)
     data{iTable} = fetch(eval(tables{iTable}) & varargin, '*');
 end
-save(filename, 'tables', 'data')
+data
+save(filename, 'tables', 'data','-v7.3')
 fprintf('Saved backup at %s\n', which(filename))
