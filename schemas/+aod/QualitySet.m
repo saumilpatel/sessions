@@ -148,26 +148,31 @@ classdef QualitySet < dj.Relvar & dj.AutoPopulate
             seg = aod.Segmenter(dat, x, y, z);
             for i = 1:size(coordinates,1)
                 seg = addClick(seg, coordinates(i,1), coordinates(i,2), coordinates(i,3));
-                
+                                
                 [p1 p2 p3] = originalCutOut(seg, i);
+                x_coord = (1:size(p3,1)); x_coord  = (x_coord - mean(x_coord)) * mean(diff(x));
+                y_coord = (1:size(p3,2)); y_coord  = (y_coord - mean(y_coord)) * mean(diff(y));
+                z_coord = (1:size(p1,2)); z_coord  = (z_coord - mean(z_coord)) * mean(diff(z));
+ 
                 cellPlanes(i).clicked_p1 = p1; %#ok<*AGROW>
                 cellPlanes(i).clicked_p2 = p2;
                 cellPlanes(i).clicked_p3 = p3;
 
-                subplot(231); imagesc(p1'); colormap gray
-                subplot(232); imagesc(p2'); colormap gray
-                subplot(233); imagesc(p3'); colormap gray
+                subplot(231); imagesc(y_coord,z_coord,p1'); colormap gray
+                subplot(232); imagesc(x_coord,z_coord,p2'); colormap gray
+                subplot(233); imagesc(x_coord,y_coord,p3'); colormap gray
 
                 [p1 p2 p3] = centeredCutOut(seg, i);
                 cellPlanes(i).centered_p1 = p1;
                 cellPlanes(i).centered_p2 = p2;
                 cellPlanes(i).centered_p3 = p3;
 
-                subplot(234); imagesc(p1'); colormap gray
-                subplot(235); imagesc(p2'); colormap gray
-                subplot(236); imagesc(p3'); colormap gray
+                subplot(234); imagesc(y_coord,z_coord,p1'); colormap gray
+                subplot(235); imagesc(x_coord,z_coord,p2'); colormap gray
+                subplot(236); imagesc(x_coord,y_coord,p3'); colormap gray
                 
                 drawnow
+                pause
                 %pause(0.5)
             end
             
