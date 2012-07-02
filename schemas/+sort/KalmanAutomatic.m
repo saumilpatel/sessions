@@ -33,19 +33,15 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
             else
                 m = getFeatures(m,'Points');
             end
-            clustCosts = [0.01 0.03 0.05];
+            clustCosts = 0.05; %[0.01 0.03 0.05];
             for i = 1:length(clustCosts)
                 m.params.Verbose = true;
                 m.params.ClusterCost = clustCosts(i)
-                marray(i) = fit(m);
+                fitted = fit(m);
+                marray(i) = saveStructure(compress(fitted));
                 
-                plot(marray(i));
+                plot(fitted);
                 pause(1)
-            
-                marray(i).Waveforms.data = {};
-                marray(i).SpikeTimes.data = {};
-                marray(i).Features.data = {};
-                marray(i).tt = [];
             end
             tuple.model = struct(marray);
             insert(this,tuple);

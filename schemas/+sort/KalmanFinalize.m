@@ -27,21 +27,13 @@ classdef KalmanFinalize < dj.Relvar & dj.AutoPopulate
             
             model = fetch1(sort.KalmanAutomatic(key),'model');
             model = model(1);
-            
-            m = MoKsmInterface(key);
-            if length(m.Waveforms.data) > 1
-                m = getFeatures(m,'PCA');
-            else
-                m = getFeatures(m,'Points');
-            end
-            
-            fields = {'params','model','Y','t','train','test','blockId','spikeId'};
-            for i = 1:length(fields)
-                m.(fields{i}) = model.(fields{i});
-            end
+ 
+            m = MoKsmInterface(model);
+            m = uncompress(m);
             m = updateInformation(m);
             m = ManualClustering(m,fetch1(detect.Electrodes & key, 'detect_electrode_file'));
-            tuple.model = struct(m);
+            
+            tuple.final_model = saveStructure(compress(m));
             insert(this,tuple);
         end
     end
