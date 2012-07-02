@@ -7,17 +7,19 @@ kalmanautomatic_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp.
 %}
 
 classdef KalmanFinalize < dj.Relvar & dj.AutoPopulate
-
-	properties(Constant)
-		table = dj.Table('sort.KalmanFinalize')
-		popRel = sort.KalmanAutomatic;
-	end
-
-	methods
-		function self = KalmanFinalize(varargin)
-			self.restrict(varargin)
+    
+    properties(Constant)
+        table = dj.Table('sort.KalmanFinalize')
+        popRel = sort.KalmanAutomatic;
+    end
+    
+    methods
+        function self = KalmanFinalize(varargin)
+            self.restrict(varargin)
         end
-
+    end
+    
+    methods (Access=protected)
         function makeTuples( this, key )
             % Cluster spikes
             %
@@ -27,7 +29,7 @@ classdef KalmanFinalize < dj.Relvar & dj.AutoPopulate
             
             model = fetch1(sort.KalmanAutomatic(key),'model');
             model = model(1);
- 
+            
             m = MoKsmInterface(model);
             m = uncompress(m);
             m = updateInformation(m);

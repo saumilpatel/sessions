@@ -7,17 +7,19 @@ kalmanautomatic_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp.
 %}
 
 classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
-
-	properties(Constant)
-		table = dj.Table('sort.KalmanAutomatic')
-		popRel = sort.Electrodes * sort.Methods('sort_method_name = "MoKsm"');
-	end
-
-	methods
-		function self = KalmanAutomatic(varargin)
-			self.restrict(varargin)
+    
+    properties(Constant)
+        table = dj.Table('sort.KalmanAutomatic')
+        popRel = sort.Electrodes * sort.Methods('sort_method_name = "MoKsm"');
+    end
+    
+    methods
+        function self = KalmanAutomatic(varargin)
+            self.restrict(varargin)
         end
-
+    end
+    
+    methods (Access=protected):
         function makeTuples( this, key )
             % Cluster spikes
             %
