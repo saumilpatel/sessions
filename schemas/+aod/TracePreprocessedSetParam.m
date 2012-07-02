@@ -26,7 +26,7 @@ classdef TracePreprocessedSetParam < dj.Relvar
             for i = 1:length(ts)
                 tuple = ts(i);
                 tuple.preprocessed_method_num = preprocess_method_num;
-                insert(aod.TracePreprocessedSetParam, tuple);
+                inserti(aod.TracePreprocessedSetParam, tuple);
             end
         end
     end

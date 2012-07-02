@@ -2,6 +2,7 @@
 aod.TraceSet (imported) # A scan site
 
 ->acq.AodScan
+->acq.SessionsCleanup
 ---
 num_cells             : int unsigned     # Number of cells in the data set
 num_planes            : int unsigned     # Number of motion planes

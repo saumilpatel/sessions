@@ -1,7 +1,7 @@
 %{
 aod.TracePreprocessed (imported) # A scan site
 
-->aod.TracePreprocessedSetParam
+->aod.TracePreprocessedSet
 ->aod.Traces
 ---
 trace           : longblob          # The unfiltered trace
@@ -39,6 +39,17 @@ classdef TracePreprocessed < dj.Relvar
                 switch (method)
                     case 'raw'
                         
+                    case 'hp20'
+                        ds = round(fs / 20);
+                        ds_trace = decimate(trace,ds,'fir');
+                        highPass = 0.1;
+                        dt = 1 / fs;
+                        k = hamming(round(1/(dt*ds)/highPass)*2+1);
+                        k = k/sum(k);
+                        trace = ds_trace - convmirr(ds_trace,k);  %  dF/F where F is low pass
+
+                        assert(ds > 1);
+                        fs = fs / ds;                        
                     case 'ds20'        % Downsample to 20 Hz
                         ds = round(fs / 20);
                         assert(ds > 1);

@@ -107,7 +107,13 @@ classdef TuningCurve < dj.Relvar & dj.AutoPopulate
             tuple.ind_responses(:,1) = ori(1:length(sample));
             tuple.ind_responses(:,2) = resp;
             insert(aod.TuningCurve, tuple);
-            
+        end
+        
+        function plot( this )
+            tc = fetch(this, '*');
+            plot(tc.ori,tc.mean_resp,tc.ind_responses(:,1),tc.ind_responses(:,2),'k.')
+        end
+        
 %             figure(1);
 %             subplot(321);
 %             plot((-pre:post) / trace.fs,on_resp);
@@ -128,7 +134,5 @@ classdef TuningCurve < dj.Relvar & dj.AutoPopulate
 %             for i = 1:size(ori_resp,2), h(i) = subplot(4,ceil(size(ori_resp,2) / 4),i); plot((-pre:post) / trace.fs,ind_responses{i}); end
 %             linkaxes(h,'xy'); xlim([0 4]);
 %             
-            drawnow
-        end
     end
 end
