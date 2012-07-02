@@ -33,6 +33,9 @@ classdef Spikes < dj.Relvar
                 case 'TetrodesMoG'
                     accessor = sort.TetrodesMoGUnits;
                     link = sort.TetrodesMoGLink;
+                case 'MoKsm'
+                    accessor = sort.KalmanUnits;
+                    link = sort.KalmanLink;
                 otherwise
                     error('"Unimplemented"');
             end
