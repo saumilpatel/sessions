@@ -27,30 +27,19 @@ classdef KalmanTemp < dj.Relvar
             
             model = updateInformation(model);
             
-            % Things to parse down:
-            % Waveforms, SpikeTimes, Features
-            idx = 1:length(model.SpikeTimes.data);
-            r = randperm(length(idx));
-            idx = idx(r(1:min(this.maxTotal, end)));
-            for i = 1:1:length(model.ClusterAssignment.data)
-                % For each cluster if less than the minimum number of
-                % points available try to add more
-                if length(intersect(idx,model.ClusterAssignment.data{i})) < this.minPerCluster
-                    idx = setdiff(idx,model.ClusterAssignment.data{i});
-                    r = randperm(length(model.ClusterAssignment.data{i}));
-                    r = r(1:min(end,this.minPerCluster));
-                    idx = [idx, model.ClusterAssignment.data{i}(r)];
-                end
-            end
-            
-            idx = sort(idx);
-            
+            idx = sort([model.train model.test]);
+            [~,model.train] = ismember(model.train, idx);
+            [~,model.test] = ismember(model.test, idx);
             model.SpikeTimes.data = model.SpikeTimes.data(idx);
             model.Waveforms.data = cellfun(@(x) x(:,idx), model.Waveforms.data, 'UniformOutput', false);
             model.Features.data = model.Features.data(idx,:);
             
             model.Y = model.Y(:,idx);
             model.t = model.t(idx);
+            
+             % block ids for all data points
+            [~, model.blockId] = histc(model.t, model.model.mu_t);
+            
             model = updateInformation(model);
             
             % Things to remove:

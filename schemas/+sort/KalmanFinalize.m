@@ -29,7 +29,7 @@ classdef KalmanFinalize < dj.Relvar & dj.AutoPopulate
             
             model = fetch1(sort.KalmanManual & key,'manual_model');
  
-            m = MoKsmInterface(model);
+            m = MoKsmInterface(model);           
             m = uncompress(m);
             m = updateInformation(m);
             

@@ -7,15 +7,15 @@ kalmanautomatic_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp.
 %}
 
 classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
-
-	properties(Constant)
-		table = dj.Table('sort.KalmanAutomatic')
-		popRel = sort.Electrodes * sort.Methods('sort_method_name = "MoKsm"');
-	end
-
-	methods
-		function self = KalmanAutomatic(varargin)
-			self.restrict(varargin)
+    
+    properties(Constant)
+        table = dj.Table('sort.KalmanAutomatic')
+        popRel = sort.Electrodes * sort.Methods('sort_method_name = "MoKsm"');
+    end
+    
+    methods
+        function self = KalmanAutomatic(varargin)
+            self.restrict(varargin)
         end
     end
     
@@ -34,17 +34,13 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
             else
                 m = getFeatures(m,'PCA');
             end
-            clustCosts = 0.05; %[0.01 0.03 0.05];
-            for i = 1:length(clustCosts)
-                m.params.Verbose = true;
-                m.params.ClusterCost = clustCosts(i)
-                fitted = fit(m);
-                marray(i) = saveStructure(compress(fitted));
-                
-                plot(fitted);
-                pause(1)
-            end
-            tuple.model = struct(marray);
+            m.params.Verbose = true;
+            fitted = fit(m);
+            compressed = saveStructure(compress(fitted));
+            
+            plot(fitted);
+            pause(1)
+            tuple.model = compressed;
             insert(this,tuple);
             
             makeTuples(sort.KalmanTemp, key, fitted);
