@@ -47,6 +47,7 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
             tuple.model = struct(marray);
             insert(this,tuple);
             
+            makeTuples(sort.KalmanTemp, key, fitted);
         end
     end
 end

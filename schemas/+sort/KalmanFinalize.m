@@ -1,6 +1,6 @@
 %{
 sort.KalmanFinalize (computed) # my newest table
--> sort.KalmanAutomatic
+-> sort.KalmanManual
 -----
 final_model: LONGBLOB # The finalized model
 kalmanautomatic_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not edit
@@ -10,7 +10,7 @@ classdef KalmanFinalize < dj.Relvar & dj.AutoPopulate
 
 	properties(Constant)
 		table = dj.Table('sort.KalmanFinalize')
-		popRel = sort.KalmanAutomatic;
+		popRel = sort.KalmanManual;
 	end
 
 	methods
@@ -27,13 +27,11 @@ classdef KalmanFinalize < dj.Relvar & dj.AutoPopulate
             close all
             tuple = key;
             
-            model = fetch1(sort.KalmanAutomatic(key),'model');
-            model = model(1);
+            model = fetch1(sort.KalmanManual & key,'manual_model');
  
             m = MoKsmInterface(model);
             m = uncompress(m);
             m = updateInformation(m);
-            m = ManualClustering(m,fetch1(detect.Electrodes & key, 'detect_electrode_file'));
             
             tuple.final_model = saveStructure(compress(m));
             insert(this,tuple);

@@ -19,9 +19,7 @@ classdef KalmanUnits < dj.Relvar
         function self = KalmanUnits(varargin)
             self.restrict(varargin{:})
         end
-    end
-    
-    methods (Access=protected)        
+        
         function self = makeTuples(self, key, kalmanModel)
             % Detect the selected single units and insert entries for them
              
