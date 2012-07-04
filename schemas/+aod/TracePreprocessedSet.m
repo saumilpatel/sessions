@@ -15,16 +15,7 @@ classdef TracePreprocessedSet < dj.Relvar & dj.AutoPopulate
         function self = TracePreprocessedSet(varargin)
             self.restrict(varargin{:})
         end
-    
-        function makeTuples( this, key )
-            % Import a spike set
-            tuple = key;
-                       
-            insert(this,tuple);           
-            
-            makeTuples( aod.TracePreprocessed, key )
-        end
-        
+
         function t = plot( this )
             assert( count(aod.TracePreprocessedSet & this) == 1, 'Only one trace set can be plotted');
             
@@ -34,6 +25,17 @@ classdef TracePreprocessedSet < dj.Relvar & dj.AutoPopulate
             traces(1,:) = [];
             time = (1:size(traces,1)) / t(1).fs;
             plot(time,bsxfun(@plus,traces,1:size(traces,2)))
+        end        
+    end
+    
+    methods (Access=protected)
+        function makeTuples( this, key )
+            % Import a spike set
+            tuple = key;
+                       
+            insert(this,tuple);           
+            
+            makeTuples( aod.TracePreprocessed, key )
         end
     end
 end

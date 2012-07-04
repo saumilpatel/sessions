@@ -20,7 +20,9 @@ classdef MultiDimInfo < dj.Relvar & dj.AutoPopulate
         function self = MultiDimInfo(varargin)
             self.restrict(varargin{:})
         end
+    end
     
+    methods (Access=protected)
         function makeTuples( this, key )
             % Import a spike set
             tuple = key;
