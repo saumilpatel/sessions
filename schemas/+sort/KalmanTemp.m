@@ -38,7 +38,7 @@ classdef KalmanTemp < dj.Relvar
             model.t = model.t(idx);
             
              % block ids for all data points
-            [~, model.blockId] = histc(model.t, model.model.mu_t);
+            [~, model.blockId] = histc(model.t, model.mu_t);
             
             model = updateInformation(model);
             
