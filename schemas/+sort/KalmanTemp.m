@@ -10,8 +10,6 @@ classdef KalmanTemp < dj.Relvar
     
     properties(Constant)
         table = dj.Table('sort.KalmanTemp')
-        minPerCluster = 500;
-        maxTotal = 10000;
     end
     
     methods
@@ -28,13 +26,13 @@ classdef KalmanTemp < dj.Relvar
             model = updateInformation(model);
             
             idx = sort([model.train model.test]);
-            [~,model.train] = ismember(model.train, idx);
-            [~,model.test] = ismember(model.test, idx);
+            [~, model.train] = ismember(model.train, idx);
+            [~, model.test] = ismember(model.test, idx);
             model.SpikeTimes.data = model.SpikeTimes.data(idx);
-            model.Waveforms.data = cellfun(@(x) x(:,idx), model.Waveforms.data, 'UniformOutput', false);
-            model.Features.data = model.Features.data(idx,:);
+            model.Waveforms.data = cellfun(@(x) x(:, idx), model.Waveforms.data, 'UniformOutput', false);
+            model.Features.data = model.Features.data(idx, :);
             
-            model.Y = model.Y(:,idx);
+            model.Y = model.Y(:, idx);
             model.t = model.t(idx);
             
              % block ids for all data points
