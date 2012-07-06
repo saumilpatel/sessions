@@ -33,10 +33,7 @@ classdef KalmanManual < dj.Relvar & dj.AutoPopulate
             
             tuple.manual_model = saveStructure(compress(m));
             insert(this,tuple);
-           
-            % Insert entries for the single units
-            makeTuples(sort.KalmanUnits, key, m);
-            
+                       
             % Delete the temporary structure
             % Err can't do this because we are already in a transaction
             %del(sort.KalmanTemp & key, false);
