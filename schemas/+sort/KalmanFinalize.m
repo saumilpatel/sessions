@@ -31,7 +31,6 @@ classdef KalmanFinalize < dj.Relvar & dj.AutoPopulate
  
             m = MoKsmInterface(model);           
             m = uncompress(m);
-            [~, m.blockId] = histc(m.t, m.model.mu_t);
             m = updateInformation(m);
             
             tuple.final_model = saveStructure(compress(m));

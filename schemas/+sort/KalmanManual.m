@@ -1,5 +1,5 @@
 %{
-sort.KalmanManual (computed) # my newest table
+sort.KalmanManual (computed) # manual processing step
 -> sort.KalmanAutomatic
 -----
 manual_model: LONGBLOB # The finalized model
@@ -21,22 +21,16 @@ classdef KalmanManual < dj.Relvar & dj.AutoPopulate
 
     methods (Access=protected)
         function makeTuples( this, key )
-            % Cluster spikes
-            %
-            % JC 2011-10-21
-            tuple = key;
-            
+
             model = getModel(sort.KalmanTemp & key);
+            model.params.Verbose = false;
  
             m = MoKsmInterface(model);
-            m = ManualClustering(m,fetch1(detect.Electrodes & key, 'detect_electrode_file'));
+            m = ManualClustering(m, fetch1(detect.Electrodes & key, 'detect_electrode_file'));
             
+            tuple = key;
             tuple.manual_model = saveStructure(compress(m));
-            insert(this,tuple);
-                       
-            % Delete the temporary structure
-            % Err can't do this because we are already in a transaction
-            %del(sort.KalmanTemp & key, false);
+            insert(this, tuple);
         end
     end
 end
