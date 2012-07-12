@@ -28,6 +28,8 @@ addpath(fullfile(base, 'processing/utils'))
 addpath(fullfile(base, 'recovery'))
 addpath(fullfile(base, 'schemas'))
 addpath(fullfile(base, 'migration'))
+addpath(fullfile(base, 'sortgui'))
+addpath(fullfile(base, 'sortgui/lib'))
 
 % DataJoint library is assumed to be in the same directory as the base
 % diretory
@@ -44,7 +46,8 @@ run(fullfile(base(1:ndx-1), 'detection/setPath.m'))
 addpath(fullfile(base(1:ndx-1), 'lfp'))
 
 % spike sorting
-addpath(fullfile(base(1:ndx-1),'clustering'))
+addpath(fullfile(base(1:ndx-1), 'clustering'))
 run(getLocalPath('/lab/libraries/various/spider/use_spider'))
+addpath(fullfile(base(1:ndx-1), 'moksm'))
 
 warning on MATLAB:dispatcher:nameConflict
