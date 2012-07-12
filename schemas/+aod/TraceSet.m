@@ -18,7 +18,10 @@ classdef TraceSet < dj.Relvar & dj.AutoPopulate
         function self = TraceSet(varargin)
             self.restrict(varargin{:})
         end
+    end
     
+    methods (Access=protected)
+
         function makeTuples( this, key )
             % Import a spike set
             tuple = key;
