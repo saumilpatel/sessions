@@ -67,10 +67,10 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
         function self = split(self, id)
             % Split cluster with given id.
         
-            assert(length(id) == 1, 'Only split one cluster at a time');
-            group = length(self.GroupingAssignment.data{id}) > 1;
+            assert(numel(id) == 1, 'Can split only one cluster at a time.')
             
-            switch(group)
+            group = length(self.GroupingAssignment.data{id}) > 1;
+            switch (group)
                 case true % For groups simply split apart into raw clusters
                     clusterIds = self.GroupingAssignment.data{id};
                     self.GroupingAssignment.data(id) = [];
@@ -123,6 +123,7 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
         function self = group(self, ids)
             % Group clusters.
             
+            assert(numel(ids) > 1, 'Nothing to group.')
             finalGroup = cat(2, self.GroupingAssignment.data{ids});
             
             % Delete previous groups and tags
