@@ -118,10 +118,14 @@ function opMerge_Callback(hObject, ~, handles)
 
 set(handles.lbSelection, 'Enable', 'off')
 fprintf('Merging clusters...')
-handles.modelData = merge(handles.modelData, GetSelectedIds(hObject,handles));
-guidata(hObject,handles);
-NewModel(hObject,handles);
-fprintf(' done\n')
+try
+    handles.modelData = merge(handles.modelData, GetSelectedIds(hObject, handles));
+    guidata(hObject, handles);
+    NewModel(hObject, handles);
+    fprintf(' done\n')
+catch err
+    fprintf(' aborted due to error: %s\n', err.message)
+end
 set(handles.lbSelection, 'Enable', 'on')
 
 
@@ -133,10 +137,14 @@ function opSplit_Callback(hObject, ~, handles)
 
 set(handles.lbSelection, 'Enable', 'off')
 fprintf('Splitting cluster')
-handles.modelData = split(handles.modelData, GetSelectedIds(hObject,handles));
-guidata(hObject,handles);
-NewModel(hObject,handles);
-fprintf(' done\n')
+try
+    handles.modelData = split(handles.modelData, GetSelectedIds(hObject, handles));
+    guidata(hObject, handles);
+    NewModel(hObject, handles);
+    fprintf(' done\n')
+catch err
+    fprintf(' aborted due to error: %s\n', err.message)
+end
 set(handles.lbSelection, 'Enable', 'on')
 
 
@@ -148,10 +156,14 @@ function opDelete_Callback(hObject, ~, handles)
 
 set(handles.lbSelection, 'Enable', 'off')
 fprintf('Deleting cluster...')
-handles.modelData = delete(handles.modelData,GetSelectedIds(hObject,handles));
-guidata(hObject,handles);
-NewModel(hObject,handles);
-fprintf(' done\n')
+try
+    handles.modelData = delete(handles.modelData, GetSelectedIds(hObject, handles));
+    guidata(hObject, handles);
+    NewModel(hObject, handles);
+    fprintf(' done\n')
+catch err
+    fprintf(' aborted due to error: %s\n', err.message)
+end
 set(handles.lbSelection, 'Enable', 'on')
 
 
@@ -163,10 +175,14 @@ function opReproject_Callback(hObject, ~, handles)
 
 set(handles.lbSelection, 'Enable', 'off')
 fprintf('Reprojecting ')
-handles.modelData = reproject(handles.modelData,GetSelectedIds(hObject,handles));
-guidata(hObject,handles);
-NewModel(hObject,handles);
-fprintf(' done\n')
+try
+    handles.modelData = reproject(handles.modelData,GetSelectedIds(hObject, handles));
+    guidata(hObject, handles);
+    NewModel(hObject, handles);
+    fprintf(' done\n')
+catch err
+    fprintf(' aborted due to error: %s\n', err.message)
+end
 set(handles.lbSelection, 'Enable', 'on')
 
 
@@ -178,10 +194,14 @@ function opStrip_Callback(hObject, ~, handles)
 
 set(handles.lbSelection, 'Enable', 'off')
 fprintf('Stripping ')
-handles.modelData = strip(handles.modelData, GetSelectedIds(hObject,handles));
-guidata(hObject,handles);
-NewModel(hObject,handles);
-fprintf(' done\n')
+try
+    handles.modelData = strip(handles.modelData, GetSelectedIds(hObject, handles));
+    guidata(hObject, handles);
+    NewModel(hObject, handles);
+    fprintf(' done\n')
+catch err
+    fprintf(' aborted due to error: %s\n', err.message)
+end
 set(handles.lbSelection, 'Enable', 'on')
 
 
@@ -193,10 +213,14 @@ function opRefit_Callback(hObject, ~, handles)
 
 set(handles.lbSelection, 'Enable', 'off')
 fprintf('Refitting model ')
-handles.modelData = refit(handles.modelData);
-guidata(hObject,handles);
-NewModel(hObject,handles);
-fprintf(' done\n')
+try
+    handles.modelData = refit(handles.modelData);
+    guidata(hObject, handles);
+    NewModel(hObject, handles);
+    fprintf(' done\n')
+catch err
+    fprintf(' aborted due to error: %s\n', err.message)
+end
 set(handles.lbSelection, 'Enable', 'on')
 
 
@@ -208,10 +232,14 @@ function opGroup_Callback(hObject, ~, handles)
 
 set(handles.lbSelection, 'Enable', 'off')
 fprintf('Grouping clusters...')
-handles.modelData = group(handles.modelData, GetSelectedIds(hObject,handles));
-guidata(hObject,handles);
-NewModel(hObject,handles);
-fprintf(' done\n')
+try
+    handles.modelData = group(handles.modelData, GetSelectedIds(hObject, handles));
+    guidata(hObject, handles);
+    NewModel(hObject, handles);
+    fprintf(' done\n')
+catch err
+    fprintf(' aborted due to error: %s\n', err.message)
+end
 set(handles.lbSelection, 'Enable', 'on')
 
 
@@ -222,12 +250,16 @@ function opSingle_Callback(hObject, ~, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 set(handles.lbSelection, 'Enable', 'off')
-handles.modelData = singleUnit(handles.modelData, GetSelectedIds(hObject, handles));
-guidata(hObject, handles);
-su = hasTag(handles.modelData, 'SingleUnit');
-table = get(handles.stats, 'Data');
-table(:, end) = num2cell(double(su'));
-set(handles.stats, 'Data', table);
+try
+    handles.modelData = singleUnit(handles.modelData, GetSelectedIds(hObject, handles));
+    guidata(hObject, handles);
+    su = hasTag(handles.modelData, 'SingleUnit');
+    table = get(handles.stats, 'Data');
+    table(:, end) = num2cell(double(su'));
+    set(handles.stats, 'Data', table);
+catch err
+    fprintf('Tagging single unit aborted due to error: %s\n', err.message)
+end
 set(handles.lbSelection, 'Enable', 'on')
 
 
