@@ -1,20 +1,19 @@
 classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
 
-	properties
-	end
-
 	methods
-		function self = MoKsmInterface(varargin)
-        % Creates a ClusteringHelper class.  Doesn't need to initialize
-        % anything yet
         
+		function self = MoKsmInterface(varargin)
+            % MoKsmInterface constructor
+            
             self = self@SpikeSortingHelper(varargin{:});
             self = self@ClusteringHelper();
             self = self@MoKsm(varargin{:});
         end
         
+        
         function self = updateInformation(self)
-            % This method updates the ClusterAssignment and ContaminationMatrix
+            % Update the ClusterAssignment and ContaminationMatrix
+            
             ids = cluster(self);
             N = length(unique(ids));
             self.ClusterAssignment.data = cell(N,1);
@@ -31,6 +30,7 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
                 self.ClusterTags.data = cell(1,length(self.ClusterAssignment.data));
             end
         end
+        
         
         function self = fit(self)
             % Fits the model
@@ -74,10 +74,10 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
             % Reclassify all the points into the remaining clusters
             self = updateInformation(self);
         end
+
         
         function self = split(self, id)
-            % Splits a cluster by ID.  Should call updateInformation
-            % afterwards.
+            % Split cluster with given id.
         
             assert(length(id) == 1, 'Only split one cluster at a time');
             group = length(self.GroupingAssignment.data{id}) > 1;
@@ -98,7 +98,6 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
                     self.ClusterTags.data{end + 1} = [];
                     self = updateInformation(self);
             end
-
         end
 
         function self = merge(self, ids)
@@ -143,9 +142,10 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
             % Reclassify all the points into the remaining clusters
             self = updateInformation(self);
         end
+
         
         function self = group(self, ids)
-            % TODO: Support grouping when a group is included
+            % Group clusters.
             
             finalGroup = cat(2, self.GroupingAssignment.data{ids});
             
@@ -157,12 +157,15 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
             self.GroupingAssignment.data(end+1) = {finalGroup};
             self.ClusterTags.data(end+1) = {[]};
         end
+
         
         function self = refit(self)
-        % Refit the complete data set again
+            % Refit the complete data set again
+            
             self = refit@MoKsm(self);
             self = updateInformation(self);
         end
+
         
         function self = compress(self, varargin)
             % Remove any information that can be recomputed and doesn't
@@ -172,8 +175,9 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
             self = compress@MoKsm(self);
         end
         
+        
         function self = uncompress(self)
-        % Recreate any information that compress strips out
+            % Recreate any information that compress strips out
         
             self = uncompress@SpikeSortingHelper(self);
             self = uncompress@MoKsm(self, self.Features.data', self.SpikeTimes.data);
