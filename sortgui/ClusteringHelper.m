@@ -279,7 +279,7 @@ classdef ClusteringHelper
             k = numel(params.clusIds);
             chans = numel(self.Waveforms.data);
             hdl = zeros(k, chans);
-            yl = [-100 100];
+            yl = [Inf -Inf];
             
             for i = 1 : k
                 color = getClusColor(self, params.clusIds(i));
