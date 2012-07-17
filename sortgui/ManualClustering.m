@@ -53,7 +53,7 @@ function ManualClustering_OpeningFcn(hObject, ~, handles, model, filename)
 % varargin   command line arguments to ManualClustering (see VARARGIN)
 
 % Choose default command line output for ManualClustering
-handles.output = hObject;
+handles.output = [];
 
 % Update handles structure
 guidata(hObject, handles);
@@ -69,22 +69,29 @@ handles.modelData = model;
 mosSetFileButtons(hObject,handles,'off');
 % Update handles structure
 guidata(hObject, handles);
-NewModel(hObject,handles);    
+NewModel(hObject,handles);  
+
+set(handles.opAccept, 'backgroundcolor', [0 0.5 0])
+set(handles.opSkip, 'backgroundcolor', [0.7 0 0])
 
 % UIWAIT makes ManualClustering wait for user response (see UIRESUME)
 uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = ManualClustering_OutputFcn(~, ~, handles) 
+function varargout = ManualClustering_OutputFcn(hObject, ~, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Get default command line output from handles structure
-varargout{1} = handles.modelData;
-delete(handles.figure1);
+if ~ishandle(hObject)
+    varargout{1} = [];
+else
+    % Get default command line output from handles structure
+    varargout{1} = handles.output;
+    delete(handles.figure1);
+end
 
 
 % --- Executes on slider movement.
@@ -328,6 +335,26 @@ if handles.fileNum < length(handles.fileNames)
 end
 
 
+% --- Executes on button press in opSkip.
+function opSkip_Callback(~, ~, ~)
+% hObject    handle to opSkip (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+uiresume
+
+
+% --- Executes on button press in opAccept.
+function opAccept_Callback(hObject, ~, handles)
+% hObject    handle to opAccept (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles.output = handles.modelData;
+guidata(hObject, handles)
+uiresume
+
+
 % --- Executes on selection change in opSelection.
 function opSelection_Callback(~, ~, ~)
 % hObject    handle to opSelection (see GCBO)
@@ -520,19 +547,5 @@ end
 UpdateDisplay(hObject,handles);
 
 
-% --- Executes on button press in accepbutton.
-function accepbutton_Callback(~, ~, ~)
-% hObject    handle to accepbutton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-uiresume
-
-
-% --- If Enable == 'on', executes on mouse press in 5 pixel border.
-% --- Otherwise, executes on mouse press in 5 pixel border or over accepbutton.
-function accepbutton_ButtonDownFcn(~, ~, ~)
-% hObject    handle to accepbutton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 

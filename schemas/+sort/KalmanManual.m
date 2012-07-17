@@ -28,9 +28,13 @@ classdef KalmanManual < dj.Relvar & dj.AutoPopulate
             m = MoKsmInterface(model);
             m = ManualClustering(m, fetch1(detect.Electrodes & key, 'detect_electrode_file'));
             
-            tuple = key;
-            tuple.manual_model = saveStructure(compress(m));
-            insert(this, tuple);
+            if ~isempty(m)
+                tuple = key;
+                tuple.manual_model = saveStructure(compress(m));
+                insert(this, tuple);
+            else
+                warning('KalmanAutomatic:canceled', 'Manual processing canceled. Not inserting anything!')
+            end
         end
     end
 end
