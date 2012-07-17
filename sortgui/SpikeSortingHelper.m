@@ -26,7 +26,7 @@ classdef SpikeSortingHelper
                 self = loadTT(self);
                 args = varargin;
             elseif ismatrix(electrode) && nargin > 1 && any(size(electrode) == length(varargin{1}))
-                warning('Construct fake spike structure.  Only use for debugging.');
+                warning('Construct fake spike structure.  Only use for debugging.'); %#ok
                 self.dataSource = struct('type','Raw');
                 self.SpikeTimes = struct('data', varargin{1}, 'meta', struct);
                 self.Features = struct('data', electrode, 'meta', struct);
@@ -113,7 +113,7 @@ classdef SpikeSortingHelper
                 X = [];
                 for i = 1:length(self.Waveforms.data)
                     [~,P] = princomp(self.Waveforms.data{i}');
-                    X = [X P(:,1:3)];
+                    X = [X P(:,1:3)]; %#ok
                 end
             else
                 error('Unsupported feature');

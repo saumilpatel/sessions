@@ -296,7 +296,7 @@ classdef ClusteringHelper
                 r = randperm(length(ids));
                 ids = sort(ids(r(1 : min(end, params.maxPoints))));
                 for j = 1 : chans
-                    hdl(i, j) = axes('Position', [(i - 1) / k, (j - 1) / chans, 1 / k, 1 / chans]);
+                    hdl(i, j) = axes('Position', [(i - 1) / k, (j - 1) / chans, 1 / k, 1 / chans]); %#ok
                     if isempty(ids), axis off, continue; end
                     plot(self.Waveforms.data{j}(:, ids), 'Color', color)
                     hold on
@@ -432,7 +432,7 @@ classdef ClusteringHelper
             for i = 1 : N
                 color = getClusColor(self, params.clusIds(i));
                 for j = 1 : N
-                    hdl(i, j) = axes('Position', [i-1 N-j 1 1] / N);
+                    hdl(i, j) = axes('Position', [i-1 N-j 1 1] / N); %#ok
                     bb = bar(time, corrs{i, j}, 1, 'FaceColor', 'k', 'LineStyle', 'none');
                     if i == j
                         set(bb, 'FaceColor', color)
