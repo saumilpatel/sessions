@@ -261,11 +261,27 @@ try
     handles.modelData = singleUnit(handles.modelData, GetSelectedIds(hObject, handles));
     guidata(hObject, handles);
     su = hasTag(handles.modelData, 'SingleUnit');
-    table = get(handles.stats, 'Data');
-    table(:, end) = num2cell(double(su'));
-    set(handles.stats, 'Data', table);
+    UpdateStatsTable(hObject, 'SU', num2cell(double(su)));
 catch err
     fprintf('Tagging single unit aborted due to error: %s\n', err.message)
+end
+set(handles.lbSelection, 'Enable', 'on')
+
+
+% --- Executes on button press in opDouble.
+function opDouble_Callback(hObject, ~, handles)
+% hObject    handle to opDouble (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+set(handles.lbSelection, 'Enable', 'off')
+try
+    handles.modelData = toggleTag(handles.modelData, GetSelectedIds(hObject, handles), 'DoubleTriggered');
+    guidata(hObject, handles);
+    dt = hasTag(handles.modelData, 'DoubleTriggered');
+    UpdateStatsTable(hObject, 'DT', num2cell(double(dt)));
+catch err
+    fprintf('Tagging cell as double-triggered aborted due to error: %s\n', err.message)
 end
 set(handles.lbSelection, 'Enable', 'on')
 
@@ -444,7 +460,8 @@ set(handles.lbSelection, 'String', num2cell(clusIds));
 set(handles.lbSelection, 'Value', 1:length(clusIds));
 [fp fn snr frac] = getStats(handles.modelData);
 su = hasTag(handles.modelData, 'SingleUnit');
-set(handles.stats, 'Data', num2cell([clusIds; groups; 100 * fp; 100 * fn; snr; 100 * frac; su]'));
+dt = hasTag(handles.modelData, 'DoubleTriggered');
+set(handles.stats, 'Data', num2cell([clusIds; groups; 100 * fp; 100 * fn; snr; 100 * frac; su; dt]'));
 
 % create CCG and waveform plots
 if isfield(handles, 'ccg')
@@ -547,5 +564,14 @@ end
 UpdateDisplay(hObject,handles);
 
 
+function UpdateStatsTable(hObject, name, data)
+% Update stats table columns
+%   UpdateStatsTable(hObject, name, data) where name is the column name
+%   (property ColumnName) and data the column data (cell array).
 
+handles = guidata(hObject);
+ndx = strcmp(name, get(handles.stats, 'ColumnName'));
+table = get(handles.stats, 'Data');
+table(:, ndx) = data;
+set(handles.stats, 'Data', table);
 

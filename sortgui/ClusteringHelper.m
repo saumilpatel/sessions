@@ -52,15 +52,8 @@ classdef ClusteringHelper
         
         function self = singleUnit(self, clusterIds)
             % Toggles the SingleUnit flag for the selected ids
-            for i = 1:length(clusterIds)
-                tags = self.ClusterTags.data{clusterIds(i)};
-                su_flags = strcmp(tags,'SingleUnit');
-                if ~any(su_flags) % If flag not found, add it
-                    self.ClusterTags.data{clusterIds(i)}{end+1} = 'SingleUnit';
-                else              % Delete any found flags
-                    self.ClusterTags.data{clusterIds(i)}(su_flags) = [];
-                end
-            end
+            
+            self = toggleTag(self, clusterIds, 'SingleUnit');
         end
         
         function cm = getContamination(self, ids)
@@ -157,6 +150,18 @@ classdef ClusteringHelper
                 bool = zeros(1,length(params.clusIds));
             end
             bool = reshape(bool,1,[]);
+        end
+        
+        function self = toggleTag(self, ids, tag)
+            % Toggle cluster tag.
+            %   self = toggleTag(self, ids, tag) adds (removes) the given
+            %   tag to (from) the clusters identified by their ids.
+            %
+            % AE 2012-07-16
+            
+            for id = ids
+                self.ClusterTags.data{id} = setxor(self.ClusterTags.data{id}, {tag});
+            end
         end
         
         function varargout = plotProjections(self,varargin)

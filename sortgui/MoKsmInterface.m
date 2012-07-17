@@ -27,7 +27,7 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
             
             if isempty(self.GroupingAssignment)
                 self.GroupingAssignment(1).data = num2cell(1:length(self.ClusterAssignment.data));
-                self.ClusterTags.data = cell(1,length(self.ClusterAssignment.data));
+                self.ClusterTags.data = repmat({{}}, 1, length(self.ClusterAssignment.data));
             end
         end
         
@@ -77,13 +77,13 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
                     self.ClusterTags.data(id) = [];
                     
                     self.GroupingAssignment.data(end+1:end+length(clusterIds)) = num2cell(clusterIds);
-                    self.ClusterTags.data(end+1:end+length(clusterIds)) = cell(1,length(clusterIds));
+                    self.ClusterTags.data(end+1:end+length(clusterIds)) = repmat({{}}, 1, length(clusterIds));
                     % No need to rerun updateInformation as cluster
                     % assignments unchanged
                 case false
                     self = splitCluster(self, id);
-                    self.GroupingAssignment.data{end + 1} = numel(self.priors);
-                    self.ClusterTags.data{end + 1} = [];
+                    self.GroupingAssignment.data(end + 1) = {numel(self.priors)};
+                    self.ClusterTags.data(end + 1) = {{}};
                     self = updateInformation(self);
             end
         end
@@ -109,7 +109,7 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
             self.GroupingAssignment.data(removedIds) = [];
             self.GroupingAssignment.data(newId) = {newModelId};
             self.ClusterTags.data(removedIds) = [];
-            self.ClusterTags.data(newId) = {[]};
+            self.ClusterTags.data(newId) = {{}};
             for i = sort(removedModelIds, 'descend')
                 self.GroupingAssignment.data = cellfun(@(x) x - (x > i), ...
                     self.GroupingAssignment.data, 'UniformOutput', false);
@@ -132,7 +132,7 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
             
             % Create new one
             self.GroupingAssignment.data(end+1) = {finalGroup};
-            self.ClusterTags.data(end+1) = {[]};
+            self.ClusterTags.data(end+1) = {{}};
         end
 
         
