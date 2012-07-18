@@ -67,6 +67,7 @@ end
 
 % display this data
 handles.modelData = model;
+handles.modelBackup = model;
 mosSetFileButtons(hObject,handles,'off');
 % Update handles structure
 guidata(hObject, handles);
@@ -74,6 +75,7 @@ NewModel(hObject,handles);
 
 set(handles.opAccept, 'backgroundcolor', [0 0.5 0])
 set(handles.opSkip, 'backgroundcolor', [0.7 0 0])
+set(handles.opReset, 'backgroundcolor', [0 0.5 1])
 
 % UIWAIT makes ManualClustering wait for user response (see UIRESUME)
 uiwait(handles.figure1);
@@ -118,7 +120,7 @@ end
 
 
 % --- Executes on button press in opMerge.
-function opMerge_Callback(hObject, ~, handles)
+function opMerge_Callback(hObject, ~, handles) %#ok<*DEFNU>
 % hObject    handle to opMerge (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -349,6 +351,17 @@ if handles.fileNum < length(handles.fileNames)
     handles.fileNum = handles.fileNum + 1;
     mosLoadFileData(hObject, handles);
 end
+
+
+% --- Executes on button press in opReset.
+function opReset_Callback(hObject, ~, handles)
+% hObject    handle to opReset (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles.modelData = handles.modelBackup;
+guidata(hObject, handles);
+NewModel(hObject, handles);
 
 
 % --- Executes on button press in opSkip.
