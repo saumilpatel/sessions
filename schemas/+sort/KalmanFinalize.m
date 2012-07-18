@@ -3,7 +3,7 @@ sort.KalmanFinalize (computed) # my newest table
 -> sort.KalmanManual
 -----
 final_model: LONGBLOB # The finalized model
-kalmanautomatic_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not edit
+kalmanfinalize_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not edit
 %}
 
 classdef KalmanFinalize < dj.Relvar & dj.AutoPopulate
