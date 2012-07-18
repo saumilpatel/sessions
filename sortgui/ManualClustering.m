@@ -52,6 +52,12 @@ function ManualClustering_OpeningFcn(hObject, ~, handles, model, filename)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to ManualClustering (see VARARGIN)
 
+% resize figure if custom size is specified via environment variable
+pos = getenv('MANUAL_CLUSTERING_POSITION');
+if ~isempty(pos)
+    set(hObject, 'Position', eval(pos));
+end
+
 % Choose default command line output for ManualClustering
 handles.output = [];
 handles.comment = '';
