@@ -1,9 +1,11 @@
 %{
 sort.KalmanManual (computed) # manual processing step
+
 -> sort.KalmanAutomatic
------
-manual_model: LONGBLOB # The finalized model
-kalmanmanual_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not edit
+---
+manual_model                : longblob                      # The manually processed model
+kalmanmanual_ts=CURRENT_TIMESTAMP: timestamp                # automatic timestamp. Do not edit
+comment=""                  : varchar(255)                  # comment on manual step
 %}
 
 classdef KalmanManual < dj.Relvar & dj.AutoPopulate
@@ -26,11 +28,12 @@ classdef KalmanManual < dj.Relvar & dj.AutoPopulate
             model.params.Verbose = false;
  
             m = MoKsmInterface(model);
-            m = ManualClustering(m, fetch1(detect.Electrodes & key, 'detect_electrode_file'));
+            [m, comment] = ManualClustering(m, fetch1(detect.Electrodes & key, 'detect_electrode_file'));
             
             if ~isempty(m)
                 tuple = key;
                 tuple.manual_model = saveStructure(compress(m));
+                tuple.comment = comment(1 : min(end, 255));
                 insert(this, tuple);
             else
                 warning('KalmanAutomatic:canceled', 'Manual processing canceled. Not inserting anything!')

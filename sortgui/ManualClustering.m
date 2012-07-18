@@ -54,6 +54,7 @@ function ManualClustering_OpeningFcn(hObject, ~, handles, model, filename)
 
 % Choose default command line output for ManualClustering
 handles.output = [];
+handles.comment = '';
 
 % Update handles structure
 guidata(hObject, handles);
@@ -86,10 +87,9 @@ function varargout = ManualClustering_OutputFcn(hObject, ~, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if ~ishandle(hObject)
-    varargout{1} = [];
+    varargout = {[], ''};
 else
-    % Get default command line output from handles structure
-    varargout{1} = handles.output;
+    varargout = {handles.output, handles.comment};
     delete(handles.figure1);
 end
 
@@ -575,3 +575,24 @@ table = get(handles.stats, 'Data');
 table(:, ndx) = data;
 set(handles.stats, 'Data', table);
 
+
+function comment_Callback(hObject, ~, handles)
+% hObject    handle to comment (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles.comment = get(hObject, 'String');
+guidata(hObject, handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function comment_CreateFcn(hObject, ~, ~)
+% hObject    handle to comment (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
