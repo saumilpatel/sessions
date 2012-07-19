@@ -69,7 +69,8 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
         
             assert(numel(id) == 1, 'Can split only one cluster at a time.')
             
-            group = length(self.GroupingAssignment.data{id}) > 1;
+            modelId = self.GroupingAssignment.data{id};
+            group = length(modelId) > 1;
             switch (group)
                 case true % For groups simply split apart into raw clusters
                     clusterIds = self.GroupingAssignment.data{id};
@@ -81,7 +82,7 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
                     % No need to rerun updateInformation as cluster
                     % assignments unchanged
                 case false
-                    self = splitCluster(self, id);
+                    self = splitCluster(self, modelId);
                     self.GroupingAssignment.data(end + 1) = {numel(self.priors)};
                     self.ClusterTags.data(end + 1) = {{}};
                     self = updateInformation(self);
