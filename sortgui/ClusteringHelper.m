@@ -497,6 +497,7 @@ classdef ClusteringHelper
             
             assert(length(params.clusIds) > 1, 'Can only do for multiple clusters');
             
+            color = getClusColor(self, params.clusIds);
             clf
             for i = 1:length(params.clusIds)
                 for j = i+1:length(params.clusIds)
@@ -518,7 +519,9 @@ classdef ClusteringHelper
                     n1 = hist(p1,bins);
                     n2 = hist(p2,bins);
                     
-                    bar(bins,[n1;n2]',1,'stacked','linestyle','none');
+                    hdl = bar(bins, [n1; n2]', 1, 'stacked', 'LineStyle', 'none');
+                    set(hdl(1), 'FaceColor', color(i, :))
+                    set(hdl(2), 'FaceColor', color(j, :))
                 end
             end
         end
