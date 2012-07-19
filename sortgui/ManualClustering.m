@@ -52,6 +52,11 @@ function ManualClustering_OpeningFcn(hObject, ~, handles, model, filename)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to ManualClustering (see VARARGIN)
 
+assert(isa(model,'ClusteringHelper'), 'This must be passed with one or more clustering helpers');
+if nargin > 4
+    set(gcf,'Name',filename);
+end
+
 % resize figure if custom size is specified via environment variable
 pos = getenv('MANUAL_CLUSTERING_POSITION');
 if ~isempty(pos)
@@ -62,16 +67,6 @@ end
 handles.output = [];
 handles.comment = '';
 
-% Update handles structure
-guidata(hObject, handles);
-
-assert(isa(model,'ClusteringHelper'), 'This must be passed with one or more clustering helpers');
-
-if nargin > 4
-    set(gcf,'Name',filename);
-end
-
-% display this data
 handles.ccgRange = str2double(get(handles.txtCCG, 'String'));
 handles.modelData = model;
 handles.modelBackup = model;
