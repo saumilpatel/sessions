@@ -426,7 +426,7 @@ classdef ClusteringHelper
             params.clusIds = getClusterIds(self);
             params = parseVarArgs(params, varargin{:});
             
-            [corrs time] = getCrossCorrs(self, 'clusIds', params.clusIds);
+            [corrs time] = getCrossCorrs(self, varargin{:});
             N = numel(params.clusIds);
             hdl = zeros(N);
             for i = 1 : N

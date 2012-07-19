@@ -72,9 +72,11 @@ if nargin > 4
 end
 
 % display this data
+handles.ccgRange = str2double(get(handles.txtCCG, 'String'));
 handles.modelData = model;
 handles.modelBackup = model;
 mosSetFileButtons(hObject,handles,'off');
+
 % Update handles structure
 guidata(hObject, handles);
 NewModel(hObject,handles);  
@@ -289,6 +291,40 @@ function opTime_Callback(hObject, ~, handles)
 
 figure
 plotTimeFeatures(handles.modelData,'clusIds',GetSelectedIds(hObject,handles));
+
+
+% --- Executes on button press in opCCG.
+function opCCG_Callback(hObject, ~, handles)
+% hObject    handle to opCCG (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+figure('Color', 0.4 * ones(1, 3))
+nBins = 80;
+binSize = 2 * handles.ccgRange / nBins;
+plotCrossCorrs(handles.modelData, 'clusIds', GetSelectedIds(hObject, handles), 'binSize', binSize, 'nBins', nBins);
+
+
+function txtCCG_Callback(hObject, ~, handles)
+% hObject    handle to txtCCG (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles.ccgRange = str2double(get(hObject,'String'));
+guidata(hObject, handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function txtCCG_CreateFcn(hObject, ~, ~)
+% hObject    handle to txtCCG (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
 
 
 % --- Executes on button press in opPrev.
