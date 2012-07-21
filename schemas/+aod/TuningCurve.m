@@ -23,7 +23,35 @@ classdef TuningCurve < dj.Relvar & dj.AutoPopulate
         function self = TuningCurve(varargin)
             self.restrict(varargin{:})
         end
+        
+        function plot( this )
+            tc = fetch(this, '*');
+            plot(tc.ori,tc.mean_resp,tc.ind_responses(:,1),tc.ind_responses(:,2),'k.')
+        end
+        
+%             figure(1);
+%             subplot(321);
+%             plot((-pre:post) / trace.fs,on_resp);
+%             subplot(323);
+%             plot(ori(1:length(sample)), resp,'.',oris,mr);
+%             %ylim([-0.05 0.4])
+%             subplot(325);
+%             plot(times,ones(size(times)),'.',trace.t0 + (0:length(trace.trace)-1) *1000 / trace.fs,trace.trace)
+%             
+%             subplot(3,2,[2 4 6]);
+%             plot((-pre:post) / trace.fs,bsxfun(@plus,ori_resp*4,1:size(ori_resp,2)),[0 0],[0 17],'k',[st st]/1000,[0 17],'k')
+%             xlim([-pre post] / trace.fs);
+%             
+%             figure(2)
+%             if exist('h','var')
+%                 linkaxes(h,'off');
+%             end
+%             for i = 1:size(ori_resp,2), h(i) = subplot(4,ceil(size(ori_resp,2) / 4),i); plot((-pre:post) / trace.fs,ind_responses{i}); end
+%             linkaxes(h,'xy'); xlim([0 4]);
+%             
+    end
     
+    methods(Access=protected)
         function makeTuples( this, key )
             % Import a spike set
             
@@ -107,32 +135,6 @@ classdef TuningCurve < dj.Relvar & dj.AutoPopulate
             tuple.ind_responses(:,1) = ori(1:length(sample));
             tuple.ind_responses(:,2) = resp;
             insert(aod.TuningCurve, tuple);
-        end
-        
-        function plot( this )
-            tc = fetch(this, '*');
-            plot(tc.ori,tc.mean_resp,tc.ind_responses(:,1),tc.ind_responses(:,2),'k.')
-        end
-        
-%             figure(1);
-%             subplot(321);
-%             plot((-pre:post) / trace.fs,on_resp);
-%             subplot(323);
-%             plot(ori(1:length(sample)), resp,'.',oris,mr);
-%             %ylim([-0.05 0.4])
-%             subplot(325);
-%             plot(times,ones(size(times)),'.',trace.t0 + (0:length(trace.trace)-1) *1000 / trace.fs,trace.trace)
-%             
-%             subplot(3,2,[2 4 6]);
-%             plot((-pre:post) / trace.fs,bsxfun(@plus,ori_resp*4,1:size(ori_resp,2)),[0 0],[0 17],'k',[st st]/1000,[0 17],'k')
-%             xlim([-pre post] / trace.fs);
-%             
-%             figure(2)
-%             if exist('h','var')
-%                 linkaxes(h,'off');
-%             end
-%             for i = 1:size(ori_resp,2), h(i) = subplot(4,ceil(size(ori_resp,2) / 4),i); plot((-pre:post) / trace.fs,ind_responses{i}); end
-%             linkaxes(h,'xy'); xlim([0 4]);
-%             
+        end       
     end
 end
