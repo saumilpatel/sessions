@@ -66,6 +66,11 @@ shift = macPar(2) * t - t + macPar(1);
 
 if(~(abs(macPar(2) - 1) < params.behDiodeSlopeErr ...
     && shift > params.behDiodeOffset(1) && shift < params.behDiodeOffset(2)))
+    br = getFile(acq.AodScan(key),'Temporal');
+    %plot(br(:,'t'),br(:,1),macSwapTimes,zeros(size(macSwapTimes))-2e5,'.',originalDiodeSwapTimes,zeros(size(originalDiodeSwapTimes))-2.5e5,'.')
+    originalMacTimes = cat(1, stim.params.trials.swapTimes) + offset;
+    plot(originalMacTimes,zeros(size(originalMacTimes))+0.5,'.',originalDiodeSwapTimes,zeros(size(originalDiodeSwapTimes))-0.5,'.')
+    ylim([-5 5])
     disp('Sync failed');
     keyboard
 end
