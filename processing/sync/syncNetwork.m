@@ -24,6 +24,8 @@ rms = sqrt(mean((p(2) * mid + p(1) - r).^2));
 % get the "zero" time of the counter that was used for network
 % sync relative to session time
 t0 = getHardwareStartTime(acq.BehaviorTraces(key));
+
+assert(~isempty(t0), ['Could not find the hardware time stamp for behavioral session: ' fetch1(acq.BehaviorTraces(key),'beh_path')])
 stimNet = convertStimTimes(stim, p, [0; 1]);
 stimNet = convertStimTimes(stimNet, [t0; 1], [t0; 1]);
 stimNet.synchronized = 'network';
