@@ -22,9 +22,7 @@ classdef Traces < dj.Relvar
         function self = Traces(varargin)
             self.restrict(varargin{:})
         end
-    end
-    
-    methods (Access=protected)    
+        
         function makeTuples( this, key, asr )
             % Import a spike set
             
