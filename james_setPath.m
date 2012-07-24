@@ -3,7 +3,7 @@ function setPath
 warning off MATLAB:dispatcher:nameConflict
 
 % user specific DJ connection parameters (uses Alex' credentials)
-host = 'at-storage.neusc.bcm.tmc.edu';
+host = 'at-database.neusc.bcm.tmc.edu';
 user = 'jcotton';
 setenv('DJ_HOST', host)
 setenv('DJ_USER', user)
