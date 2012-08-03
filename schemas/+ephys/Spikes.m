@@ -6,8 +6,9 @@ unit_id        : int unsigned          # The spike data
 ---
 electrode_num=0             : int unsigned                  # The electrode number
 spike_times=null            : longblob                      # The spike timing data
-mean_waveform=null        : longblob                      # The spike waveform data
+mean_waveform=null          : longblob                      # The spike waveform data
 spike_file_path=""          : varchar(255)                  # The file containing the spike data
+multi_trigger_fraction      : float                         # fraction of spikes triggered multiple times
 %}
 
 classdef Spikes < dj.Relvar
@@ -45,8 +46,9 @@ classdef Spikes < dj.Relvar
             for i = 1:length(keys)
                 tuple = key;
                 tuple.unit_id = i;
-                [tuple.spike_times, tuple.mean_waveform, tuple.spike_file_path] = getSpikes(accessor & keys(i));
                 tuple.electrode_num = keys(i).electrode_num;
+                [spikes, tuple.mean_waveform, tuple.spike_file_path] = getSpikes(accessor & keys(i));
+                [tuple.spike_times, tuple.multi_trigger_fraction] = removeDoubleSpikes(spikes, type);
                 insert(ephys.Spikes, tuple)
                 
                 if numel(link)
@@ -68,4 +70,28 @@ classdef Spikes < dj.Relvar
             end
         end
     end
+end
+
+
+function [spikes, removedFraction] = removeDoubleSpikes(spikes, type)
+% Remove spikes that were triggered multiple times.
+
+keep = true(size(spikes));
+switch type
+    case 'MultiUnit'
+        refractory = 0.05;  % enforced refractory period in ms
+        keep(2:end) = diff(spikes) > refractory;
+    otherwise
+        refractory = 0.5;   % enforced refractory period in ms
+        last = 1;
+        for i = 2:numel(spikes)
+            if spikes(i) - spikes(last) < refractory
+                keep(i) = false;
+            else
+                last = i;
+            end
+        end
+end
+spikes = spikes(keep);
+removedFraction = sum(~keep) / sum(keep);
 end
