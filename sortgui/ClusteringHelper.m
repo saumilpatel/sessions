@@ -41,7 +41,13 @@ classdef ClusteringHelper
     end
 
 	methods
-		function self = ClusteringHelper()
+		function self = ClusteringHelper(s)
+            if nargin && isfield(s, 'ClusterAssignment')
+                self.ClusterAssignment = s.ClusterAssignment;
+                self.GroupingAssignment = s.GroupingAssignment;
+                self.ClusterTags = s.ClusterTags;
+                self.ContaminationMatrix = s.ContaminationMatrix;
+            end
         end
         
         function s = saveStructure(self)

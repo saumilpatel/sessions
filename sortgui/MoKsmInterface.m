@@ -6,7 +6,7 @@ classdef MoKsmInterface < SpikeSortingHelper & ClusteringHelper & MoKsm
             % MoKsmInterface constructor
             
             self = self@SpikeSortingHelper(varargin{:});
-            self = self@ClusteringHelper();
+            self = self@ClusteringHelper(varargin{:});
             self = self@MoKsm(varargin{:});
         end
         
