@@ -482,7 +482,8 @@ classdef ClusteringHelper
                     [~, index] = ismember(index, self.Waveforms.meta.subset);
                     index = index(index > 0);
                 end
-                wf = self.Waveforms.data{1}(:, index);
+                wf = cellfun(@(x) x(:, index), self.Waveforms.data, 'UniformOutput', false);
+                wf = cat(1, wf{:});
                 snr(i) = range(mean(wf, 2)) / mean(std(wf, [], 2)) / 2;
             end
             
