@@ -3,7 +3,7 @@ function electrodes = spikesUtah(sourceFile, spikesFile)
 % AE 2011-10-26
 
 % determine which tetrodes were recorded
-electrodes = 1:96
+electrodes = 1:96;
 
 % Extract the common reference
 extract_common_reference(sourceFile);

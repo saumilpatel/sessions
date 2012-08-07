@@ -7,9 +7,6 @@ function import_steinbruch(sessionList)
 % 
 % Needs to access both recDb and EphysDj.
 
-import ephys.*;
-import sessions.*;
-
 % get tree structure
 xml = xmlread(sessionList);
 root = xml.getElementsByTagName('root').item(0);
@@ -156,10 +153,10 @@ function writeScript(s)
 
 for i = 1:length(s.Subject)
     subj = s.Subject(i);
-    subjDj = sessions.Subjects(sprintf('subject_name="%s"',subj.meta.subjectName));
+    subjDj = acq.Subjects(sprintf('subject_name="%s"',subj.meta.subjectName));
     if count(subjDj) == 0
-        subject_id = max(fetchn(Subjects,'subject_id')) + 1;
-        insert(sessions.Subjects,struct('subject_name',s.meta.subjectName,'subject_id',subject_id));
+        subject_id = max(fetchn(acq.Subjects,'subject_id')) + 1;
+        insert(acq.Subjects,struct('subject_name',s.meta.subjectName,'subject_id',subject_id));
     else
         subject_id = fetch1(subjDj, 'subject_id')
     end
@@ -171,26 +168,26 @@ for i = 1:length(s.Subject)
         if isempty(beh.processedFolder)
             continue;
         end
-        acq = getfield(load(fullfile(getLocalPath(beh.processedFolder),'sessionInfo')),'acq');
+        acqStruct = getfield(load(fullfile(getLocalPath(beh.processedFolder),'sessionInfo')),'acq');
         
         % Create the session structure to insert
         sessStruct = struct;
         sessStruct.setup = sess.meta.setup;
-        idx = strfind(acq.folder,'/');
-        session_date = acq.folder(idx(end)+1:end);
+        idx = strfind(acqStruct.folder,'/');
+        session_date = acqStruct.folder(idx(end)+1:end);
         sessStruct.session_start_time = matlabTimeToLabviewTime(datenum(session_date,'yyyy-mm-dd_HH-MM-SS'));
         sessStruct.subject_id = subject_id;
         sessKey = sessStruct;
         sessStruct.session_datetime = datestr(datenum(session_date,'yyyy-mm-dd_HH-MM-SS'),'yyyy-mm-dd HH:MM:SS');
         sessStruct.experimenter = 'James';
-        sessStruct.session_path = acq.folder;
-        sessStruct.hammer = 'TRUE';
-        if count(sessions.Sessions(sessStruct)) ~= 0
-            continue;
+        sessStruct.session_path = acqStruct.folder;
+        sessStruct.recording_software = 'Hammer';
+        if count(acq.Sessions(sessStruct)) ~= 0
+            %continue;
         end
         
         % Create the ephys structure to insert
-        recInfo = acq.recSessions(beh.recIndex);
+        recInfo = acqStruct.recSessions(beh.recIndex);
         ephysStruct = sessKey;
         ephysStruct.ephys_start_time = matlabTimeToLabviewTime(datenum(recInfo.startTime,'yyyy-mm-dd HH:MM:SS'));
         ephysKey = ephysStruct;
@@ -200,53 +197,57 @@ for i = 1:length(s.Subject)
                 ephysStruct.ephys_task = 'TwoTetrodes';
             else
                 error('Not sure what to use here');
-                ephysStruct.task = 'Chronic Tetrode';
+                ephysStruct.ephys_task = 'Chronic Tetrode';
             end
         elseif isfield(sess,'Electrode')
             ephysStruct.ephys_task = 'UtahArray';
         else
             error 'Unable to determine session type.  No tetrodes or electrodes';
         end
-        ephysStruct.ephys_path = [acq.folder '/' recInfo.folder];
+        ephysStruct.ephys_path = [acqStruct.folder '/' recInfo.folder];
 
         
         detectionSetParamStruct = ephysKey;
-        detectionSetParamStruct.detection_method = 'Utah';
+        if isfield(sess,'Tetrode')
+            detectionSetParamStruct.detect_method_num = fetch1(detect.Methods('detect_method_name="Tetrodes"'),'detect_method_num');
+        else
+            detectionSetParamStruct.detect_method_num = fetch1(detect.Methods('detect_method_name="Utah"'),'detect_method_num');
+        end
         detectionSetParamStructKey = detectionSetParamStruct;
-        detectionSetParamStruct.ephys_processed_directory = beh.processedFolder;
+        detectionSetParamStruct.ephys_processed_path = beh.processedFolder;
         
         detectionSetStruct = detectionSetParamStructKey;
         detectionSetStructKey = detectionSetStruct;
-        detectionSetStruct.detection_set_directory = [detectionSetParamStruct.ephys_processed_directory '/' recInfo.folder sess.meta.clusterSet];
+        detectionSetStruct.detect_set_path = [detectionSetParamStruct.ephys_processed_path '/' recInfo.folder sess.meta.clusterSet];
 
         sessStruct.session_stop_time = ephysStruct.ephys_stop_time;
-        inserti(sessions.Sessions, sessStruct);
-        inserti(sessions.Ephys, ephysStruct);
-        inserti(ephys.DetectionSetParam, detectionSetParamStruct);
-        inserti(ephys.DetectionSet, detectionSetStruct)
+        inserti(acq.Sessions, sessStruct);
+        inserti(acq.Ephys, ephysStruct);
+        inserti(detect.Params, detectionSetParamStruct);
+        inserti(detect.Sets, detectionSetStruct)
         
         % Todo determine electrodes
-        fileNames = dir(fullfile(getLocalPath(detectionSetStruct.detection_set_directory),'*.Htt'));
+        fileNames = dir(fullfile(getLocalPath(detectionSetStruct.detect_set_path),'*.Htt'));
         for i = 1:length(fileNames)
             detectionElectrodeStruct = detectionSetStructKey;
-            detectionElectrodeStruct.electrode_number = sscanf(fileNames(i).name,'Sc%u.Htt');
-            detectionElectrodeStruct.detection_electrode_filename = getGlobalPath(fullfile(detectionSetStruct.detection_set_directory, fileNames(i).name));
-            inserti(ephys.DetectionElectrode, detectionElectrodeStruct);
+            detectionElectrodeStruct.electrode_num = sscanf(fileNames(i).name,'Sc%u.Htt');
+            detectionElectrodeStruct.detect_electrode_file = getGlobalPath(fullfile(detectionSetStruct.detect_set_path, fileNames(i).name));
+            inserti(detect.Electrodes, detectionElectrodeStruct);
         end
         
         % Deal with newer file format
-        fileNames = dir(fullfile(getLocalPath(detectionSetStruct.detection_set_directory),'*.Hsp'));
+        fileNames = dir(fullfile(getLocalPath(detectionSetStruct.detect_set_path),'*.Hsp'));
         for i = 1:length(fileNames)
             detectionElectrodeStruct = detectionSetStructKey;
-            detectionElectrodeStruct.electrode_number = sscanf(fileNames(i).name,'Sc%u.Hsp');
-            detectionElectrodeStruct.detection_electrode_filename = getGlobalPath(fullfile(detectionSetStruct.detection_set_directory, fileNames(i).name));
-            inserti(ephys.DetectionElectrode, detectionElectrodeStruct);
+            detectionElectrodeStruct.electrode_num = sscanf(fileNames(i).name,'Sc%u.Hsp');
+            detectionElectrodeStruct.detect_electrode_file = getGlobalPath(fullfile(detectionSetStruct.detect_set_path, fileNames(i).name));
+            inserti(detect.Electrodes, detectionElectrodeStruct);
         end
         
-        clusterSetParamStruct = detectionSetStructKey;
-        clusterSetParamStruct.clustering_method = 'MultiUnit';
-        clusterSetParamStructKey = clusterSetParamStruct;
-        inserti(ephys.ClusterSetParam,clusterSetParamStruct);
+%         clusterSetParamStruct = detectionSetStructKey;
+%         clusterSetParamStruct.clustering_method = 'MultiUnit';
+%         clusterSetParamStructKey = clusterSetParamStruct;
+%         inserti(ephys.ClusterSetParam,clusterSetParamStruct);
         
         % Create stimulation structure
         stimulationStruct = sessKey;
@@ -264,7 +265,7 @@ for i = 1:length(s.Subject)
         stimulationStruct.total_trials = length(stim.params.trials);
         stimulationStruct.correct_trials = sum([stim.params.trials.correctResponse]==1 & [stim.params.trials.validTrial]);
         stimulationStruct.incorrect_trials = sum([stim.params.trials.correctResponse]==0 & [stim.params.trials.validTrial]);
-        inserti(sessions.Stimulation, stimulationStruct);
+        inserti(acq.Stimulation, stimulationStruct);
         
 %         % TODO: Attach the monitor size/resolution to something in DB
 %         if isfield(sess,'arrayLocation')
@@ -286,7 +287,7 @@ for i = 1:length(s.Subject)
         
         % Create clus set stim structure
         ephysStimLinkStruct = dj.utils.structJoin(ephysKey, stimulationKey);
-        inserti(ephys.EphysStimLink, ephysStimLinkStruct);
+        inserti(acq.EphysStimulationLink, ephysStimLinkStruct);
     end
 end
     
