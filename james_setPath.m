@@ -20,10 +20,15 @@ addpath(fullfile(base, 'processing/utils'))
 addpath(fullfile(base, 'recovery'))
 addpath(fullfile(base, 'schemas'))
 addpath(fullfile(base, 'migration'))
+addpath(fullfile(base, 'sortgui'))
+addpath(fullfile(base, 'sortgui/lib'))
+addpath(fullfile(base, 'aodgui'))
 
 % DataJoint library is assumed to be in the same directory as the base
 % diretory
 addpath(fullfile(base, '../DataJoint/matlab'));
+
+addpath(fullfile(base, '../moksm'));
 
 
 if isequal(computer, 'PCWIN64')
