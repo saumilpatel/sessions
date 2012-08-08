@@ -42,4 +42,7 @@ for i = 1:n
 end
 
 % synchronize stimualtions
-populate(acq.StimulationSync, sessKey);
+for k = sessKey'
+    populate(acq.StimulationSync, k);
+    close all
+end
