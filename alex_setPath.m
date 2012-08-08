@@ -46,8 +46,8 @@ run(fullfile(base(1:ndx-1), 'detection/setPath.m'))
 addpath(fullfile(base(1:ndx-1), 'lfp'))
 
 % spike sorting
-addpath(fullfile(base(1:ndx-1), 'clustering'))
-run(getLocalPath('/lab/libraries/various/spider/use_spider'))
+% addpath(fullfile(base(1:ndx-1), 'clustering'))
+% run(getLocalPath('/lab/libraries/various/spider/use_spider'))
 addpath(fullfile(base(1:ndx-1), 'moksm'))
 
 warning on MATLAB:dispatcher:nameConflict
