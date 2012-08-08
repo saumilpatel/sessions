@@ -16,7 +16,9 @@ classdef VariationalClusteringFinalize < dj.Relvar & dj.AutoPopulate
         function self = VariationalClusteringFinalize(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)        
         function makeTuples( this, key )
             % Perform the post processing step
             %

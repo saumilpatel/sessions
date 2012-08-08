@@ -8,7 +8,6 @@ bins                    : tinyint   # Number of pins for both orientation and po
 classdef TuningCurveParams < dj.Relvar
     properties(Constant)
         table = dj.Table('class_discrimination.TuningCurveParams');
-        popRel = class_discrimination.ClassDiscriminationExperiment*ephys.StimTrialGroupAligned*class_discrimination.PeriodAnalysis;
     end
     
     methods

@@ -11,6 +11,14 @@ function importBlackrockSession(baseFolder, sessionFolder, subject, setup, exper
 %   clockOffset=0, estimate it based on the offset between
 %   ephys_start_times and stim_start_times (the latter should alsways be
 %   slightly after the former), and then re-import with the correct value.
+%
+%   e.g. for AcuteGratingExperiment
+%   importBlackrockSession('/Volumes/recordings/raw', 'Albert/2012-02-16_00-00-00', 'Albert', 100, 'Alex', 160000)
+%
+%   for all others, clockOffset = 0 should work
+%
+%   You may have to put a break point before the inserts at the end of this
+%   function and insert only the part you want
 %   
 % AE 2012-01-24
 
@@ -59,10 +67,11 @@ d = dir(fullfile(baseFolder, sessionFolder, '*-*-*_*-*-*'));
 ephys = repmat(key, numel(d), 1);
 for i = 1:numel(d)
     file = dir(fullfile(baseFolder, sessionFolder, d(i).name, '*.ns5'));
-    br = baseReader([baseFolder '/' sessionFolder '/' d(i).name '/' file.name]);
+    fileName = strrep(file.name, 'ns5', '*');
+    br = baseReader([baseFolder '/' sessionFolder '/' d(i).name '/' fileName]);
     ephys(i).ephys_start_time = dateToLabviewTime(d(i).name, format);
     ephys(i).ephys_stop_time = ephys(i).ephys_start_time + 1000 * (getNbSamples(br) / getSamplingRate(br) + 30);
-    ephys(i).ephys_path = ['/raw/' sessionFolder '/' d(i).name '/' file.name];
+    ephys(i).ephys_path = ['/raw/' sessionFolder '/' d(i).name '/' fileName];
     ephys(i).ephys_task = ephysTask;
     close(br);
     session.session_stop_time = max(session.session_stop_time, ephys(i).ephys_stop_time);
@@ -78,6 +87,9 @@ for i = 1:numel(d)
     expType = strrep(files(ndx).name, 'Synched', '');
     expType = strrep(expType, '.mat', '');
     load(fullfile(stimFolder, d(i).name, expType))
+    if isempty(stim.params.trials)
+        stim = recover(StimulationData(stim), fullfile(stimFolder, d(i).name));
+    end
     
     stimulation(i).stim_start_time = dateToLabviewTime(d(i).name, format) + clockOffset;
     stimulation(i).stim_stop_time = stimulation(i).stim_start_time + uint64(ceil(1000 * (stim.params.constants.endTime - stim.params.constants.startTime)));
@@ -90,6 +102,6 @@ for i = 1:numel(d)
     session.session_stop_time = max(session.session_stop_time, stimulation(i).stim_stop_time);
 end
 
-insert(acq.Sessions, session);
-insert(acq.Ephys, ephys);
-insert(acq.Stimulation, stimulation);
+inserti(acq.Sessions, session);
+inserti(acq.Ephys, ephys);
+inserti(acq.Stimulation, stimulation);

@@ -12,14 +12,16 @@ classdef EphysStimulationLink < dj.Relvar & dj.AutoPopulate
         table = dj.Table('acq.EphysStimulationLink');
         popRel = acq.Ephys * acq.Stimulation ...
             & acq.SessionsCleanup ...
-            & 'ephys_start_time < stim_start_time AND ephys_stop_time > stim_stop_time';
+            & 'ephys_start_time <= stim_start_time AND ephys_stop_time >= stim_stop_time';
     end
     
     methods
         function self = EphysStimulationLink(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)        
         function makeTuples(self, key)
             insert(self, key);
         end

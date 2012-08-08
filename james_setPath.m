@@ -2,14 +2,8 @@ function setPath
 
 warning off MATLAB:dispatcher:nameConflict
 
-if isequal(computer, 'PCWIN64')
-    addpath(getLocalPath('/lab/libraries/mym/win64'))
-else
-    addpath(getLocalPath('/lab/libraries/mym'))
-end
-
 % user specific DJ connection parameters (uses Alex' credentials)
-host = 'at-storage.neusc.bcm.tmc.edu';
+host = 'at-database.neusc.bcm.tmc.edu';
 user = 'jcotton';
 setenv('DJ_HOST', host)
 setenv('DJ_USER', user)
@@ -26,9 +20,24 @@ addpath(fullfile(base, 'processing/utils'))
 addpath(fullfile(base, 'recovery'))
 addpath(fullfile(base, 'schemas'))
 addpath(fullfile(base, 'migration'))
+addpath(fullfile(base, 'sortgui'))
+addpath(fullfile(base, 'sortgui/lib'))
+addpath(fullfile(base, 'aodgui'))
+
 % DataJoint library is assumed to be in the same directory as the base
 % diretory
-addpath(getLocalPath('/lab/libraries/datajoint2'))
+addpath(fullfile(base, '../DataJoint/matlab'));
+
+addpath(fullfile(base, '../moksm'));
+
+
+if isequal(computer, 'PCWIN64')
+    addpath(fullfile(base, '../DataJoint/mym/win64'));
+else
+    addpath(fullfile(base, '../DataJoint/mym'));
+end
+
+
 
 % TEMP until updated on /lab/libraries
 run(getLocalPath('/lab/libraries/hdf5matlab/setPath'))

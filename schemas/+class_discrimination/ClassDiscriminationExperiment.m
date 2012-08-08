@@ -16,14 +16,16 @@ classdiscriminationexperiment_ts=CURRENT_TIMESTAMP: timestamp# automatic timesta
 classdef ClassDiscriminationExperiment < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('class_discrimination.ClassDiscriminationExperiment');
-        popRel = acq.Stimulation('exp_type="ClassDiscrimination" AND correct_trials > 400')*stimulation.StimTrialGroup
+        popRel = acq.Stimulation('exp_type="ClassDiscrimination" AND correct_trials > 400') & stimulation.StimTrialGroup
     end
     
     methods 
         function self = ClassDiscriminationExperiment(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)        
         function makeTuples( this, key )
             % Get additional information for each trial
             tuple = key;
@@ -59,7 +61,7 @@ classdef ClassDiscriminationExperiment < dj.Relvar & dj.AutoPopulate
             
             
             insert(this,tuple);
-            tuples = dj.utils.structJoin(key, fetch(stimulation.StimTrials(key,'valid_trial=TRUE')));
+            tuples = dj.struct.join(key, fetch(stimulation.StimTrials(key,'valid_trial=TRUE')));
             
             for tuple = tuples'
                 makeTuples(class_discrimination.ClassDiscriminationTrial,tuple);

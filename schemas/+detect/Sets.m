@@ -16,7 +16,9 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
         function self = Sets(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)        
         function makeTuples(~, key)
             switch fetch1(detect.Params(key) * detect.Methods, 'detect_method_name')
                 case 'Tetrodes'

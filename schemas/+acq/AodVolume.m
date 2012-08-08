@@ -38,24 +38,54 @@ classdef AodVolume < dj.Relvar
             self.restrict(varargin{:})
         end
         
-        function fileName = getFileName(self, varargin)
-            % Get name of stimulation file for tuple in relvar
-            %   fileName = getStimFile(self, [variant]) returns the file
-            %   name matching the tuple in self. If the string variant is
-            %   passed as second input it is appended at the end of the
-            %   file name (e.g. 'Synched').
-            [stimPath, expType] = fetch1(self, 'stim_path', 'exp_type');
-            fileName = getLocalPath([stimPath '/' expType varargin{:} '.mat']);
+        function fn = getFileName(self)
+            % Return name of data file matching the tuple in relvar self.
+            %   fn = getFileName(self)
+            aodPath = fetch1(self, 'aod_volume_filename');
+            fn = findFile(RawPathMap, aodPath);
         end
         
-        function [stim, fileName] = getStim(self, varargin)
-            % Load stimulation file for tuple in relvar
-            %   [stim, fileName] = getStimFile(self, [variant]) returns the
-            %   stimulation structure matching the tuple in self. If the
-            %   string variant is passed as second input it is appended at
-            %   the end of the file name (e.g. 'Synched').
-            fileName = getFileName(self, varargin{:});
-            stim = getfield(load(fileName), 'stim'); %#ok
+        function br = getFile(self)
+            % Open a reader for the ephys file matching the tuple in self.
+            %   br = getFile(self)
+            br = aodReader(getFileName(self), 'Volume');
         end
+
+        function time = getHardwareStartTime(self)
+            % Get the hardware start time for the tuple in relvar
+            %   time = getHardwareStartTime(self)
+            cond = sprintf('ABS(timestamper_time - %ld) < 5000', fetch1(self, 'aod_volume_start_time'));
+            rel = acq.SessionTimestamps(cond) & acq.TimestampSources('source = "AOD"') & (acq.Sessions * self);
+            time = acq.SessionTimestamps.getRealTimes(rel);
+        end
+        
+        function updateVolumeInformation(self)
+            av = fetch(self);
+            
+            for i = 1:length(av)
+                tuple = av(i);
+                avr = getFile(acq.AodVolume(tuple));
+                
+                attr.x_range = range(avr.x);
+                attr.y_range = range(avr.y);
+                attr.z_range = range(avr.z);
+                
+                attr.x_resolution = length(avr.x);
+                attr.y_resolution = length(avr.y);
+                attr.z_resolution = length(avr.z);
+                
+                f = fields(attr);
+                for j = 1:length(f)
+                    val = fetch1(self & tuple, f{j});
+                    if val == 0
+                        update(self & tuple, f{j}, attr.(f{j}));
+                    elseif val == attr.(f{j})
+                    else
+                        disp('Value set but does not match file');
+                    end
+                end
+            end
+        end
+
     end
 end

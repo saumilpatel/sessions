@@ -19,7 +19,9 @@ classdef Performance < dj.Relvar & dj.AutoPopulate
         function self = Performance(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)
         function makeTuples( this, key )
             % Compute the performance
             tuple = key;

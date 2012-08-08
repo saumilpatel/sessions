@@ -16,7 +16,9 @@ classdef TetrodesMoGFinalize < dj.Relvar & dj.AutoPopulate
         function self = TetrodesMoGFinalize(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)
         function makeTuples(self, key)
             % do model refit
             sortPath = fetch1(sort.Sets(key), 'sort_set_path');

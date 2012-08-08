@@ -27,6 +27,12 @@ classdef AodScan < dj.Relvar
         table = dj.Table('acq.AodScan');
     end
     
+    properties(Constant,Access=public)
+        x_step = 100 / 146000000;
+        y_step = 100 / 146000000;
+        z_step = 100 / 70000;
+    end
+    
     methods 
         function self = AodScan(varargin)
             self.restrict(varargin{:})
@@ -39,10 +45,15 @@ classdef AodScan < dj.Relvar
             fn = findFile(RawPathMap, aodPath);
         end
         
-        function br = getFile(self, varargin)
+        function br = getFile(self, dataType)
             % Open a reader for the ephys file matching the tuple in self.
             %   br = getFile(self)
-            br = aodReader(getFileName(self), 'Temporal', varargin{:});
+            
+            if nargin < 2
+                dataType = 'Functional';
+            end
+            
+            br = aodReader(getFileName(self), dataType);
         end
         
         function time = getHardwareStartTime(self)

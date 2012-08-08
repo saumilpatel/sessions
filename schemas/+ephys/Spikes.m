@@ -21,7 +21,7 @@ classdef Spikes < dj.Relvar
         end
         
         function makeTuples(~, key)
-            type = fetch1(sort.SetsCompleted(key) * sort.Methods, 'sort_method_name');
+            type = fetch1(sort.SetsCompleted * sort.Methods & key, 'sort_method_name');
             
             switch type
                 case 'MultiUnit'
@@ -33,6 +33,9 @@ classdef Spikes < dj.Relvar
                 case 'TetrodesMoG'
                     accessor = sort.TetrodesMoGUnits;
                     link = sort.TetrodesMoGLink;
+                case 'MoKsm'
+                    accessor = sort.KalmanUnits;
+                    link = sort.KalmanLink;
                 otherwise
                     error('"Unimplemented"');
             end

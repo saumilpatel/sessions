@@ -27,7 +27,7 @@ for key = aodScansKeys'
     % create stop_time entries if missing
     aodStopTime = fetch1(aod, 'aod_scan_stop_time');
     if isnan(aodStopTime)
-        br = getFile(aod);
+        br = getFile(aod,'Temporal');
         duration = 1000 * length(br) / getSamplingRate(br);
         close(br);
         aodStopTime = key.aod_scan_start_time + fix(duration);
@@ -101,7 +101,9 @@ for key = stimKeys'
     % to recover it from the trial backups on the Mac
     stimulation = acq.Stimulation(key);
     stimFile = getFileName(stimulation);
-    assert(exist(stimFile, 'file') > 0, 'Stimulation file not found: %s\nRecover from Mac first, then try again!', stimFile)
+    if ~exist(stimFile, 'file')
+        warning(sprintf('Stimulation file not found: %s\nRecover from Mac first, then try again!', stimFile))
+    end
     
     % create stop_time entries if missing
     stimStopTime = fetch1(stimulation, 'stim_stop_time');

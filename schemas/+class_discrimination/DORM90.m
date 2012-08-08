@@ -27,13 +27,15 @@ classdef DORM90 < dj.Relvar & dj.AutoPopulate
         function self = DORM90(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)        
         function makeTuples( this, key )
             % Compute the class tuning for this cell
             tuple = key;
             
             [cue_class selected_class orientation posterior spikes] = ...
-                fetchn(class_discrimination.ClassDiscriminationTrial(key) * ephys.SpikesAlignedTrial(key),...
+                fetchn((class_discrimination.ClassDiscriminationTrial * ephys.SpikesAlignedTrial) & key,...
                 'stimulus_class', 'selected_class', 'orientation', 'posterior_a', 'spikes_aligned');
             
             selectedA = cellfun(@(x) x=='A', selected_class);

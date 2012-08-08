@@ -17,7 +17,9 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
         function self = Sets(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access=protected)        
         function makeTuples(self, key)
             detectPath = fetch1(detect.Sets(key), 'detect_set_path');
             sortMethod = fetch1(sort.Methods(key), 'sort_method_name');
@@ -26,7 +28,7 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
             self.insert(tuple);
             
             % insert electrodes
-            electrodes =  dj.utils.structJoin(key,fetch(detect.Electrodes(key)));
+            electrodes =  dj.struct.join(key,fetch(detect.Electrodes(key)));
             insert(sort.Electrodes, electrodes);
         end
     end
