@@ -1,18 +1,16 @@
 %{
 acq.Sessions (manual) # list of sessions
 
-->acq.Subjects
-setup                    : tinyint unsigned  # setup number
-session_start_time       : bigint            # start session timestamp
+-> acq.Subjects
+setup           : tinyint unsigned      # setup number
+session_start_time: bigint              # start session timestamp
 ---
-session_stop_time = NULL : bigint            # end of session timestamp
-experimenter \
-    : enum('James','Alex','Mani','Allison','Tori','Jacob','Dimitri','Cathryn','Manolis') \
-    # name of person running the exp
-session_path             : varchar(255)      # path to the data
-session_datetime = NULL  : datetime          # readable format of session start
-recording_software = 'Acquisition2.0' : ENUM('Acquisition2.0','Hammer','Blackrock') # software used to record the data
-hammer                   : boolean           # recorded by Hammer? (remove this)
+session_stop_time=null      : bigint                        # end of session timestamp
+experimenter                : enum('James','Alex','Mani','Allison','Tori','Jacob','Dimitri','Cathryn','Manolis','Dennis','George','Shan')# name of person running exp
+session_path                : varchar(255)                  # path to the data
+session_datetime=null       : datetime                      # readable format of session start
+hammer=0                    : tinyint                       # 
+recording_software="Acquisition2.0": enum('Acquisition2.0','Hammer','Blackrock')# software used to record the data
 %}
 
 classdef Sessions < dj.Relvar
