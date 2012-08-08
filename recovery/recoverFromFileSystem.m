@@ -62,7 +62,7 @@ sessions = sessKey;
 sessions.experimenter = experimenters{subjectId};
 sessions.session_path = ['/raw/' subjectName '/' sessionDatetime];
 sessions.session_datetime = sessionDatetime;
-sessions.hammer = 'false';
+sessions.hammer = 0;
 inserti(acq.Sessions, sessions)
 
 % recover timestamps table
