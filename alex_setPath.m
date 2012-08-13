@@ -12,15 +12,11 @@ base = fileparts(mfilename('fullpath'));
 addpath(base)
 
 % user specific DJ connection parameters (uses Alex' credentials)
-host = getHost();
-user = 'aecker';
-setenv('DJ_HOST', host)
-setenv('DJ_USER', user)
-setenv('DJ_PASS', 'aecker#1')
+initDJ();
 fprintf('Datajoint connection\n')
 fprintf('--------------------\n')
-fprintf('host: %s\n', host)
-fprintf('user: %s\n\n', user)
+fprintf('host: %s\n', getenv('DJ_HOST'))
+fprintf('user: %s\n\n', getenv('DJ_USER'))
 
 addpath(fullfile(base, 'processing'))
 addpath(fullfile(base, 'processing/sync'))
