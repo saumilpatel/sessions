@@ -13,7 +13,6 @@ host = 'at-storage.neusc.bcm.tmc.edu';
 user = 'mani';
 setenv('DJ_HOST', host)
 setenv('DJ_USER', user)
-setenv('DJ_PASS', 'mani')
 fprintf('Datajoint connection\n')
 fprintf('--------------------\n')
 fprintf('host: %s\n', host)
