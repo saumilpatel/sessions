@@ -22,7 +22,7 @@ function varargout = ScanInspector(varargin)
 
 % Edit the above text to modify the response to help ScanInspector
 
-% Last Modified by GUIDE v2.5 20-Jul-2012 17:23:16
+% Last Modified by GUIDE v2.5 06-Aug-2012 17:39:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,12 +57,10 @@ handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
-
-sdt = fetchn(acq.Sessions(acq.Subjects('subject_name="Mouse"')),'session_datetime');
-set(handles.SessionsList, 'String', sdt);
+updateSessions(handles)
 
 % UIWAIT makes ScanInspector wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+% uiwait(handles.ScanInspector);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -85,11 +83,23 @@ function SessionsList_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns SessionsList contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from SessionsList
 
-contents = cellstr(get(hObject,'String'));
-sdt = contents{get(hObject,'Value')};
-sess = fetch(acq.Sessions(['session_datetime="' sdt '"']));
-files = fetchn(acq.AodScan & sess, 'aod_scan_filename');
-set(handles.AodScans, 'String', files);
+contents = get(hObject,'UserData');
+session_key = contents(get(hObject,'Value'));
+sess = fetch(acq.Sessions(session_key));
+[files keys] = fetchn(acq.AodScan & sess, 'aod_scan_filename');
+str = cell(length(keys),1);
+for i = 1:length(keys)
+    expTypes = fetchn(acq.Stimulation & (acq.AodStimulationLink & acq.AodScan(keys(i))), 'exp_type');
+    if length(expTypes) >= 1
+        expTypes = sprintf('%s,',expTypes{:});
+        expTypes(end) = [];
+        str{i} = [files{i} ' (' expTypes ')'];
+    else
+        str{i} = files{i};
+    end
+end
+set(handles.AodScans, 'String', str);
+set(handles.AodScans, 'UserData', keys);
 set(handles.AodScans, 'Value', 1);
 
 % --- Executes during object creation, after setting all properties.
@@ -114,9 +124,9 @@ function AodScans_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns AodScans contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from AodScans
 
-contents = cellstr(get(hObject,'String'));
-fileName = contents{get(hObject,'Value')};
-scan = acq.AodScan(['aod_scan_filename="' fileName '"']);
+keys = get(hObject,'UserData');
+scan = keys(get(hObject,'Value'));
+set(handles.currentScan, 'String', fetch1(acq.AodScan & scan, 'aod_scan_filename'));
 data = fetch(aod.TracePreprocessSet & scan);
 if ~isempty(data)
     methods = fetchn(aod.TracePreprocessMethod(data),'preprocess_method_name');
@@ -177,6 +187,71 @@ function Preprocessing_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in cbExcludeEmpty.
+function cbExcludeEmpty_Callback(hObject, eventdata, handles)
+% hObject    handle to cbExcludeEmpty (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of cbExcludeEmpty
+updateSessions(handles)
+
+function updateSessions(handles)
+
+
+if get(handles.cbExcludeEmpty,'Value')
+    sess = acq.Sessions(acq.Subjects('subject_name="Mouse"')) & aod.TracePreprocessSetParam;
+else
+    sess = acq.Sessions(acq.Subjects('subject_name="Mouse"'));
+end
+[sdt count key] = fetchn(pro(sess, acq.AodScan, 'COUNT(aod_scan_start_time)->scan_count','session_datetime'),'session_datetime','scan_count');
+
+% Add the number of scans to each session string
+str = cell(length(key),1);
+for i = 1:length(sdt)
+    str{i} = [sdt{i} ' (' num2str(count(i)) ')'];
+end
+
+set(handles.SessionsList, 'String', str);
+set(handles.SessionsList, 'UserData', key);
+
+
+
+function currentScan_Callback(hObject, eventdata, handles)
+% hObject    handle to ScanInspector (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of ScanInspector as text
+%        str2double(get(hObject,'String')) returns contents of ScanInspector as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function ScanInspector_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to ScanInspector (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function currentScan_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to currentScan (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');

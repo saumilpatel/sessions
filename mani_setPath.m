@@ -1,13 +1,19 @@
-function setPath
+function mani_setPath
 
 warning off MATLAB:dispatcher:nameConflict
 
+if isequal(computer, 'PCWIN64')
+    addpath(getLocalPath('/lab/libraries/mym/win64'))
+else
+    addpath(getLocalPath('/lab/libraries/mym'))
+end
+
 % user specific DJ connection parameters (uses Alex' credentials)
-host = 'at-database.neusc.bcm.tmc.edu';
-user = 'jcotton';
+host = 'at-storage.neusc.bcm.tmc.edu';
+user = 'mani';
 setenv('DJ_HOST', host)
 setenv('DJ_USER', user)
-setenv('DJ_PASS', 'jcotton#1')
+setenv('DJ_PASS', 'mani')
 fprintf('Datajoint connection\n')
 fprintf('--------------------\n')
 fprintf('host: %s\n', host)
@@ -20,35 +26,23 @@ addpath(fullfile(base, 'processing/utils'))
 addpath(fullfile(base, 'recovery'))
 addpath(fullfile(base, 'schemas'))
 addpath(fullfile(base, 'migration'))
-addpath(fullfile(base, 'sortgui'))
-addpath(fullfile(base, 'sortgui/lib'))
-addpath(fullfile(base, 'aodgui'))
 
 % DataJoint library is assumed to be in the same directory as the base
 % diretory
-addpath(fullfile(base, '../DataJoint/matlab'));
-
-addpath(fullfile(base, '../moksm'));
-
-
-if isequal(computer, 'PCWIN64')
-    addpath(fullfile(base, '../DataJoint/mym/win64'));
-else
-    addpath(fullfile(base, '../DataJoint/mym'));
-end
-
-
+ndx = find(base == filesep, 1, 'last');
+addpath(fullfile(base(1:ndx-1), 'datajoint/matlab'))
 
 % TEMP until updated on /lab/libraries
-run(getLocalPath('/lab/libraries/hdf5matlab/setPath'))
-
-% LFP
-addpath(getLocalPath('/lab/libraries/lfp'));
-
-% spike sorting
-addpath(getLocalPath('/lab/users/james/Matlab/VariationalClustering'));
+run(fullfile(base(1:ndx-1), 'hdf5matlab/setPath.m'))
 
 % spike detection
-run(getLocalPath('/lab/users/james/Matlab/spikesorting/detection/setPath'));
+run(fullfile(base(1:ndx-1), 'detection/setPath.m'))
+
+% LFP
+addpath(fullfile(base(1:ndx-1), 'lfp'))
+
+% spike sorting
+% addpath(fullfile(base(1:ndx-1),'clustering'))
+% run(getLocalPath('/lab/libraries/various/spider/use_spider'))
 
 warning on MATLAB:dispatcher:nameConflict

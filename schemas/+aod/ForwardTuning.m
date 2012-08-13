@@ -10,7 +10,7 @@ b=null                : longblob   # Tuning curve
 p                     : double     # The significance
 dof                   : double     # The degrees of freedom
 dofps                 : double     # The DoF per sec
-regress_cov           : longblog   # The covariance of the regressor
+regress_cov           : longblob   # The covariance of the regressor
 %}
 
 classdef ForwardTuning < dj.Relvar & dj.AutoPopulate
@@ -40,7 +40,7 @@ classdef ForwardTuning < dj.Relvar & dj.AutoPopulate
             disp 'computing responses'
             [B,R2,pF,DoF] = aod.ForwardTuning.regress(traces, G, 0);
             
-            tuple.regressor_cov = G'*G;
+            regressor_cov = G'*G;
             % Parse the information into separate cells
             disp (['inserting results for ' num2str(length(cell_num)) ' traces']);
             for i = 1:length(cell_num)
@@ -51,7 +51,7 @@ classdef ForwardTuning < dj.Relvar & dj.AutoPopulate
                 tuple.p = pF(i);
                 tuple.dof = DoF(i);
                 tuple.dofps = DoF(i) / (range(times) / 1000);;
-                tuple.regressor_cov = regress_cov;
+                tuple.regress_cov = regressor_cov;
                 [~,idx] = max(tuple.b);
                 tuple.preferred_orientation = oris(idx);
                 insert(aod.ForwardTuning, tuple);

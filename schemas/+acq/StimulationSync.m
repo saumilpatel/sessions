@@ -39,16 +39,18 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
                 [stim, tuple.residual_rms, tuple.diode_offset] = syncEphysBlackrock(stim, ephysKey); %#ok
             else
                 
-                if numel(stim.params.trials) <= 10
-                    return;
-                end
-
-                % network sync
-                [stim, tuple.residual_rms] = syncNetwork(stim, key);
-                tuple.sync_network = true;
-
                 % was the session recorded? -> sync to photodiode
                 if ~isempty(aodKey)
+                    if numel(stim.params.trials) > 10
+                        % network sync
+                        [stim, tuple.residual_rms] = syncNetwork(stim, key);
+                        tuple.sync_network = true;
+                    else
+                        % network sync that performs better with few trials
+                        [stim, tuple.residual_rms] = syncNetworkFewTrials(stim, key);
+                        tuple.sync_network = true;                       
+                    end
+
                     if length(aodKey) > 1
                         len = fetchn(pro(acq.AodScan(aodKey),'(aod_scan_stop_time - aod_scan_start_time)->x'),'x');
                         [~,idx] = max(len);
@@ -59,6 +61,10 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
                     tuple.diode_offset = offset;
                     tuple.sync_diode = true;
                 elseif ~isempty(ephysKey)
+                    % network sync
+                    [stim, tuple.residual_rms] = syncNetwork(stim, key);
+                    tuple.sync_network = true;
+
                     % catch old sessions where hardware clocks weren't phase locked
                     if fetch1(acq.Ephys(ephysKey), 'ephys_start_time') < dateToLabviewTime('2012-02-08 18:00') || ...
                         fetch1(acq.Ephys(ephysKey),'setup') == 2
@@ -69,6 +75,15 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
                     tuple.residual_rms = rms;
                     tuple.diode_offset = offset;
                     tuple.sync_diode = true;
+                else % nothing to sync against
+                    % network sync
+                    if numel(stim.params.trials) <= 10
+                        disp 'Few trials'
+                        return;
+                    end
+
+                    [stim, tuple.residual_rms] = syncNetwork(stim, key);
+                    tuple.sync_network = true;
                 end
             end
             

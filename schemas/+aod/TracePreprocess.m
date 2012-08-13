@@ -34,9 +34,7 @@ classdef TracePreprocess < dj.Relvar
             
             times = t0 + (0:length(trace)-1) * 1000 / fs;
         end
-    end
-    
-    methods(Access=protected)
+        
         function makeTuples( this, key )
             % Import a spike set
             
