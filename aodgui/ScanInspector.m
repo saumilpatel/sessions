@@ -176,6 +176,11 @@ if count(aod.TracePreprocessSet(key)) == 1
     traces_data = cat(2,traces.trace);
     traces_data = bsxfun(@rdivide, traces_data, std(traces_data,[],1)) / 4;
     traces_t = (1:size(traces_data,1)) / traces(1).fs;
+    
+    assignin('base', 'gui_traces_key', key);
+    assignin('base', 'gui_traces_data', traces_data);
+    assignin('base', 'gui_traces_t', traces_t);
+
     axes(handles.Traces);
     plot(traces_t, bsxfun(@plus,traces_data, 1:size(traces_data,2)));
 end
