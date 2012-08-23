@@ -25,7 +25,7 @@ classdef TracePreprocessSetParam < dj.Relvar
             ts = fetch(aod.TraceSet & key);
             for i = 1:length(ts)
                 tuple = ts(i);
-                tuple.preprocessed_method_num = preprocess_method_num;
+                tuple.preprocess_method_num = preprocess_method_num;
                 inserti(aod.TracePreprocessSetParam, tuple);
             end
         end
