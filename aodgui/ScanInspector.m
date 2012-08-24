@@ -172,10 +172,20 @@ end
 key = keys(get(hObject,'Value'));
 
 if count(aod.TracePreprocessSet(key)) == 1
-    traces = fetch(aod.TracePreprocess & key,'*');
-    traces_data = cat(2,traces.trace);
+    [traces_data fs trace_key] = fetchn(aod.TracePreprocess & key,'trace', 'fs');
+    traces_data = cat(2,traces_data{:});
     traces_data = bsxfun(@rdivide, traces_data, std(traces_data,[],1)) / 4;
-    traces_t = (1:size(traces_data,1)) / traces(1).fs;
+    traces_t = (1:size(traces_data,1)) / fs(1);
+    
+    for i = 1:length(trace_key)
+        [coord.x(i) coord.y(i) coord.z(i)] = fetch1(aod.Traces & trace_key(i), 'x', 'y', 'z');
+    end
+    
+    assignin('base', 'gui_traces_key', key);
+    assignin('base', 'gui_traces_data', traces_data);
+    assignin('base', 'gui_traces_t', traces_t);
+    assignin('base', 'gui_traces_coord', coord);
+    
     axes(handles.Traces);
     plot(traces_t, bsxfun(@plus,traces_data, 1:size(traces_data,2)));
 end

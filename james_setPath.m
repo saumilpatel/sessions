@@ -7,7 +7,6 @@ host = 'at-database.neusc.bcm.tmc.edu';
 user = 'jcotton';
 setenv('DJ_HOST', host)
 setenv('DJ_USER', user)
-setenv('DJ_PASS', 'jcotton#1')
 fprintf('Datajoint connection\n')
 fprintf('--------------------\n')
 fprintf('host: %s\n', host)
@@ -23,6 +22,7 @@ addpath(fullfile(base, 'migration'))
 addpath(fullfile(base, 'sortgui'))
 addpath(fullfile(base, 'sortgui/lib'))
 addpath(fullfile(base, 'aodgui'))
+addpath(fullfile(base, 'lib/two_photon'))
 
 % DataJoint library is assumed to be in the same directory as the base
 % diretory
@@ -38,17 +38,20 @@ else
 end
 
 
-
-% TEMP until updated on /lab/libraries
-run(getLocalPath('/lab/libraries/hdf5matlab/setPath'))
-
-% LFP
-addpath(getLocalPath('/lab/libraries/lfp'));
-
-% spike sorting
-addpath(getLocalPath('/lab/users/james/Matlab/VariationalClustering'));
-
-% spike detection
-run(getLocalPath('/lab/users/james/Matlab/spikesorting/detection/setPath'));
-
-warning on MATLAB:dispatcher:nameConflict
+if exist('/Volumes/lab/', 'dir')
+    % TEMP until updated on /lab/libraries
+    run(getLocalPath('/lab/libraries/hdf5matlab/setPath'))
+    
+    % LFP
+    addpath(getLocalPath('/lab/libraries/lfp'));
+    
+    % spike sorting
+    addpath(getLocalPath('/lab/users/james/Matlab/VariationalClustering'));
+    
+    % spike detection
+    run(getLocalPath('/lab/users/james/Matlab/spikesorting/detection/setPath'));
+    
+    warning on MATLAB:dispatcher:nameConflict
+else
+    warning('at-lab not mounded.  File access tools not added to path');
+end

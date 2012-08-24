@@ -1,7 +1,7 @@
 %{
 sort.KalmanLink (computed) # Links ephys.Spikes to cluster
 
--> sort.KalmanFinalize
+-> sort.KalmanUnits
 -> ephys.Spikes
 ---
 %}
