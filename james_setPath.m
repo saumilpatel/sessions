@@ -22,6 +22,7 @@ addpath(fullfile(base, 'migration'))
 addpath(fullfile(base, 'sortgui'))
 addpath(fullfile(base, 'sortgui/lib'))
 addpath(fullfile(base, 'aodgui'))
+addpath(fullfile(base, 'lib/two_photon'))
 
 % DataJoint library is assumed to be in the same directory as the base
 % diretory
