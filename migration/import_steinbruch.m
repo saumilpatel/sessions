@@ -1,18 +1,19 @@
-function import_steinbruch(sessionList)
+function import_steinbruch(sessionList, experimenter, ephysTask)
 % Parses a steinbruch import XML file to create a set of session entries
 % 
 % JC 2011-08-22
+% AE 2012-08-30
 %
 % Currently written for ephys onlly
-% 
-% Needs to access both recDb and EphysDj.
+
+if nargin < 3, ephysTask = ''; end
 
 % get tree structure
 xml = xmlread(sessionList);
 root = xml.getElementsByTagName('root').item(0);
 tree = buildTree(struct('meta',struct,'children',struct),root);
 s = collapseTree(tree);
-writeScript(s);
+writeScript(s, experimenter, ephysTask);
 
 % ---------------------------------------------------------------------------- %
 function treeNode = buildTree(treeNode,xmlNode)
@@ -128,7 +129,7 @@ d = n - datenum('01-Jan-1904');
 n = round(d * 1000 * 60 * 60 * 24);
 
 % ---------------------------------------------------------------------------- %
-function writeScript(s)
+function writeScript(s, experimenter, ephysTask)
 % Takes in a structure of sessions
 %   Subject
 %   Sesssion
@@ -179,9 +180,10 @@ for i = 1:length(s.Subject)
         sessStruct.subject_id = subject_id;
         sessKey = sessStruct;
         sessStruct.session_datetime = datestr(datenum(session_date,'yyyy-mm-dd_HH-MM-SS'),'yyyy-mm-dd HH:MM:SS');
-        sessStruct.experimenter = 'James';
+        sessStruct.experimenter = experimenter;
         sessStruct.session_path = acqStruct.folder;
         sessStruct.recording_software = 'Hammer';
+        sessStruct.hammer = 1;
         if count(acq.Sessions(sessStruct)) ~= 0
             %continue;
         end
@@ -192,17 +194,21 @@ for i = 1:length(s.Subject)
         ephysStruct.ephys_start_time = matlabTimeToLabviewTime(datenum(recInfo.startTime,'yyyy-mm-dd HH:MM:SS'));
         ephysKey = ephysStruct;
         ephysStruct.ephys_stop_time = matlabTimeToLabviewTime(datenum(recInfo.endTime,'yyyy-mm-dd HH:MM:SS'));
-        if isfield(sess,'Tetrode')
-            if length(sess.Tetrode) <= 3
-                ephysStruct.ephys_task = 'TwoTetrodes';
-            else
-                error('Not sure what to use here');
-                ephysStruct.ephys_task = 'Chronic Tetrode';
-            end
-        elseif isfield(sess,'Electrode')
-            ephysStruct.ephys_task = 'UtahArray';
+        if ~isempty(ephysTask)
+            ephysStruct.ephys_task = ephysTask;
         else
-            error 'Unable to determine session type.  No tetrodes or electrodes';
+            if isfield(sess,'Tetrode')
+                if length(sess.Tetrode) <= 3
+                    ephysStruct.ephys_task = 'TwoTetrodes';
+                else
+                    error('Not sure what to use here');
+                    ephysStruct.ephys_task = 'Chronic Tetrode';
+                end
+            elseif isfield(sess,'Electrode')
+                ephysStruct.ephys_task = 'UtahArray';
+            else
+                error 'Unable to determine session type.  No tetrodes or electrodes';
+            end
         end
         ephysStruct.ephys_path = [acqStruct.folder '/' recInfo.folder];
 
@@ -286,7 +292,7 @@ for i = 1:length(s.Subject)
 %         end
         
         % Create clus set stim structure
-        ephysStimLinkStruct = dj.utils.structJoin(ephysKey, stimulationKey);
+        ephysStimLinkStruct = dj.struct.join(ephysKey, stimulationKey);
         inserti(acq.EphysStimulationLink, ephysStimLinkStruct);
     end
 end
