@@ -211,13 +211,17 @@ for i = 1:length(s.Subject)
         inserti(detect.Params, detectionSetParamStruct);
         inserti(detect.Sets, detectionSetStruct)
 
-        % determine electrodes
-        fileNames = dir(fullfile(getLocalPath(detectionSetStruct.detect_set_path),'*.Ntt'));
-        for iFile = 1:length(fileNames)
+        % determine electrodes & preamp gains
+        for tet = sess.Tetrode
             detectionElectrodeStruct = detectionSetStructKey;
-            detectionElectrodeStruct.electrode_num = sscanf(fileNames(iFile).name,'Sc%u.Htt');
-            detectionElectrodeStruct.detect_electrode_file = getGlobalPath(fullfile(detectionSetStruct.detect_set_path, fileNames(iFile).name));
+            detectionElectrodeStruct.electrode_num = tet.meta.tetrodeNumber;
+            detectionElectrodeStruct.detect_electrode_file = sprintf('%sSc%d.Ntt', detectionSetStruct.detect_set_path, tet.meta.tetrodeNumber);
             inserti(detect.Electrodes, detectionElectrodeStruct);
+            
+            gainStruct = ephysKey;
+            gainStruct.electrode_num = tet.meta.tetrodeNumber;
+            gainStruct.preamp_gain = tet.meta.amplifierGain / 1000;
+            inserti(acq.AmplifierGains, gainStruct);
         end
         
         % sort.Params & Sets
