@@ -20,7 +20,7 @@ eventTypes = {'userInteraction',  3,  0; ...
           'sound',           35,  0; ...
           'acquireFixation', 36,  1; ...
           'eot',             40,  1; ...
-          'abort',           41,  0; ...
+          'eyeAbort',        41,  0; ...
           'reward',          42,  0; ...
           };
 stim.eventTypes = unique(eventTypes(:,1));
@@ -148,9 +148,21 @@ for i = 1:nTrials
     % put events
     stim.events(i).types = evtTable( ...
         sub2ind(evtTableSize,qnx.e_types{i},qnx.e_subtypes{i}+1));
-
+    
     % event times translated to absolute times
     stim.events(i).times = events.t(evtNdx(i)) + qnx.e_times{i};
+    
+    % throw out duplicate events
+    rm = [];
+    ndx = find(~diff(stim.events(i).times));
+    for n = ndx(:)'
+        if isequal(stim.events(i).types(n), stim.events(i).types(n + 1))
+            rm(end + 1) = n; %#ok
+        end
+    end
+    stim.events(i).types(rm) = [];
+    stim.events(i).times(rm) = [];
+    stim.events(i).info = cell(size(stim.events(i).types));
 
     % per trial parameters (these we only have for valid trials)
     stim.params.trials(i).correctResponse = true; % stub since those are fixation experiments
@@ -165,3 +177,15 @@ end
 % write output
 mkdir(fileparts(outFile))
 save(outFile, 'stim')
+save(strrep(outFile, '.mat', 'Synched.mat'), 'stim')
+
+readmeText = ['These file were generated from MPI data structures by:\n' ...
+    'migration/genStimFileMPI.m\n' ...
+    'located in github repo: https://github.com/peabody124/sessions.git\n' ...
+    'hash: ' gitHash(mfilename)];
+fid = fopen(fullfile(fileparts(outFile), 'readme'), 'w');
+fprintf(fid, readmeText);
+fclose(fid);
+
+    
+

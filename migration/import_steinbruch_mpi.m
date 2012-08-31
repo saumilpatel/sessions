@@ -171,7 +171,7 @@ for i = 1:length(s.Subject)
         session_date = cellfun(@str2double, session_date{1}, 'UniformOutput', false);
         session_datetime = sprintf('%04d-%02d-%02d_%02d-%02d-%02d', session_date{:});
         stimFile = sprintf('/stor01/stimulation/%s/%s/%s.mat', m.subject, session_datetime, m.expType);
-        if ~exist(getLocalPath(stimFile), 'file')
+        if 1||~exist(getLocalPath(stimFile), 'file')
             stim = genStimFileMPI(m.qnxFile, m.cheetahDir, m.expType, m.chtEvtBegin, m.chtEvtEnd, getLocalPath(stimFile));
         else
             stim = getfield(load(getLocalPath(stimFile)), 'stim'); %#ok
@@ -242,13 +242,20 @@ for i = 1:length(s.Subject)
         stimulationStruct = sessKey;
         stimulationStruct.stim_start_time = sessStruct.session_start_time;
         stimulationKey = stimulationStruct;
-        stimulationStruct.stim_path = stimFile;
+        stimulationStruct.stim_path = fileparts(stimFile);
         
         stimulationStruct.exp_type = m.expType;
         stimulationStruct.total_trials = length(stim.params.trials);
         stimulationStruct.correct_trials = sum([stim.params.trials.correctResponse]==1 & [stim.params.trials.validTrial]);
         stimulationStruct.incorrect_trials = sum([stim.params.trials.correctResponse]==0 & [stim.params.trials.validTrial]);
         inserti(acq.Stimulation, stimulationStruct);
+        
+        % create fake stimulation sync
+        stimSyncStruct = stimulationKey;
+        stimSyncStruct.sync_network = 1;
+        stimSyncStruct.sync_diode = 1;
+        inserti(acq.StimulationSync, stimSyncStruct);
+        inserti(acq.StimulationSyncDiode, dj.struct.join(stimulationKey, ephysKey));
         
         % Create clus set stim structure
         ephysStimLinkStruct = dj.struct.join(ephysKey, stimulationKey);
