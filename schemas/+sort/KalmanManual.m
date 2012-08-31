@@ -18,7 +18,19 @@ classdef KalmanManual < dj.Relvar & dj.AutoPopulate
     methods
         function self = KalmanManual(varargin)
             self.restrict(varargin)
-        end        
+        end
+        
+        function review(self)
+            % Review manual clustering model
+            
+            assert(count(self) == 1, 'relvar must be scalar!')
+            disp 'Review only. No changes will take effect!'
+            disp 'If you need to change something, delete the tuple and redo it.'
+            title = fetch1(self * detect.Electrodes, 'detect_electrode_file');
+            title = ['|| READ ONLY || ' title ' || READ ONLY ||'];
+            model = uncompress(MoKsmInterface(fetch1(self, 'manual_model')));
+            ManualClustering(model, title)
+        end
     end
 
     methods (Access=protected)
