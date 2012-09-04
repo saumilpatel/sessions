@@ -171,7 +171,7 @@ for i = 1:length(s.Subject)
         session_date = cellfun(@str2double, session_date{1}, 'UniformOutput', false);
         session_datetime = sprintf('%04d-%02d-%02d_%02d-%02d-%02d', session_date{:});
         stimFile = sprintf('/stor01/stimulation/%s/%s/%s.mat', m.subject, session_datetime, m.expType);
-        if 1||~exist(getLocalPath(stimFile), 'file')
+        if ~exist(getLocalPath(stimFile), 'file')
             stim = genStimFileMPI(m.qnxFile, m.cheetahDir, m.expType, m.chtEvtBegin, m.chtEvtEnd, getLocalPath(stimFile));
         else
             stim = getfield(load(getLocalPath(stimFile)), 'stim'); %#ok
