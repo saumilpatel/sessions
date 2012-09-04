@@ -39,12 +39,12 @@ classdef KalmanManual < dj.Relvar & dj.AutoPopulate
             model = getModel(sort.KalmanTemp & key);
             model.params.Verbose = false;
  
-            m = MoKsmInterface(model);
-            [m, comment] = ManualClustering(m, fetch1(detect.Electrodes & key, 'detect_electrode_file'));
+            model = MoKsmInterface(model);
+            [model, comment] = ManualClustering(model, fetch1(detect.Electrodes & key, 'detect_electrode_file'));
             
-            if ~isempty(m)
+            if ~isempty(model)
                 tuple = key;
-                tuple.manual_model = saveStructure(compress(m));
+                tuple.manual_model = saveStructure(compress(model));
                 tuple.comment = comment(1 : min(end, 255));
                 insert(this, tuple);
             else
