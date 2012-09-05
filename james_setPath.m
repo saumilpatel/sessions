@@ -38,7 +38,7 @@ else
 end
 
 
-if exist('/Volumes/lab/', 'dir')
+if exist(getLocalPath('/lab/'), 'dir')
     % TEMP until updated on /lab/libraries
     run(getLocalPath('/lab/libraries/hdf5matlab/setPath'))
     

@@ -8,7 +8,7 @@ ephys.SpikesAlignedSet (computed) # Set of spikes binned a certain way
 spikesalignedset_ts=CURRENT_TIMESTAMP: timestamp             # automatic timestamp. Do not edit
 %}
 
-classdef SpikesAlignedSet < dj.Relvar & dj.AutoPopulate
+classdef SpikesAlignedSet < dj.Relvar & dj.Automatic
     properties(Constant)
         table = dj.Table('ephys.SpikesAlignedSet');
         popRel = (ephys.SpikeSet .* ephys.Spikes) * acq.EphysStimulationLink * ...
