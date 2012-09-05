@@ -1,4 +1,4 @@
-function import_steinbruch(sessionList, experimenter, ephysTask)
+function import_steinbruch_mpi(sessionList, experimenter, ephysTask)
 % Parses a steinbruch import XML file to create a set of session entries
 % 
 % JC 2011-08-22
@@ -59,7 +59,7 @@ for i = 0:children.getLength-1
                 % check if this overwrites a present instance
                 name = char(node.getAttribute('name'));
                 instances = treeNode.children.(childClass).instances;
-                ndx = strmatch(name,{instances.name});
+                ndx = strmatch(name,{instances.name}); %#ok
                 if isempty(ndx) || isempty(name)
                     default = treeNode.children.(childClass).default;
                     default.name = name;
@@ -92,7 +92,7 @@ end
 function s = collapseTree(tree, init)
 
 if nargin < 2, s = struct('meta',struct);
-else, s = init; end
+else s = init; end
 
 s.meta=mergeStruct(s.meta,tree.meta);
 
@@ -159,141 +159,112 @@ for i = 1:length(s.Subject)
         subject_id = max(fetchn(acq.Subjects,'subject_id')) + 1;
         insert(acq.Subjects,struct('subject_name',s.meta.subjectName,'subject_id',subject_id));
     else
-        subject_id = fetch1(subjDj, 'subject_id')
+        subject_id = fetch1(subjDj, 'subject_id') %#ok
     end
     
     for j = 1:length(subj.Session)
         sess = subj.Session(j);
-        beh = getfield(load(fullfile(getLocalPath(sess.meta.stimulationDir), ...
-            'behInfo.mat')),'beh');
-        if isempty(beh.processedFolder)
-            continue;
+        
+        % generate fake stim file according to Tolias lab standards
+        m = sess.meta;
+        session_date = regexp(m.cheetahDir, '([0-9]+)-([0-9]+)-([0-9]+)_([0-9]+)-([0-9]+)-([0-9]+)', 'tokens');
+        session_date = cellfun(@str2double, session_date{1}, 'UniformOutput', false);
+        session_datetime = sprintf('%04d-%02d-%02d_%02d-%02d-%02d', session_date{:});
+        stimFile = sprintf('/stor01/stimulation/%s/%s/%s.mat', m.subject, session_datetime, m.expType);
+        if ~exist(getLocalPath(stimFile), 'file')
+            stim = genStimFileMPI(m.qnxFile, m.cheetahDir, m.expType, m.chtEvtBegin, m.chtEvtEnd, getLocalPath(stimFile));
+        else
+            stim = getfield(load(getLocalPath(stimFile)), 'stim'); %#ok
         end
-        acqStruct = getfield(load(fullfile(getLocalPath(beh.processedFolder),'sessionInfo')),'acq');
         
         % Create the session structure to insert
         sessStruct = struct;
-        sessStruct.setup = sess.meta.setup;
-        idx = strfind(acqStruct.folder,'/');
-        session_date = acqStruct.folder(idx(end)+1:end);
-        sessStruct.session_start_time = matlabTimeToLabviewTime(datenum(session_date,'yyyy-mm-dd_HH-MM-SS'));
+        sessStruct.setup = 99;
+        sessStruct.session_start_time = matlabTimeToLabviewTime(datenum(session_date{:}));
         sessStruct.subject_id = subject_id;
         sessKey = sessStruct;
-        sessStruct.session_datetime = datestr(datenum(session_date,'yyyy-mm-dd_HH-MM-SS'),'yyyy-mm-dd HH:MM:SS');
+        sessStruct.session_datetime = session_datetime;
         sessStruct.experimenter = experimenter;
-        sessStruct.session_path = acqStruct.folder;
-        sessStruct.recording_software = 'Hammer';
-        sessStruct.hammer = 1;
-        if count(acq.Sessions(sessStruct)) ~= 0
-            %continue;
-        end
+        sessStruct.session_path = m.cheetahDir;
+        sessStruct.recording_software = 'Neuralynx';
+        sessStruct.hammer = 0;
         
         % Create the ephys structure to insert
-        recInfo = acqStruct.recSessions(beh.recIndex);
         ephysStruct = sessKey;
-        ephysStruct.ephys_start_time = matlabTimeToLabviewTime(datenum(recInfo.startTime,'yyyy-mm-dd HH:MM:SS'));
+        ephysStruct.ephys_start_time = sessStruct.session_start_time;
         ephysKey = ephysStruct;
-        ephysStruct.ephys_stop_time = matlabTimeToLabviewTime(datenum(recInfo.endTime,'yyyy-mm-dd HH:MM:SS'));
-        if ~isempty(ephysTask)
-            ephysStruct.ephys_task = ephysTask;
-        else
-            if isfield(sess,'Tetrode')
-                if length(sess.Tetrode) <= 3
-                    ephysStruct.ephys_task = 'TwoTetrodes';
-                else
-                    error('Not sure what to use here');
-                    ephysStruct.ephys_task = 'Chronic Tetrode';
-                end
-            elseif isfield(sess,'Electrode')
-                ephysStruct.ephys_task = 'UtahArray';
-            else
-                error 'Unable to determine session type.  No tetrodes or electrodes';
-            end
-        end
-        ephysStruct.ephys_path = [acqStruct.folder '/' recInfo.folder];
+        ephysStruct.ephys_task = ephysTask;
+        ephysStruct.ephys_path = sessStruct.session_path;
 
-        
+        % detect.Params & Sets
         detectionSetParamStruct = ephysKey;
-        if isfield(sess,'Tetrode')
-            detectionSetParamStruct.detect_method_num = fetch1(detect.Methods('detect_method_name="Tetrodes"'),'detect_method_num');
-        else
-            detectionSetParamStruct.detect_method_num = fetch1(detect.Methods('detect_method_name="Utah"'),'detect_method_num');
-        end
+        detectionSetParamStruct.detect_method_num = fetch1(detect.Methods('detect_method_name="Tetrodes"'),'detect_method_num');
         detectionSetParamStructKey = detectionSetParamStruct;
-        detectionSetParamStruct.ephys_processed_path = beh.processedFolder;
+        detectionSetParamStruct.ephys_processed_path = sessStruct.session_path;
         
         detectionSetStruct = detectionSetParamStructKey;
         detectionSetStructKey = detectionSetStruct;
-        detectionSetStruct.detect_set_path = [detectionSetParamStruct.ephys_processed_path '/' recInfo.folder sess.meta.clusterSet];
-
-        sessStruct.session_stop_time = ephysStruct.ephys_stop_time;
+        detectionSetStruct.detect_set_path = sessStruct.session_path;
+        
         inserti(acq.Sessions, sessStruct);
         inserti(acq.Ephys, ephysStruct);
         inserti(detect.Params, detectionSetParamStruct);
         inserti(detect.Sets, detectionSetStruct)
-        
-        % Todo determine electrodes
-        fileNames = dir(fullfile(getLocalPath(detectionSetStruct.detect_set_path),'*.Htt'));
-        for i = 1:length(fileNames)
+
+        % determine electrodes & preamp gains
+        for tet = sess.Tetrode
             detectionElectrodeStruct = detectionSetStructKey;
-            detectionElectrodeStruct.electrode_num = sscanf(fileNames(i).name,'Sc%u.Htt');
-            detectionElectrodeStruct.detect_electrode_file = getGlobalPath(fullfile(detectionSetStruct.detect_set_path, fileNames(i).name));
+            detectionElectrodeStruct.electrode_num = tet.meta.tetrodeNumber;
+            detectionElectrodeStruct.detect_electrode_file = sprintf('%sSc%d.Ntt', detectionSetStruct.detect_set_path, tet.meta.tetrodeNumber);
             inserti(detect.Electrodes, detectionElectrodeStruct);
+            
+            gainStruct = ephysKey;
+            gainStruct.electrode_num = tet.meta.tetrodeNumber;
+            gainStruct.preamp_gain = tet.meta.amplifierGain / 1000;
+            inserti(acq.AmplifierGains, gainStruct);
         end
         
-        % Deal with newer file format
-        fileNames = dir(fullfile(getLocalPath(detectionSetStruct.detect_set_path),'*.Hsp'));
-        for i = 1:length(fileNames)
-            detectionElectrodeStruct = detectionSetStructKey;
-            detectionElectrodeStruct.electrode_num = sscanf(fileNames(i).name,'Sc%u.Hsp');
-            detectionElectrodeStruct.detect_electrode_file = getGlobalPath(fullfile(detectionSetStruct.detect_set_path, fileNames(i).name));
-            inserti(detect.Electrodes, detectionElectrodeStruct);
+        % sort.Params & Sets
+        methods = {'MultiUnit', 'MoKsm'};
+        for iMethod = 1 : numel(methods)
+            sortSetParamStruct = detectionSetParamStructKey;
+            sortSetParamStruct.sort_method_num = fetch1(sort.Methods(struct('sort_method_name', methods{iMethod})), 'sort_method_num');
+            
+            sortSetStruct = sortSetParamStruct;
+            sortSetStruct.sort_set_path = sprintf('/processed/%s/%s/%s/spikes/Tetrodes/%s', m.subject, session_datetime, session_datetime, methods{iMethod});
+            
+            inserti(sort.Params, sortSetParamStruct);
+            inserti(sort.Sets, sortSetStruct);
+            inserti(sort.Electrodes, fetch((sort.Sets * detect.Electrodes) & detectionSetStruct));
         end
-        
-%         clusterSetParamStruct = detectionSetStructKey;
-%         clusterSetParamStruct.clustering_method = 'MultiUnit';
-%         clusterSetParamStructKey = clusterSetParamStruct;
-%         inserti(ephys.ClusterSetParam,clusterSetParamStruct);
         
         % Create stimulation structure
         stimulationStruct = sessKey;
-        stimulationStruct.stim_start_time = sessKey.session_start_time + round(beh.startTime);
+        stimulationStruct.stim_start_time = sessStruct.session_start_time;
         stimulationKey = stimulationStruct;
-        stimulationStruct.stim_stop_time = sessKey.session_start_time + round(beh.endTime);
-        stimulationStruct.stim_path = getGlobalPath(getLocalPath(beh.folder));
+        stimulationStruct.stim_path = fileparts(stimFile);
         
-        % Get rid of variant
-        stimulationStruct.stim_path = strrep(stimulationStruct.stim_path,'Synched','');
-        stimulationStruct.stim_path = strrep(stimulationStruct.stim_path,'Synced','');
-        
-        stimulationStruct.exp_type = sess.meta.expType;
-        stim = getfield(load(fullfile(getLocalPath(beh.folder), beh.file)),'stim');
+        stimulationStruct.exp_type = m.expType;
         stimulationStruct.total_trials = length(stim.params.trials);
         stimulationStruct.correct_trials = sum([stim.params.trials.correctResponse]==1 & [stim.params.trials.validTrial]);
         stimulationStruct.incorrect_trials = sum([stim.params.trials.correctResponse]==0 & [stim.params.trials.validTrial]);
         inserti(acq.Stimulation, stimulationStruct);
         
-%         % TODO: Attach the monitor size/resolution to something in DB
-%         if isfield(sess,'arrayLocation')
-%             disp('Need to populate location information')
-%             utahStruct = ephysKey;
-%             utahStruct.array_location = sess.meta.arrayLocation;
-%             % inserti(UtayInfo, utahStruct);
-%         elseif isfield(sess,'Tetrode') && isfield(sess.Tetrode(1).meta, 'tetrodeNumber')
-%             disp('Need to populate nonchronic meta information');
-%             for k = 1:length(sess.Tetrode)
-%                 nonchronicStruct = ephysKey;
-%                 nonchronicStruct.tetrode_number = sess.Tetrode(k).meta.tetrodeNumber;
-%                 nonchronicStruct.tetrode_location = sess.Tetrode(k).meta.gridLocation;
-%                 nonchronicStruct.gri_number = sess.meta.gridNumber;
-%                 nonchronicStruct.grid_orientation = sess.meta.gridOrientation;
-%                 % inserti(NonchronicTetrodeInfo,nonchronicStruct);
-%             end
-%         end
+        % create fake stimulation sync
+        stimSyncStruct = stimulationKey;
+        stimSyncStruct.sync_network = 1;
+        stimSyncStruct.sync_diode = 1;
+        inserti(acq.StimulationSync, stimSyncStruct);
+        inserti(acq.StimulationSyncDiode, dj.struct.join(stimulationKey, ephysKey));
         
         % Create clus set stim structure
         ephysStimLinkStruct = dj.struct.join(ephysKey, stimulationKey);
         inserti(acq.EphysStimulationLink, ephysStimLinkStruct);
+        
+        % create cont.lfp tuples
+        lfpStruct = ephysKey;
+        lfpStruct.lfp_file = [ephysStruct.ephys_path 'CSC%d.Ncs'];
+        inserti(cont.Lfp, lfpStruct);
     end
 end
     

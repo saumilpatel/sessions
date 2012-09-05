@@ -16,6 +16,11 @@ classdef StimTrialGroup < dj.Relvar & dj.Automatic
         function self = StimTrialGroup(varargin)
             self.restrict(varargin{:})
         end
+        
+        function val = getConstant(self, field, varargin)
+            constants = fetchn(self, 'stim_constants');
+            val = cellfun(@(x) x.(field), constants, varargin{:});
+        end
     end
     
     methods (Access=protected)        
@@ -35,11 +40,6 @@ classdef StimTrialGroup < dj.Relvar & dj.Automatic
             % Insert trials
             makeTuples(stimulation.StimTrials, key, stim);
 
-        end
-        
-        function val = getConstant(self, field, varargin)
-            constants = fetchn(self, 'stim_constants');
-            val = cellfun(@(x) x.(field), constants, varargin{:});
         end
     end
 end

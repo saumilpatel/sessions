@@ -10,7 +10,7 @@ experimenter                : enum('James','Alex','Mani','Allison','Tori','Jacob
 session_path                : varchar(255)                  # path to the data
 session_datetime=null       : datetime                      # readable format of session start
 hammer=0                    : tinyint                       # 
-recording_software="Acquisition2.0": enum('Acquisition2.0','Hammer','Blackrock')# software used to record the data
+recording_software="Acquisition2.0": enum('Acquisition2.0','Hammer','Blackrock','Neuralynx')# software used to record the data
 %}
 
 classdef Sessions < dj.Relvar

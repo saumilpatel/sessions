@@ -11,7 +11,7 @@ num_planes            : int unsigned     # Number of motion planes
 classdef TraceSet < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('aod.TraceSet');
-        popRel = acq.AodScan & acq.SessionsCleanup
+        popRel = (acq.AodScan & acq.SessionsCleanup) - acq.AodScanIgnore
     end
     
     methods 
