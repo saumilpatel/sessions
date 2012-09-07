@@ -3,6 +3,7 @@ aod.CosineTuning (computed) # my newest table
 -> aod.OrientationResponseSet
 -> aod.TracePreprocess
 -----
+mean_firing            : double # The mean response magnitude
 orientation_preference : double # The orientation preference
 orientation_magnitude  : double # The magnitude of cosine tuning
 significance           : double # The p-value
