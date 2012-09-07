@@ -125,7 +125,7 @@ classdef TracePreprocess < dj.Relvar
                         fs = fs / ds;
                         trace = fast_oopsi(trace, struct('dt',dt * ds));
                         f0_offset = 0;
-                        f0_scale = 0;
+                        f0_scale = 1;
                     otherwise
                         error('Unknown processing method');
                 end
