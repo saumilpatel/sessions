@@ -88,7 +88,17 @@ classdef TracePreprocess < dj.Relvar
                             [c p] = princomp(dat);
                             pc = p(:,1) * c(:,1)';
                         end
+
+                        % Remove the first PC
                         trace = trace - pc(:,i);
+
+                        % Compute the HPF version
+                        highPass = 0.1;
+                        dt = 1 / fs;
+                        k = hamming(round(1/dt/highPass)*2+1);
+                        k = k/sum(k);
+                        trace = trace - convmirr(trace,k);  %  dF/F where F is low pass
+                        
                         ds = round(fs / 20);
                         assert(ds > 1);
                         trace = decimate(trace,ds,'fir');
@@ -114,6 +124,8 @@ classdef TracePreprocess < dj.Relvar
   
                         fs = fs / ds;
                         trace = fast_oopsi(trace, struct('dt',dt * ds));
+                        f0_offset = 0;
+                        f0_scale = 0;
                     otherwise
                         error('Unknown processing method');
                 end
