@@ -86,7 +86,7 @@ function SessionsList_Callback(hObject, eventdata, handles)
 contents = get(hObject,'UserData');
 session_key = contents(get(hObject,'Value'));
 sess = fetch(acq.Sessions(session_key));
-[files keys] = fetchn(acq.AodScan & sess, 'aod_scan_filename');
+[files keys] = fetchn(acq.AodScan & aod.TracePreprocessSet & sess, 'aod_scan_filename');
 str = cell(length(keys),1);
 for i = 1:length(keys)
     expTypes = fetchn(acq.Stimulation & (acq.AodStimulationLink & acq.AodScan(keys(i))), 'exp_type');
@@ -220,7 +220,7 @@ if get(handles.cbExcludeEmpty,'Value')
 else
     sess = acq.Sessions(acq.Subjects('subject_name="Mouse"'));
 end
-[sdt count key] = fetchn(pro(sess, acq.AodScan, 'COUNT(aod_scan_start_time)->scan_count','session_datetime'),'session_datetime','scan_count');
+[sdt count key] = fetchn(pro(sess, acq.AodScan & aod.TracePreprocessSet, 'COUNT(aod_scan_start_time)->scan_count','session_datetime'),'session_datetime','scan_count');
 
 % Add the number of scans to each session string
 str = cell(length(key),1);

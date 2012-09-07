@@ -11,7 +11,7 @@ classdef OrientationResponseSet < dj.Relvar & dj.Automatic
     
     properties(Constant)
         table = dj.Table('aod.OrientationResponseSet')
-        popRel = aod.OrientationResponseSetParams  % !!! update the populate relation
+        popRel = aod.OrientationResponseSetParams & aod.UniqueCells % !!! update the populate relation
     end
     
     methods
@@ -42,6 +42,7 @@ classdef OrientationResponseSet < dj.Relvar & dj.Automatic
             % This method needs an array of stimulus condition numbers and
             % onset/offset times
             
+            assert(count(aod.TracePreprocess & aod.UniqueCell & key) > 1, 'Not enough unique cells found');
             [traces cell_num] = fetchn(aod.TracePreprocess & aod.UniqueCell & key, 'trace', 'cell_num');
             traces = cat(2,traces{:});
             times = getTimes(aod.TracePreprocess & key);
