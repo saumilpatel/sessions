@@ -5,7 +5,7 @@ aod.TracePreprocessSet (imported) # A scan site
 ---
 %}
 
-classdef TracePreprocessSet < dj.Relvar & dj.AutoPopulate
+classdef TracePreprocessSet < dj.Relvar & dj.Automatic
     properties(Constant)
         table = dj.Table('aod.TracePreprocessSet');
         popRel = aod.TracePreprocessSetParam - acq.AodScanIgnore;
