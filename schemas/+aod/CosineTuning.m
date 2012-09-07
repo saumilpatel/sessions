@@ -3,6 +3,7 @@ aod.CosineTuning (computed) # my newest table
 -> aod.OrientationResponseSet
 -> aod.TracePreprocess
 -----
+mean_firing            : double # The mean response magnitude
 orientation_preference : double # The orientation preference
 orientation_magnitude  : double # The magnitude of cosine tuning
 significance           : double # The p-value
@@ -64,9 +65,11 @@ classdef CosineTuning < dj.Relvar & dj.Automatic
             r2 = 1 - ss_resid ./ ss;            
             p = (mean(bsxfun(@lt,r2,r2_shuffled),1));
             
+            means = mean(responses);
             for i = 1:length(data.cell_nums)
                 tuple = key;
                 tuple.cell_num = data.cell_nums(i);
+                tuple.mean_firing = means(i);
                 tuple.orientation_preference = mod(angle(ori_tune(i)) / (2*pi) * 180, 180);
                 tuple.orientation_magnitude = abs(ori_tune(i));
                 tuple.significance = p(i);
