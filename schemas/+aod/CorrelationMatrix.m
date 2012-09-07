@@ -1,7 +1,7 @@
 %{
 aod.CorrelationMatrix (computed) # Correlation matrix for a scan site
 
-->aod.PreprocessScan
+->aod.TracePreprocessSet
 ---
 corr                       : longblob                      # The preprocessed trace
 cov                        : longblob                      # The preprocessed trace
@@ -10,14 +10,16 @@ cov                        : longblob                      # The preprocessed tr
 classdef CorrelationMatrix < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('aod.CorrelationMatrix');
-        popRel = aod.PreprocessScan;
+        popRel = aod.TracePreprocessSet;
     end
     
     methods 
         function self = CorrelationMatrix(varargin)
             self.restrict(varargin{:})
         end
-
+    end
+    
+    methods (Access=protected)
         function makeTuples(self, key)
             tuple = key;
             
