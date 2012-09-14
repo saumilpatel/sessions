@@ -6,7 +6,7 @@ ephys.SpikeSet (imported) # Import sets of spikes
 spikeset_ts=CURRENT_TIMESTAMP: timestamp           # automatic timestamp. Do not edit
 %}
 
-classdef SpikeSet < dj.Relvar & dj.AutoPopulate
+classdef SpikeSet < dj.Relvar & dj.Automatic
     properties(Constant)
         table = dj.Table('ephys.SpikeSet');
         popRel = sort.SetsCompleted;

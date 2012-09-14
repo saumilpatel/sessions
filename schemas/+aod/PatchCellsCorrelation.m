@@ -59,7 +59,8 @@ classdef PatchCellsCorrelation < dj.Relvar & dj.AutoPopulate
                 predicted = (predicted' - convmirr(predicted',h))';  %  dF/F where F is low pass
                 
                 % Regress all the traces at this time constant
-                [~,R2] = aod.PatchCellsCorrelation.regress(traces, predicted', 0);
+                %[~,R2] = aod.PatchCellsCorrelation.regress(traces, predicted', 0);
+                [~,R2] = aod.PatchCellsCorrelation.regress(bsxfun(@minus,traces,mean(traces)), predicted', 0);
                 
                 tuple.r2(:,k) = R2';
                 

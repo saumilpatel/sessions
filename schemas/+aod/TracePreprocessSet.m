@@ -5,10 +5,10 @@ aod.TracePreprocessSet (imported) # A scan site
 ---
 %}
 
-classdef TracePreprocessSet < dj.Relvar & dj.AutoPopulate
+classdef TracePreprocessSet < dj.Relvar & dj.Automatic
     properties(Constant)
         table = dj.Table('aod.TracePreprocessSet');
-        popRel = aod.TracePreprocessSetParam;
+        popRel = aod.TracePreprocessSetParam - acq.AodScanIgnore;
     end
     
     methods 
@@ -19,12 +19,11 @@ classdef TracePreprocessSet < dj.Relvar & dj.AutoPopulate
         function t = plot( this )
             assert( count(aod.TracePreprocessSet & this) == 1, 'Only one trace set can be plotted');
             
-            t = fetch(aod.TracePreprocess & this, '*');
-            t(1) = [];
-            traces = cat(2,t.trace);
-            traces(1,:) = [];
-            time = (1:size(traces,1)) / t(1).fs;
-            plot(time,bsxfun(@plus,traces,1:size(traces,2)))
+            time = getTimes(aod.TracePreprocess & this);
+            traces = fetchn(aod.TracePreprocess & this, 'trace');
+            traces = cat(2,traces{:});
+            
+            plot(time,bsxfun(@plus,traces*4,1:size(traces,2)))
         end        
     end
     
