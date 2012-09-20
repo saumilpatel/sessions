@@ -26,8 +26,11 @@ classdef StimTrialEvents < dj.Relvar
                 tuple.event_time = events.times(i);
                 tuple.event_info = events.info{i};
                 
-                if isnan(tuple.event_time)
-                    % Time was not recorded
+                if isnan(tuple.event_time) || tuple.event_time < 0
+                    % (a) Time was not recorded
+                    % (b) In some old sessions sounds got timestamped as
+                    % zero, which translated into negative times after
+                    % synchronization
                     continue;
                 end
                 

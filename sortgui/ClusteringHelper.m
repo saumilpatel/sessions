@@ -529,6 +529,7 @@ classdef ClusteringHelper
                     hdl = bar(bins, [n1; n2]', 1, 'stacked', 'LineStyle', 'none');
                     set(hdl(1), 'FaceColor', color(i, :))
                     set(hdl(2), 'FaceColor', color(j, :))
+                    axis tight
                 end
             end
         end

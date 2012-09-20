@@ -6,7 +6,7 @@ stimulation.StimTrialGroup (imported) # Set of imported trials
 stim_constants                     : longblob               # A structure with all the stimulation constants
 stimtrialgroup_ts=CURRENT_TIMESTAMP: timestamp              # automatic timestamp. Do not edit
 %}
-classdef StimTrialGroup < dj.Relvar & dj.Automatic
+classdef StimTrialGroup < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('stimulation.StimTrialGroup');
         popRel = acq.StimulationSync;

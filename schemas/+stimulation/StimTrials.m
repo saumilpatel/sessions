@@ -32,7 +32,7 @@ classdef StimTrials < dj.Relvar
             for i = 1:length(stim.params.trials);
                 tuple.trial_num = i;
                 tuple.valid_trial = stim.params.trials(i).validTrial;
-                tuple.start_time = min(stim.events(i).times); % Time trial trial started (in ms)
+                tuple.start_time = min(stim.events(i).times(stim.events(i).times > 0)); % Time trial trial started (in ms)
                 tuple.end_time = max(stim.events(i).times); % Time trial trial ended (in ms)
                 tuple.trial_params = stim.params.trials(i); % Stimulation structure for all params
                 
