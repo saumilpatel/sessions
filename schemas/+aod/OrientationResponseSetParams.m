@@ -25,12 +25,23 @@ classdef OrientationResponseSetParams < dj.Relvar
         function createDefaults
             defaultParams = struct('lag',0,'bin_duration',500);
             sets = fetch((aod.TracePreprocessSet('preprocess_method_num != 1') & aod.UniqueCells) * ...
-                (acq.AodStimulationLink & stimulation.MultiDimInfo('num_orientations>=8')) - ...
+                (acq.AodStimulationLink & stimulation.MultiDimInfo('num_orientations>=8 AND block_design=1')) - ...
+                aod.OrientationResponseSetParams(defaultParams));
+            for i = 1:length(sets)
+                insert(aod.OrientationResponseSetParams, dj.struct.join(sets(i),defaultParams));
+            end
+        end
+        
+        function createDefaultsMultidim
+            defaultParams = struct('lag',0,'bin_duration',100);
+            sets = fetch((aod.TracePreprocessSet('preprocess_method_num != 1') & aod.UniqueCells) * ...
+                (acq.AodStimulationLink & stimulation.MultiDimInfo('num_orientations>=8 AND block_design=0')) - ...
                 aod.OrientationResponseSetParams(defaultParams));
             for i = 1:length(sets)
                 insert(aod.OrientationResponseSetParams, dj.struct.join(sets(i),defaultParams));
             end
             
         end
+        
     end
 end
