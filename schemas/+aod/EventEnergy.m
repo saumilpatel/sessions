@@ -26,12 +26,11 @@ classdef EventEnergy < dj.Relvar & dj.Automatic
 		function makeTuples(self, key)
             tuple = key;
             
-            pc = fetch(aod.PatchedCell & aod.Spikes & aod.Traces)
             h = @(tau, time) [zeros(1,100) exp(-(time - time(1)) / tau)];
             
             %% Get data
-            trace = fetch1(aod.Traces & pc(3), 'trace');
-            times = getTimes(aod.TracePreprocess('preprocess_method_num=1') & pc(3));
+            trace = fetch1(aod.Traces & key, 'trace');
+            times = getTimes(aod.TracePreprocess('preprocess_method_num=1') & key);
             
             %% Preprocess data
             highPass = 0.0001;
