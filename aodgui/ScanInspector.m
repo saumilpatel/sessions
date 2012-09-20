@@ -59,6 +59,31 @@ handles.output = hObject;
 guidata(hObject, handles);
 updateSessions(handles)
 
+if nargin > 0
+	% Try and select anything passed in
+    key = varargin{1};
+    if count(acq.Sessions & key) == 1
+        matchedKey = fetch(acq.Sessions & key);
+        keys = get(handles.SessionsList, 'UserData');
+        for i = 1:length(keys)
+            if isequal(keys(i),matchedKey)
+                set(handles.SessionsList,'Value',i);
+                SessionsList_Callback(handles.SessionsList, [], handles)
+                scanKeys = get(handles.AodScans,'UserData');
+                scanKey = fetch(acq.AodScan & key);
+                for j = 1:length(scanKeys)
+                    if isequal(scanKeys(j), scanKey)
+                        set(handles.AodScans, 'Value', j);
+                        AodScans_Callback(handles.AodScans, [], handles);
+                        break;
+                    end
+                end
+                break
+            end
+        end
+    end
+end
+
 % UIWAIT makes ScanInspector wait for user response (see UIRESUME)
 % uiwait(handles.ScanInspector);
 
@@ -75,7 +100,7 @@ varargout{1} = handles.output;
 
 
 % --- Executes on selection change in SessionsList.
-function SessionsList_Callback(hObject, eventdata, handles)
+function SessionsList_Callback(hObject, ~, handles)
 % hObject    handle to SessionsList (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
