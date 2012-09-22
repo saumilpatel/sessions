@@ -53,6 +53,8 @@ for i = 1:size(mot,3)/gridSize
     up = 1;
     ref1 = interp2(ref1,up,'*cubic');
     ref2 = interp2(ref2,up,'*cubic');
+    ref1(ref1(:)<=0.01) = 0.01; % avoid nan
+    ref2(ref2(:)<=0.01) = 0.01;
     
     % compute motion against bigger reference
     up = 2^up;
