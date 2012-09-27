@@ -15,8 +15,7 @@ ind_responses         : longblob # Individual responses
 classdef TuningCurve < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('aod.TuningCurve');
-        %popRel = pro(aod.TracePreprocessed) * pro(acq.AodStimulationLink) * pro(stimulation.MultiDimInfo);
-        popRel = aod.TracePreprocessed * acq.AodStimulationLink * stimulation.MultiDimInfo;
+        popRel = aod.TracePreprocessed * acq.AodStimulationLink * stimulation.MultiDimInfo('num_orientations>8');
     end
 
     methods 

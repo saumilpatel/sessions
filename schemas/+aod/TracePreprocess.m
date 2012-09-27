@@ -103,6 +103,8 @@ classdef TracePreprocess < dj.Relvar
                         assert(ds > 1);
                         trace = decimate(trace,ds,'fir');
                         fs = fs / ds;
+                        
+                        f0_offset = mean(trace); % mean is zero at this point
                     case 'fast_oopsi'   % Run the voegelstein fast oopsi method                
                         if ~exist('pc', 'var')
                             dat = cat(2,aodTraces.trace);
