@@ -294,6 +294,11 @@ for i = 1:length(s.Subject)
         % Create clus set stim structure
         ephysStimLinkStruct = dj.struct.join(ephysKey, stimulationKey);
         inserti(acq.EphysStimulationLink, ephysStimLinkStruct);
+
+        % create cont.lfp tuples
+        lfpStruct = ephysKey;
+        lfpStruct.lfp_file = [detectionSetStruct.detect_set_path(1 : end - 5) 'lfp/lfp%d'];
+        inserti(cont.Lfp, lfpStruct);
     end
 end
     
