@@ -15,7 +15,9 @@ classdef TetrodesMoGAutomatic < dj.Relvar & dj.AutoPopulate
         function self = TetrodesMoGAutomatic(varargin)
             self.restrict(varargin{:})
         end
-        
+    end
+    
+    methods (Access = protected)
         function makeTuples(self, key)
             spikesPath = fetch1(detect.Sets(key), 'detect_set_path');
             outPath = fetch1(sort.Sets(key), 'sort_set_path');
