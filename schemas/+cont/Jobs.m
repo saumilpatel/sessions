@@ -1,5 +1,5 @@
 %{
-sort.Jobs (job)   # jobs
+cont.Jobs (job)   # jobs
 
 table_name : varchar(255) # className of the table
 key_hash   : char(32)     # key hash
@@ -13,7 +13,7 @@ timestamp=CURRENT_TIMESTAMP : timestamp                         # automatic time
 
 classdef Jobs < dj.Relvar
     properties(Constant)
-        table = dj.Table('sort.Jobs')
+        table = dj.Table('cont.Jobs')
     end
     methods
         function self = Jobs(varargin)
