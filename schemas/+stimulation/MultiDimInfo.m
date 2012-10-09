@@ -87,7 +87,48 @@ classdef MultiDimInfo < dj.Relvar & dj.AutoPopulate
 
             insert(this,tuple);         
         end
-        
-
     end
+    
+    methods
+        function [G startTime endTime oris] = makeDesignMatrix(self, times)
+            % This method needs an array of stimulus condition numbers and
+            % onset/offset times
+            
+            assert(count(self) == 1, 'Only for one stimulus');
+            
+            %opt.tau = 1500;
+            %alpha = @(x,a) (x>0).*x/a/a.*exp(-x/a);  % response shape
+            
+            alpha = @(x,a) (x > 200 & x < 1200);  % response shape
+            
+            trials = fetch(stimulation.StimTrials & self);
+            conditions = fetch(stimulation.StimConditions & self,'*');
+            
+            oris = unique(arrayfun(@(x) x.orientation, [conditions.condition_info]));
+            
+            disp 'constructing design matrix...'
+            G = zeros(length(times), length(oris));
+            
+            % Select the time constant of the alpha decay
+            
+            for i = 1:length(trials)
+                trial_info = fetch1(stimulation.StimTrials(trials(i)), 'trial_params');
+                event = fetch(stimulation.StimTrialEvents(trials(i), 'event_type="showSubStimulus"'),'*');
+                onsets = double(sort([event.event_time]));
+                for j = 1:length(onsets)
+                    cond = trial_info.conditions(j);
+                    onset = onsets(j);
+                    ori = conditions(cond).condition_info.orientation;
+                    condIdx = find(ori == oris);
+                    
+                    idx = find(times >= onset & times < onset+6*opt.tau);
+                    G(idx, condIdx) = G(idx, condIdx) + alpha(times(idx)-onset,opt.tau)';
+                end
+            end
+            
+            startTime = fetch1(pro(stimulation.StimTrialEvents, stimulation.StimTrialGroup(key), 'MIN(event_time)->time'),'time');
+            endTime = fetch1(pro(stimulation.StimTrialEvents, stimulation.StimTrialGroup(key), 'MAX(event_time)->time'),'time');
+        end
+    end
+    
 end
