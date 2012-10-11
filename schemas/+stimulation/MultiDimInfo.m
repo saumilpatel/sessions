@@ -103,8 +103,8 @@ classdef MultiDimInfo < dj.Relvar & dj.AutoPopulate
             
             disp 'constructing design matrix...'
                         
-            stimTime = 250;
-            numSplines = 4;
+            stimTime = 100;
+            numSplines = 10;
             G = zeros(length(times), length(oris) * numSplines);
 
             for i = 1:length(trials)
