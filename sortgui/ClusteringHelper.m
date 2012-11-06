@@ -213,7 +213,7 @@ classdef ClusteringHelper
                 ids = getSpikesByClusIds(self, params.clusIds(k));
                 r = randperm(numel(ids));
                 prior = numel(ids) / nSpikes;
-                show{k} = ids(r(1 : min(end, round(params.maxPoints * prior))));
+                show{k} = ids(r(1 : min(end, ceil(params.maxPoints * prior))));
             end
 
             % plot 2D scatter plots
