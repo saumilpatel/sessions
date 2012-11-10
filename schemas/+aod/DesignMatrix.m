@@ -52,17 +52,17 @@ classdef DesignMatrix < dj.Relvar & dj.Automatic
                 tuple.patched_data = true;
                 
                 % Move this trace from the main matrix to a separate one
-                idx = find(tuple.cell_num == tuple.patched_cell_num);
+                idx = find(tuple.cell_nums == tuple.patched_cell_num);
                 tuple.patched_trace = tuple.traces_matrix(:,idx);
-                tuple.traces_matrix(idx) = [];
-                tuple.patched_cell_num(idx) = [];
+                tuple.traces_matrix(:,idx) = [];
+                tuple.cell_nums(idx) = [];
             else
                 tuple.spikes_binned = [];
                 tuple.patched_trace = [];
                 tuple.patched_cell_num = -1;
                 tuple.patched_data = false;
             end
-            tuple
+
 			self.insert(tuple);
 		end
 	end
