@@ -40,11 +40,19 @@ classdef DesignMatrix < dj.Relvar & dj.Automatic
             % Create a matrix of the traces
             [traces, tuple.cell_nums] = fetchn(aod.TracePreprocess & aod.UniqueCell & key, 'trace', 'cell_num');
             tuple.traces_matrix = cat(2,traces{:});
+            % Normalize the energy
+            tuple.traces_matrix = bsxfun(@rdivide, tuple.traces_matrix, ...
+                std(tuple.traces_matrix,[],1));
             
             % Get the stimulus design matrix
             [tuple.stimuli_matrix startTime endTime] = ...
                 network.GlmHelper.makeDesignMatrix(tuple.times, key);
 
+            % Throw away any bins outside this stimulus
+            delBins = (tuple.times < startTime) | (tuple.times > endTime);
+            tuple.times(delBins) = [];
+            tuple.traces_matrix(delBins,:) = [];
+            
             if count(aod.Spikes & key) == 1
                 spikes = fetch1(aod.Spikes & key, 'times');
                 tuple.spikes_binned = histc(spikes, tuple.times);
