@@ -26,7 +26,21 @@ classdef DesignMatrix < dj.Relvar & dj.Automatic
 	methods
 		function self = DesignMatrix(varargin)
 			self.restrict(varargin)
-		end
+        end
+        
+        function traces = removeStimulus(self)
+            % Remove any component that can be predicted from teh stimulus
+            % from the traces
+            
+            assert(count(self) == 1, 'Only for one object');
+            dat = fetch(self,'*');
+            x = [ones(size(dat.stimuli_matrix,1),1) dat.stimuli_matrix];
+            traces = zeros(size(dat.traces_matrix));
+            for i = 1:size(dat.traces_matrix,2);
+                [~,~,resid] = regress(dat.traces_matrix(:,i), x);
+                traces(:,i) = resid;
+            end
+        end
 	end
 
 	methods(Access=protected)
@@ -52,6 +66,7 @@ classdef DesignMatrix < dj.Relvar & dj.Automatic
             delBins = (tuple.times < startTime) | (tuple.times > endTime);
             tuple.times(delBins) = [];
             tuple.traces_matrix(delBins,:) = [];
+            tuple.stimuli_matrix(delBins,:) = [];
             
             if count(aod.Spikes & key) == 1
                 spikes = fetch1(aod.Spikes & key, 'times');
