@@ -1,4 +1,4 @@
-function tetrodes = spikesTetrodes(sourceFile, spikesFile)
+function [tetrodes, artifacts] = spikesTetrodes(sourceFile, spikesFile)
 % Spike detection callback for tetrodes
 % AE 2011-10-26
 
@@ -17,3 +17,5 @@ parfor i = 1:numel(tetrodes)
 end
 
 matlabpool close
+
+artifacts = cell(1, numel(tetrodes));

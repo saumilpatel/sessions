@@ -78,7 +78,7 @@ createOrEmpty(outDir)
 
 % run callback for spike detection
 outFile = fullfilefs(outDir, spikesFile);
-electrodes = spikesCb(sourceFile, outFile);
+[electrodes, artifacts] = spikesCb(sourceFile, outFile);
 
 % wait for LFP & MUA jobs to finish
 if ~count(cont.Lfp(key)) && ~isempty(lfpCb)
@@ -109,11 +109,17 @@ end
 tuple = key;
 tuple.detect_set_path = fullfilefs(processedDir, spikesDir);
 insert(detect.Sets, tuple);
-for e = electrodes
+for i = 1 : numel(electrodes)
+    key.electrode_num = electrodes(i);
     tuple = key;
-    tuple.electrode_num = e;
-    tuple.detect_electrode_file = fullfilefs(processedDir, spikesDir, sprintf(spikesFile, e));
+    tuple.detect_electrode_file = fullfilefs(processedDir, spikesDir, sprintf(spikesFile, electrodes(i)));
     insert(detect.Electrodes, tuple);
+    for j = 1 : size(artifacts{i}, 1)
+        tuple = key;
+        tuple.artifact_start = artifacts{i}(j, 1);
+        tuple.artifact_end = artifacts{i}(j, 2);
+        insert(detect.NoiseArtifacts, tuple)
+    end
 end
 
 if useTempDir
