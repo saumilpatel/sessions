@@ -1,4 +1,4 @@
-function channels = spikesSiliconProbes(sourceFile, spikesFile)
+function [channels, artifacts] = spikesSiliconProbes(sourceFile, spikesFile)
 % Spike detection callback for silicon probes.
 % AE 2011-10-26
 
@@ -19,3 +19,5 @@ end
 matlabpool close
 
 channels = 1:channels;
+
+artifacts = cell(1, numel(channels));
