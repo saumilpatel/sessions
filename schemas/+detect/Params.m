@@ -5,6 +5,7 @@ detect.Params (manual) # Parameters being used for spike detection
 -> detect.Methods
 ---
 ephys_processed_path : varchar(255) # directory containing spike files
+use_toolchain = 1    : boolean      # use toolchain or just detect spikes?
 %}
 
 classdef Params < dj.Relvar

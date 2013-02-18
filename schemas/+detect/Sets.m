@@ -27,6 +27,12 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
                     lfpCb = @extractLfpTetrodes;
                     muaCb = @extractMuaTetrodes;
                     pathCb = @extractPath;
+                case 'TetrodesV2'
+                    spikesCb = @spikesTetrodesV2;
+                    spikesFile = 'Sc%d.Htt';
+                    lfpCb = @extractLfpTetrodes;
+                    muaCb = @extractMuaTetrodes;
+                    pathCb = @extractPath;
                 case 'SiliconProbes'
                     spikesCb = @spikesSiliconProbes;
                     spikesFile = 'Sc%d.Htt';
@@ -39,7 +45,17 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
                     spikesFile = 'Sc%03u.Hsp';
                     lfpCb = []; muaCb = []; pathCb = [];
             end
-            processSet(key, spikesCb, spikesFile, lfpCb, muaCb, pathCb);
+            useTemp = true;
+
+            % if not in toolchain mode, don't extract LFP
+            if ~fetch1(detect.Params(key), 'use_toolchain')
+                lfpCb = [];
+                muaCb = [];
+                pathCb = [];
+                useTemp = false;
+            end
+
+            processSet(key, spikesCb, spikesFile, lfpCb, muaCb, pathCb, useTemp);
         end
     end
 end

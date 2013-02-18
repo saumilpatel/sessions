@@ -1,11 +1,12 @@
 function processSet(key, spikesCb, spikesFile, lfpCb, muaCb, pathCb, useTempDir)
 % TODO: write documentation
 
-if nargin < 8
+if nargin < 7
     useTempDir = true;
 end
 
 maxFiles = 200; % maximum number of files that fit on temp storage right now
+parToolbox = logical(exist('matlabpool', 'file'));
 
 assert(isfield(key, 'setup') && isfield(key, 'session_start_time') && isfield(key, 'ephys_start_time'), isfield(key, 'detect_method_num'), 'Incomplete primary key!')
 assert(count(detect.Params(key)) == 1, 'Did not find a detection that matches this key!')
@@ -57,19 +58,26 @@ else
     destDir = localProcessedDir;
 end
 
-matlabpool close force local
+if parToolbox
+    matlabpool close force local
+end
 
 % If we need to process an LFP kick of these jobs now on a thread
 if ~count(cont.Lfp(key)) && ~isempty(lfpCb)
     outDir = fullfilefs(destDir, lfpDir);
     createOrEmpty(outDir)
-    scheduler = findResource('scheduler', 'configuration', 'local');
-    if ~isempty(scheduler.Jobs) % cancel jobs that are still running from a crash
-        scheduler.Jobs.destroy();
+    if parToolbox
+        scheduler = findResource('scheduler', 'configuration', 'local');
+        if ~isempty(scheduler.Jobs) % cancel jobs that are still running from a crash
+            scheduler.Jobs.destroy();
+        end
+        p = pathCb();
+        lfpJob = batch(scheduler, lfpCb, 0, {sourceFile, fullfilefs(outDir, lfpFile)}, 'PathDependencies', p);
+        muaJob = batch(scheduler, muaCb, 0, {sourceFile, fullfilefs(outDir, muaFile)}, 'PathDependencies', p);
+    else
+        lfpCb(sourceFile, fullfilefs(outDir, lfpFile));
+        muaCb(sourceFile, fullfilefs(outDir, lfpFile));
     end
-    p = pathCb();
-    lfpJob = batch(scheduler, lfpCb, 0, {sourceFile, fullfilefs(outDir, lfpFile)}, 'PathDependencies', p);
-    muaJob = batch(scheduler, muaCb, 0, {sourceFile, fullfilefs(outDir, muaFile)}, 'PathDependencies', p);
 end
 
 % create or clear output directory for spikes
@@ -82,19 +90,21 @@ electrodes = spikesCb(sourceFile, outFile);
 
 % wait for LFP & MUA jobs to finish
 if ~count(cont.Lfp(key)) && ~isempty(lfpCb)
-    disp('Waiting on LFP');
-    while ~wait(lfpJob, 'finished', 60);
-        fprintf('.');
+    if parToolbox
+        disp('Waiting on LFP');
+        while ~wait(lfpJob, 'finished', 60);
+            fprintf('.');
+        end
+        diary(lfpJob)
+        assert(isempty(lfpJob.Tasks.Error), 'Error extracting LFP: %s', lfpJob.Tasks.Error.message);
+
+        disp('Waiting on MUA');
+        while ~wait(muaJob, 'finished', 60);
+            fprintf('.');
+        end
+        diary(muaJob)
+        assert(isempty(muaJob.Tasks.Error), 'Error extracting MUA: %s', muaJob.Tasks.Error.message);
     end
-    diary(lfpJob)
-    assert(isempty(lfpJob.Tasks.Error), 'Error extracting LFP: %s', lfpJob.Tasks.Error.message);
-    
-    disp('Waiting on MUA');
-    while ~wait(muaJob, 'finished', 60);
-        fprintf('.');
-    end
-    diary(muaJob)
-    assert(isempty(muaJob.Tasks.Error), 'Error extracting MUA: %s', muaJob.Tasks.Error.message);
     
     lfpCb = rmfield(key, 'detect_method_num');
     lfpCb.lfp_file = fullfilefs(processedDir, lfpDir, lfpFile);
