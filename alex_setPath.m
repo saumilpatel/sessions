@@ -36,7 +36,7 @@ addpath(fullfile(base(1:ndx-1), 'datajoint'))
 run(fullfile(base(1:ndx-1), 'hdf5matlab/setPath.m'))
 
 % spike detection
-run(fullfile(base(1:ndx-1), 'detection/setPath.m'))
+run(fullfile(base(1:ndx-1), 'spikedetection/setPath.m'))
 
 % LFP
 addpath(fullfile(base(1:ndx-1), 'lfp'))
