@@ -55,22 +55,28 @@ classdef OrientationResponseSet < dj.Relvar & dj.Automatic
             oris = unique(arrayfun(@(x) x.orientation, [conditions.condition_info]));
             
             % Extract segment of trials for each stimulus
-            trial_data = repmat(struct,length(trials),1);
+            event = fetch(stimulation.StimTrialEvents(trials(1), 'event_type="showSubStimulus"'),'*');
+            oriPerTrial = length(event);
+            trial_data = repmat(struct,length(trials) * oriPerTrial,1);
+            k = 1;
+
             for i = 1:length(trials)
                 trial_info = fetch1(stimulation.StimTrials(trials(i)), 'trial_params');
                 event = fetch(stimulation.StimTrialEvents(trials(i), 'event_type="showSubStimulus"'),'*');
                 onset = sort([event.event_time]);
-                assert(length(onset) == 1, 'Appears to be a multidim stimulus');
                 
-                cond = trial_info.conditions;
-                ori = conditions(cond).condition_info.orientation;
-                condIdx = find(ori == oris);
-                
-                idx = find(times >= (onset + lag) & times < (onset + lag + duration));
-                
-                trial_data(i).ori = ori;
-                trial_data(i).condIdx = condIdx;
-                trial_data(i).traces = traces(idx,:);
+                for j = 1:length(event)
+                    cond = trial_info.conditions(j);
+                    ori = conditions(cond).condition_info.orientation;
+                    condIdx = find(ori == oris);
+                    
+                    idx = find(times >= (onset(j) + lag) & times < (onset(j) + lag + duration));
+                    
+                    trial_data(k).ori = ori;
+                    trial_data(k).condIdx = condIdx;
+                    trial_data(k).traces = traces(idx,:);
+                    k = k+1;
+                end
             end
             
             % drop trials with no data
