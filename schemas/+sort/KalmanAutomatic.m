@@ -24,14 +24,29 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
     methods (Access=protected)
         function makeTuples( this, key )
             % Cluster spikes
-            %
-            % JC 2011-10-21
             
             de_key = fetch(detect.Electrodes(key));
             
             m = MoKsmInterface(de_key);
             m = getFeatures(m,'PCA');
+
+            % Parameters for sorting. Those were tweaked for tetrode
+            % recordings. Other types of data may need substantial
+            % adjustments... [AE]
+            switch key.sort_method_num
+                case 5
+                    m.params.ClusterCost = 0.0025;
+                    m.params.Df = 2;
+                case 6
+                    m.params.ClusterCost = 0.0023;
+                    m.params.Df = 5;
+            end
+            m.params.CovRidge = 1.5;
+            m.params.DriftRate = 400 / 3600 / 1000;
+            m.params.DTmu = 60 * 1000;
+            m.params.Tolerance = 0.0005;
             m.params.Verbose = true;
+
             fitted = fit(m);
             plot(fitted);
             drawnow
