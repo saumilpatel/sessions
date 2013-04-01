@@ -56,6 +56,23 @@ classdef Traces < dj.Relvar
             
                 insert(this,tuple);
             end
+
         end
+        function times = getTimes( this )
+            % Get the times for the selected traces, ensuring they are
+            % identical
+            
+            assert(count(this) >= 1, 'No traces selected');
+
+            [t0 fs] = fetchn(this, 't0', 'fs');
+            assert(unique(t0) == t0(1) && unique(fs) == fs(1), 'Traces with different times selected');
+            t0 = unique(t0);
+            fs = unique(fs);
+            keys = fetch(this);
+            trace = fetch1(this & keys(1), 'trace');
+            
+            times = t0 + (0:length(trace)-1) * 1000 / fs;
+        end
+                
     end
 end
