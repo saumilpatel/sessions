@@ -128,6 +128,38 @@ classdef TracePreprocess < dj.Relvar
                         trace = fast_oopsi(trace, struct('dt',dt * ds));
                         f0_offset = 0;
                         f0_scale = 1;
+                    case 'fast_oopsi_nopc'   % Run the voegelstein fast oopsi method                
+                        ds = round(fs / 20);
+                        dt = 1 / fs;
+
+                        ds_trace = decimate(trace,ds);
+                        highPass = 0.1;
+        
+                        k = hamming(round(1/(dt*ds)/highPass)*2+1);
+                        k = k/sum(k);
+                        trace = ds_trace - convmirr(ds_trace,k);  %  dF/F where F is low pass
+  
+                        fs = fs / ds;
+                        trace = fast_oopsi(trace, struct('dt',dt * ds));
+                        f0_offset = 0;
+                        f0_scale = 1;
+                    case 'fast_oopsi_100'   % Run the voegelstein fast oopsi method                
+
+                        ds = round(fs / 100);
+                        dt = 1 / fs;
+
+                        ds_trace = decimate(trace,ds);
+                        highPass = 0.1;
+        
+                        k = hamming(round(1/(dt*ds)/highPass)*2+1);
+                        k = k/sum(k);
+                        trace = ds_trace - convmirr(ds_trace,k);  %  dF/F where F is low pass
+  
+                        fs = fs / ds;
+                        trace = fast_oopsi(trace, struct('dt',dt * ds));
+                        f0_offset = 0;
+                        f0_scale = 1;
+                        
                     otherwise
                         error('Unknown processing method');
                 end
