@@ -1,13 +1,12 @@
-function backupSubset(filename, tables, varargin)
+function backupSubset(folder, tables, varargin)
 % Backup subsets of database tables identified by common restrictions.
-%   backup(filename, tables, key) creates a backup file containing all
+%   backup(folder, tables, key) creates a backup file containing all
 %   tuples from the given tables matching the specified key. 
 %
 %   Inputs: 
-%       filename    name of the Matlab file containing the backup. The file
-%                   contains the variable tables (see below) and a cell
-%                   called data which contains the tuples for each of the
-%                   specified tables.
+%       folder      name of the folder containing the backup. Each table
+%                   is stored in a file contains the variable tuples (the
+%                   table content) and table (the table name).
 %       tables      cell array of strings containing the names of the
 %                   tables to be backed up (including the schema, e.g.
 %                   {'acq.Subjects', 'acq.Sessions', ...}
@@ -16,12 +15,19 @@ function backupSubset(filename, tables, varargin)
 %
 %   Use restoreSubset to restore the file to the database.
 %
-% AE 2012-06-29
+% AE 2013-04-10
 
-data = cell(size(tables));
 for iTable = 1 : numel(tables)
-    data{iTable} = fetch(eval(tables{iTable}) & varargin, '*');
+    table = tables{iTable};
+    fprintf('backing up table %s... ', table)
+    tuples = fetch(eval(table) & varargin, '*');
+    ndx = find(table == '.', 1);
+    subfolder = table(1 : ndx - 1);
+    file = table(ndx + 1 : end);
+    if ~exist(fullfile(folder, subfolder), 'file')
+        mkdir(fullfile(folder, subfolder));
+    end
+    save(fullfile(folder, subfolder, file), 'table', 'tuples', '-v7.3')
+    fprintf('done\n')
 end
-data
-save(filename, 'tables', 'data','-v7.3')
-fprintf('Saved backup at %s\n', which(filename))
+
