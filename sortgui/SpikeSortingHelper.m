@@ -81,31 +81,38 @@ classdef SpikeSortingHelper
         function self = getWaveforms(self)
             % Get and scale the waveforms
 
-            % By default, assume data was recorded on Tolias lab system and
-            % determine gain automatically
-            if max(mean(self.tt.w{1}, 2)) > 1  % data originally was in raw values
-                gain = 2^23 / 317000;
-            else % new data is in volts, convert to muV
-                gain = 1e-6;
-            end
-            
-            % with old Neuralynx and newer Blackrock data we need to
-            % convert the recordings manually to muV. For those datasets we
-            % manually put the gains into the table acq.AmplifierGains.
-            % Those values are used to override the automatically
-            % determined gains (if a tuple exists).
-            if isstruct(self.dataSource) && isequal(self.dataSource.type, 'DataJoint')
-                key = self.dataSource.key;
-                if count(acq.AmplifierGains(key))
-                    gain = fetch1(acq.AmplifierGains(key), 'preamp_gain');
-                elseif ~count(acq.Sessions(key) & 'recording_software IN ("Hammer", "Acquisition2.0")')
-                    warning('SpikeSortingHelper:automaticGain', ...
-                        ['Scaling waveforms based on heuristics that apply only to Tolias lab system\n' ...
-                         'but data were recorded by a different system.\n' ...
-                         'Enter the gains into acq.AmplifierGains if the scale is important!'])
+            % old tt files were not stored in consistent units, try and
+            % convert them
+            if ~isfield(self.tt, 'units') || ~strcmp(self.tt.units, 'muV')
+
+                % By default, assume data was recorded on Tolias lab system and
+                % determine gain automatically
+                if max(mean(self.tt.w{1}, 2)) > 1  % data originally was in raw values
+                    gain = 2^23 / 317000;
+                else % new data is in volts, convert to muV
+                    gain = 1e-6;
                 end
+
+                % with old Neuralynx and newer Blackrock data we need to
+                % convert the recordings manually to muV. For those datasets we
+                % manually put the gains into the table acq.AmplifierGains.
+                % Those values are used to override the automatically
+                % determined gains (if a tuple exists).
+                if isstruct(self.dataSource) && isequal(self.dataSource.type, 'DataJoint')
+                    key = self.dataSource.key;
+                    if count(acq.AmplifierGains(key))
+                        gain = fetch1(acq.AmplifierGains(key), 'preamp_gain');
+                    elseif ~count(acq.Sessions(key) & 'recording_software IN ("Hammer", "Acquisition2.0")')
+                        warning('SpikeSortingHelper:automaticGain', ...
+                            ['Scaling waveforms based on heuristics that apply only to Tolias lab system\n' ...
+                            'but data were recorded by a different system.\n' ...
+                            'Enter the gains into acq.AmplifierGains if the scale is important!'])
+                    end
+                end
+            else
+                gain = 1; % new files are already in muV
             end
-                
+
             wf = cellfun(@(x) x / gain, self.tt.w, 'UniformOutput',false);
             self.Waveforms = struct('data', {wf}, 'meta', struct('units', 'muV', 'gain', gain));
         end

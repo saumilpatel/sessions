@@ -1,4 +1,4 @@
-function detectKey = createDetectSet(ephysKey, detectMethod)
+function detectKey = createDetectSet(ephysKey, detectMethod, useToolchain)
 % Create spike detection set for ephys recording
 %   detectKey = createDetectSet(ephysKey) creates a spike detection set for
 %   the given ephys recording using the detect_method_num defined in
@@ -19,7 +19,11 @@ if count(detect.Params(detectKey))
     fprintf('Detection set exists already.\n')
     return
 end
+if nargin < 3
+    useToolchain = true;
+end
 tuple = detectKey;
 ephysFolder = fileparts(fetch1(acq.Ephys(ephysKey), 'ephys_path'));
 tuple.ephys_processed_path = to(RawPathMap, ephysFolder, '/processed');
+tuple.use_toolchain = useToolchain;
 insert(detect.Params, tuple);

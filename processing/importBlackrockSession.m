@@ -1,6 +1,9 @@
 function importBlackrockSession(baseFolder, sessionFolder, subject, setup, experimenter, clockOffset)
 % Import session recorded by Blackrock system into database
 %   importBlackrockSession(baseFolder, sessionFolder, subject, setup, experimenter, clockOffset)
+%
+%   baseFolder is the location of /raw, e.g. /kyb/agmbrecordings
+%   sessionFolder is usually /raw/Subject/YYYY-mm-dd_HH-MM-SS
 %   
 %   It's currently assumed that all stimulation files are in
 %   /stimulation/subject/<DATE>

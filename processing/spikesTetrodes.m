@@ -7,15 +7,24 @@ br = baseReader(sourceFile);
 tetrodes = getTetrodes(br);
 close(br);
 
-matlabpool
-
-% for i = 1:numel(tetrodes)
-parfor i = 1:numel(tetrodes)
-    fprintf('Extracting spikes from tetrode %d\n', tetrodes(i));
-    outFile = sprintf(strrep(spikesFile, '\', '\\'), tetrodes(i));
-    detectSpikesTetrodes(sourceFile, tetrodes(i), outFile);
+if exist('matlabpool', 'file')
+    matlabpool
+    parfor i = 1 : numel(tetrodes)
+        run(spikesFile, sourceFile, tetrodes(i))
+    end
+    matlabpool close
+else
+    for i = 1 : numel(tetrodes)
+        run(spikesFile, sourceFile, tetrodes(i))
+    end
 end
 
-matlabpool close
-
 artifacts = cell(1, numel(tetrodes));
+
+
+function run(spikesFile, sourceFile, tetrode)
+
+fprintf('Extracting spikes from tetrode %d\n', tetrode);
+outFile = sprintf(strrep(spikesFile, '\', '\\'), tetrode);
+detectSpikesTetrodes(sourceFile, tetrode, outFile);
+
