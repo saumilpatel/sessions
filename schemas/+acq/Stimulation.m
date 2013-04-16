@@ -32,6 +32,10 @@ classdef Stimulation < dj.Relvar
             switch(expType)
                 case 'MouseMultiDim'
                     expType = 'MultDimExperiment';
+                case 'MouseBar'
+                    expType = 'BarMappingExperiment';
+                case 'WhiteNoiseOrientationDetection'
+                    expType = 'WNOriDetectExperiment';
                 otherwise
             end
             fileName = getLocalPath([stimPath '/' expType varargin{:} '.mat']);
