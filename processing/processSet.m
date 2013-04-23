@@ -123,6 +123,7 @@ n = numel(electrodes);
 for i = 1 : n
     e = electrodes(i);
     tuple = key;
+    tuple.electrode_num = e;
     tuple.detect_electrode_file = fullfilefs(processedDir, spikesDir, sprintf(spikesFile, electrodes(i)));
     insert(detect.Electrodes, tuple);
     tuple = key;
