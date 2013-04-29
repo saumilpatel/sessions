@@ -82,7 +82,7 @@ classdef TracePreprocess < dj.Relvar
                         assert(ds > 1);
                         trace = decimate(trace,ds,'fir');
                         fs = fs / ds;
-                    case 'pc20'         % Downsample to 5 Hz
+                    case 'pc20'
                         if ~exist('pc', 'var')
                             dat = cat(2,aodTraces.trace);
                             [c p] = princomp(dat);
@@ -105,6 +105,47 @@ classdef TracePreprocess < dj.Relvar
                         fs = fs / ds;
                         
                         f0_offset = mean(trace); % mean is zero at this point
+                    case 'pc20_full'
+                        if ~exist('pc', 'var')
+                            dat = cat(2,aodTraces.trace);
+                            [c p] = princomp(dat);
+                            pc = p(:,1) * c(:,1)';
+                        end
+
+                        % Remove the first PC
+                        trace = trace - pc(:,i);
+
+                        % Compute the HPF version
+                        highPass = 0.1;
+                        dt = 1 / fs;
+                        k = hamming(round(1/dt/highPass)*2+1);
+                        k = k/sum(k);
+                        trace = trace - convmirr(trace,k);  %  dF/F where F is low pass
+                        
+                        ds = 1;                        
+                        f0_offset = mean(trace); % mean is zero at this point
+                    case 'fast_oopsi_fullspeed'
+                        if ~exist('pc', 'var')
+                            dat = cat(2,aodTraces.trace);
+                            [c p] = princomp(dat);
+                            pc = p(:,1) * c(:,1)';
+                        end
+
+                        % Remove the first PC
+                        trace = trace - pc(:,i);
+
+                        % Compute the HPF version
+                        highPass = 0.1;
+                        dt = 1 / fs;
+                        k = hamming(round(1/dt/highPass)*2+1);
+                        k = k/sum(k);
+                        trace = trace - convmirr(trace,k);  %  dF/F where F is low pass
+                        
+                        ds = 1;
+                        
+                        trace = fast_oopsi(trace, struct('dt',dt));
+                        f0_offset = 0;
+                        f0_scale = 1;
                     case 'fast_oopsi'   % Run the voegelstein fast oopsi method                
                         if ~exist('pc', 'var')
                             dat = cat(2,aodTraces.trace);
@@ -126,6 +167,29 @@ classdef TracePreprocess < dj.Relvar
   
                         fs = fs / ds;
                         trace = fast_oopsi(trace, struct('dt',dt * ds));
+                        f0_offset = 0;
+                        f0_scale = 1;
+                    case 'fast_oopsi_100_pc'   % Run the voegelstein fast oopsi method                
+                        if ~exist('pc', 'var')
+                            dat = cat(2,aodTraces.trace);
+                            [c p] = princomp(dat);
+                            pc = p(:,1) * c(:,1)';
+                        end
+
+                        trace = trace - pc(:,i);
+
+                        ds = round(fs / 100);
+                        dt = 1 / fs;
+
+                        ds_trace = decimate(trace,ds);
+                        highPass = 0.1;
+        
+                        k = hamming(round(1/(dt*ds)/highPass)*2+1);
+                        k = k/sum(k);
+                        trace = ds_trace - convmirr(ds_trace,k);  %  dF/F where F is low pass
+  
+                        fs = fs / ds;
+                        trace = fast_oopsi(trace, struct('dt',dt * ds)); %, struct('lam',0.3));
                         f0_offset = 0;
                         f0_scale = 1;
                     case 'fast_oopsi_nopc'   % Run the voegelstein fast oopsi method                
@@ -160,6 +224,76 @@ classdef TracePreprocess < dj.Relvar
                         f0_offset = 0;
                         f0_scale = 1;
                         
+                    case 'fast_oopsi_100_tweaked'   % Run the voegelstein fast oopsi method                
+
+                        ds = round(fs / 100);
+                        dt = 1 / fs;
+
+                        ds_trace = decimate(trace,ds);
+                        highPass = 0.1;
+        
+                        k = hamming(round(1/(dt*ds)/highPass)*2+1);
+                        k = k/sum(k);
+                        trace = ds_trace - convmirr(ds_trace,k);  %  dF/F where F is low pass
+  
+                        fs = fs / ds;
+                        trace = fast_oopsi(trace, struct('dt',dt * ds), struct('lam',0.3));
+                        f0_offset = 0;
+                        f0_scale = 1;
+
+                    case 'fast_oopsi_motion'
+                        % Run the voegelstein fast oopsi method after
+                        % removing the first principal component AND 
+                        % motion component
+                        
+                        if ~exist('motion_corrected', 'var')
+                            mk = fetch(aod.MotionKalman & key, 'resid');
+                            assert(length(mk) == 1, 'populate aod.MotionKalman');
+                            [c p] = princomp(mk.resid);
+                            
+                            % remove first PC
+                            motion_corrected = p(:,2:end)*c(:,2:end)';
+                        end
+                        
+                        ds = round(fs / 20);
+                        dt = 1 / fs;
+
+                        ds_trace = decimate(trace,ds);
+                        highPass = 0.1;
+        
+                        k = hamming(round(1/(dt*ds)/highPass)*2+1);
+                        k = k/sum(k);
+                        trace = ds_trace - convmirr(ds_trace,k);  %  dF/F where F is low pass
+  
+                        fs = fs / ds;
+                        trace = fast_oopsi(trace, struct('dt',dt * ds));
+                        f0_offset = 0;
+                        f0_scale = 1;
+                        
+                    case 'fast_oopsi_fa'
+                        if ~exist('detrended', 'var')
+                            dat = cat(2,aodTraces.trace);
+                            [L,Ph,LL,F]=ffa(dat,1,300);
+                            detrended = dat - F*L';
+                        end
+
+                        trace = trace - detrended(:,i);
+
+                        ds = round(fs / 20);
+                        dt = 1 / fs;
+
+                        ds_trace = decimate(trace,ds);
+                        highPass = 0.1;
+        
+                        k = hamming(round(1/(dt*ds)/highPass)*2+1);
+                        k = k/sum(k);
+                        trace = ds_trace - convmirr(ds_trace,k);  %  dF/F where F is low pass
+  
+                        fs = fs / ds;
+                        trace = fast_oopsi(trace, struct('dt',dt * ds));
+                        f0_offset = 0;
+                        f0_scale = 1;
+
                     otherwise
                         error('Unknown processing method');
                 end
