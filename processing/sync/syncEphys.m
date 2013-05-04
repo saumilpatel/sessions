@@ -4,8 +4,8 @@ function [stimDiode, rms, offset] = syncEphys(stim, key)
 
 params.oldFile = false;
 params.maxPhotodiodeErr = 0.100;  % 100 us err allowed
-params.behDiodeOffset = [2.8 4]; % [min max] in ms
-params.behDiodeSlopeErr = 1e-7;   % max deviation from 1
+params.behDiodeOffset = [3 4];    % [min max] in ms
+params.behDiodeSlopeErr = 1e-6;   % max deviation from 1
 params.diodeThreshold = 0.04;
 params.minNegTime = -100;  % 100 ms timing error
 
@@ -58,12 +58,17 @@ offset = offsets(ndx) * c(ndx) / sum(c(ndx));
 [macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, offset);
 N = numel(macSwapTimes);
 
-% exact correction using robust linear regression (undo manual gain
-% correction first)
-% macPar = myrobustfit(macSwapTimes / params.gain, diodeSwapTimes);
+% exact correction using linear regression
 macPar = regress(diodeSwapTimes', [ones(N, 1), macSwapTimes]);
-assert(abs(macPar(2) - 1) < params.behDiodeSlopeErr ...
-    && macPar(1) > params.behDiodeOffset(1) && macPar(1) < params.behDiodeOffset(2), ...
+
+% calculate offset (not the same as macPar(1) because the times can
+% sometimes be very large, in which case even very minor slope errors can
+% lead to severe errors in the estimate; we assume the slope is actually
+% unity to approximate the offset)
+diodeSlopeErr = macPar(2) - 1;
+diodeOffset = macPar(1) + macSwapTimes(1) * diodeSlopeErr;
+assert(abs(diodeSlopeErr) < params.behDiodeSlopeErr ...
+    && diodeOffset > params.behDiodeOffset(1) && diodeOffset < params.behDiodeOffset(2), ...
     'Regression between behavior clock and photodiode clock outside system tolerances');
 
 % convert times in stim file
