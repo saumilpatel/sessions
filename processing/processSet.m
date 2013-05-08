@@ -149,7 +149,11 @@ if useTempDir
     copyfile(destDir, localProcessedDir);
     
     % delete temp data
-    rmdir(tempDir, 's');
+    try
+        rmdir(tempDir, 's');
+    catch %#ok
+        disp 'Error removing temporary directory...'
+    end
 end
 
 
