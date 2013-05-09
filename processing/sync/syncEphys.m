@@ -3,7 +3,7 @@ function [stimDiode, rms, offset] = syncEphys(stim, key)
 % AE 2011-10-25
 
 params.oldFile = false;
-params.maxPhotodiodeErr = 0.100;  % 100 us err allowed
+params.maxPhotodiodeErr = 0.5;    % 0.5 ms err allowed
 params.behDiodeOffset = [3 4];    % [min max] in ms
 params.behDiodeSlopeErr = 1e-6;   % max deviation from 1
 params.diodeThreshold = 0.04;
