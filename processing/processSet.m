@@ -25,6 +25,9 @@ lfpDir = 'lfp';
 lfpFile = 'lfp%d';
 muaFile = 'amua%d';
 
+% set window title
+setTitle(sprintf('Spike detection: %s', processedDir))
+
 % make sure files fit on temp drive
 map = RawPathMap;
 if useTempDir
@@ -156,7 +159,7 @@ if useTempDir
     end
 end
 
-
+setTitle('Spike detection completed')
 
 
 function createOrEmpty(outDir)
