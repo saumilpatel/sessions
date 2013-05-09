@@ -15,4 +15,4 @@ if nargin < 2 || isempty(sortMethod)
 else
     [sortKeys.sort_method_num] = deal(fetch1(sort.Methods(struct('sort_method_name', sortMethod)), 'sort_method_num'));
 end
-insert(sort.Params, sortKeys);
+inserti(sort.Params, sortKeys);
