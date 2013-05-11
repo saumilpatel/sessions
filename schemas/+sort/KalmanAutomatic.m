@@ -33,7 +33,7 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
             % Parameters for sorting. Those were tweaked for tetrode
             % recordings. Other types of data may need substantial
             % adjustments... [AE]
-            m.params.ClusterCost = 0.0023;
+            m.params.ClusterCost = 0.002;
             m.params.Df = 5;
             m.params.CovRidge = 1.5;
             m.params.DriftRate = 400 / 3600 / 1000;
