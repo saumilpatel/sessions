@@ -13,7 +13,7 @@ block_design         : bool           # if it is a block design
 classdef MultiDimInfo < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('stimulation.MultiDimInfo');
-        popRel = stimulation.StimTrialGroup & acq.Stimulation('exp_type="MultDimExperiment" OR exp_type="MouseMultiDim"');
+        popRel = pro(stimulation.StimTrialGroup & acq.Stimulation('exp_type="MultDimExperiment" OR exp_type="MouseMultiDim"'), stimulation.StimTrials, 'count(1) -> num_trials') & 'num_trials >= 10';
     end
     
     methods 
