@@ -274,7 +274,9 @@ classdef TracePreprocess < dj.Relvar
                         if ~exist('detrended', 'var')
                             dat = cat(2,aodTraces.trace);
                             [L,Ph,LL,F]=ffa(dat,1,300);
-                            detrended = dat - F*L';
+                            C = cov(dat);
+                            
+                            detrended = (diag(Ph)*(C\dat'))';
                         end
 
                         trace = trace - detrended(:,i);
