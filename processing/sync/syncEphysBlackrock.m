@@ -50,6 +50,86 @@ end
 stimDiode = convertStimTimes(stim, macPar, [0 1]);
 stimDiode.synchronized = 'diode';
 
+% detect dropped frames
+firstSwaps = arrayfun(@(x) x.swapTimes(1), stimDiode.params.trials);
+dd = bsxfun(@minus, firstSwaps, diodeSwapTimes);
+md = min(abs(dd));
+trials = find(diff(md) > 10);
+br = getFile(acq.Ephys(key), 'ac');
+dd = diff(diodeSwapTimes);
+oneFrame = mean(dd(dd < 25));
+for trial = trials
+    
+    % plot trial and some context
+    figure(1), clf
+    ts = stimDiode.params.trials(trial).swapTimes;
+    ii = getSampleIndex(br, [ts(1) - 4000, ts(end) + 2000]);
+    x = br(ii(1) : ii(2), 1);
+    t = br(ii(1) : ii(2), 't');
+    ds = diodeSwapTimes; 
+    ds = ds(ds > t(1) & ds < t(end));
+    ms = cat(1, stimDiode.params.trials.swapTimes);
+    ms = ms(ms > t(1) & ms < t(end));
+    plot(t - ts(1), x, 'k', ms - ts(1), 100 * ones(size(ms)), '.r', ...
+         ds - ts(1), 100 * ones(size(ds)), 'or');
+    xlim([t(1) t(end)] - ts(1))
+    
+    % let user find and input the dropped frame
+    done = false;
+    next = false;
+    skip = false;
+    while ~done
+        tmiss = input('Enter the approximate timestamp of the dropped frame (+/- 5 ms)\n> ');
+        [td, ndx] = min(abs(tmiss + ts(1) - ts));
+        if td < 5
+            hold on
+            hdl = plot(ts(ndx) - ts(1), 100, '.g', 'markersize', 50);
+            answer = input('Is the green one the correct one? [y/n] > ', 's');
+            if ~isempty(answer) && lower(answer(1)) == 'y'
+                done = true;
+            else
+                delete(hdl);
+            end
+        else
+            answer = input('No timestamp found. First frame of next trial or skip? [n/f/s] > ', 's');
+            if ~isempty(answer)
+                if lower(answer(1)) == 'f'
+                    next = true;
+                    done = true;
+                elseif lower(answer(1)) == 's'
+                    skip = true;
+                    done = true;
+                end
+            end
+        end
+    end
+    
+    % skip?
+    if skip, continue, end
+
+    % adjust timestamps in trial where missed frame occurred
+    if ~next
+        ts(ndx : end) = ts(ndx : end) + oneFrame;
+        stimDiode.params.trials(trial).swapTimes = ts;
+        et = stimDiode.events(trial).times;
+        et(et >= ts(ndx)) = et(et >= ts(ndx)) + oneFrame;
+        stimDiode.events(trial).times = et;
+    end
+    
+    % adjust timestamps in remaining trials
+    for i = trial + 1 : length(stimDiode.events)
+        stimDiode.events(i).times = stimDiode.events(i).times + oneFrame;
+        stimDiode.params.trials(i).swapTimes = stimDiode.params.trials(i).swapTimes + oneFrame;
+    end
+
+    % insert into database
+    tuple = fetch(acq.EphysStimulationLink & key);
+    tuple.trial_num = trial + next;
+    tuple.frame_drop_time = ts(ndx) + oneFrame;
+    inserti(nc.FrameDrops, tuple);
+end
+close(br);
+
 % Make sure we have at least one trial where all swap times are matched.
 % This ensures that we're not off by a frame or two
 macSwapTimes = cat(1, stimDiode.params.trials.swapTimes);
@@ -67,11 +147,17 @@ assert(i <= numel(stim.params.trials), ...
 
 % plot residuals
 figure
+subplot(2, 1, 1)
 res = macSwapTimes(:) - diodeSwapTimes(:);
 plot(diodeSwapTimes, res, '.k');
 rms = sqrt(mean(res.^2));
 assert(rms < params.maxPhotodiodeErr, 'Residuals too large after synchronization to photodiode!');
 fprintf('Residuals on photodiode regression had a range of %g and an RMS of %g ms\n', range(res), rms);
+
+% plot number of matched timestamps per trial
+subplot(2, 1, 2)
+d = diff(find(diff(macSwapTimes) > 100));
+plot(d, '.k');
 
 offset = -1; % irrelevant for these recordings
 
