@@ -17,18 +17,26 @@ diodeSwapTimes = detectSwaps(key);
 % swap times recorded on the Mac
 macSwapTimes = cat(1, stim.params.trials.swapTimes);
 
+% deal with some details of how photodiode signal is handled in acute
+% experiments. not all frames are registered
 switch fetch1(acq.Stimulation & key, 'exp_type')
     case 'AcuteGratingExperiment'
-        % for some reason the first swap doesn't show up
-        macSwapTimes = macSwapTimes(2 : end - 3);
+        % for some reason the first swap doesn't show up. We add a fake
+        % first swap
+        d = diff(macSwapTimes);
+        periodMac = mean(d(d < 0.025));
+        periodDiode = median(diff(diodeSwapTimes(1 : 100)));
+        first = round(diff(macSwapTimes(1 : 2)) / periodMac) * periodDiode;
+        diodeSwapTimes = [diodeSwapTimes(1) - first; diodeSwapTimes(1 : end - 3)];
     case 'SquareMappingExperiment'
         % swap timer was modified by Wangchen such that it changes polarity
         % only during the stimulus loop
         ndx = find(diff(macSwapTimes) > 1, 1);
         macSwapTimes = macSwapTimes(ndx + 1 : end - 1);
 end
+assert(numel(macSwapTimes) == numel(diodeSwapTimes), 'Not all swaps found in photodiode signal. Chaos!!!')
 
-% compute regression iteratively
+% compute regression iteratively by removing all non-matches
 N = 50;
 ms = macSwapTimes;
 ds = diodeSwapTimes;
@@ -50,114 +58,53 @@ end
 stimDiode = convertStimTimes(stim, macPar, [0 1]);
 stimDiode.synchronized = 'diode';
 
-% detect dropped frames
-firstSwaps = arrayfun(@(x) x.swapTimes(1), stimDiode.params.trials);
-dd = bsxfun(@minus, firstSwaps, diodeSwapTimes);
-md = min(abs(dd));
-trials = find(diff(md) > 10);
-br = getFile(acq.Ephys(key), 'ac');
-dd = diff(diodeSwapTimes);
-oneFrame = mean(dd(dd < 25));
-for trial = trials
-    
-    % plot trial and some context
-    figure(1), clf
-    ts = stimDiode.params.trials(trial).swapTimes;
-    ii = getSampleIndex(br, [ts(1) - 4000, ts(end) + 2000]);
-    x = br(ii(1) : ii(2), 1);
-    t = br(ii(1) : ii(2), 't');
-    ds = diodeSwapTimes; 
-    ds = ds(ds > t(1) & ds < t(end));
-    ms = cat(1, stimDiode.params.trials.swapTimes);
-    ms = ms(ms > t(1) & ms < t(end));
-    plot(t - ts(1), x, 'k', ms - ts(1), 100 * ones(size(ms)), '.r', ...
-         ds - ts(1), 100 * ones(size(ds)), 'or');
-    xlim([t(1) t(end)] - ts(1))
-    
-    % let user find and input the dropped frame
-    done = false;
-    next = false;
-    skip = false;
-    while ~done
-        tmiss = input('Enter the approximate timestamp of the dropped frame (+/- 5 ms)\n> ');
-        [td, ndx] = min(abs(tmiss + ts(1) - ts));
-        if td < 5
-            hold on
-            hdl = plot(ts(ndx) - ts(1), 100, '.g', 'markersize', 50);
-            answer = input('Is the green one the correct one? [y/n] > ', 's');
-            if ~isempty(answer) && lower(answer(1)) == 'y'
-                done = true;
-            else
-                delete(hdl);
-            end
-        else
-            answer = input('No timestamp found. First frame of next trial or skip? [n/f/s] > ', 's');
-            if ~isempty(answer)
-                if lower(answer(1)) == 'f'
-                    next = true;
-                    done = true;
-                elseif lower(answer(1)) == 's'
-                    skip = true;
-                    done = true;
-                end
-            end
-        end
-    end
-    
-    % skip?
-    if skip, continue, end
+macSwapTimes = cat(1, stimDiode.params.trials.swapTimes);
+d = diff(macSwapTimes);
+period = mean(d(d < 25));
 
+% detect dropped frames
+offset = round((diodeSwapTimes - macSwapTimes) / period);
+drop = find(offset, 1);
+while ~isempty(drop)
+    n = [0 cumsum(arrayfun(@(x) numel(x.swapTimes), stimDiode.params.trials))];
+    trial = find(drop < n, 1) - 1;
+    frame = drop - n(trial);
+    
+    
     % adjust timestamps in trial where missed frame occurred
-    if ~next
-        ts(ndx : end) = ts(ndx : end) + oneFrame;
-        stimDiode.params.trials(trial).swapTimes = ts;
-        et = stimDiode.events(trial).times;
-        et(et >= ts(ndx)) = et(et >= ts(ndx)) + oneFrame;
-        stimDiode.events(trial).times = et;
-    end
+    shift = period * offset(drop);
+    ts = stimDiode.params.trials(trial).swapTimes;
+    ts(frame : end) = ts(frame : end) + shift;
+    stimDiode.params.trials(trial).swapTimes = ts;
+    et = stimDiode.events(trial).times;
+    et(et >= ts(frame)) = et(et >= ts(frame)) + shift;
+    stimDiode.events(trial).times = et;
     
     % adjust timestamps in remaining trials
     for i = trial + 1 : length(stimDiode.events)
-        stimDiode.events(i).times = stimDiode.events(i).times + oneFrame;
-        stimDiode.params.trials(i).swapTimes = stimDiode.params.trials(i).swapTimes + oneFrame;
+        stimDiode.events(i).times = stimDiode.events(i).times + shift;
+        stimDiode.params.trials(i).swapTimes = stimDiode.params.trials(i).swapTimes + shift;
     end
-
+    
     % insert into database
-    tuple = fetch(acq.EphysStimulationLink & key);
-    tuple.trial_num = trial + next;
-    tuple.frame_drop_time = ts(ndx) + oneFrame;
-    inserti(nc.FrameDrops, tuple);
+    tuple = key;
+    tuple.trial_num = trial;
+    tuple.frame_num = frame;
+    tuple.shift = offset(drop);
+    inserti(acq.FrameDrops, tuple)
+    
+    macSwapTimes = cat(1, stimDiode.params.trials.swapTimes);
+    offset = round((diodeSwapTimes - macSwapTimes) / period);
+    drop = find(offset, 1);
 end
-close(br);
-
-% Make sure we have at least one trial where all swap times are matched.
-% This ensures that we're not off by a frame or two
-macSwapTimes = cat(1, stimDiode.params.trials.swapTimes);
-[macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, [0 1]);
-i = 1;
-while i <= numel(stimDiode.params.trials)
-    if all(ismember(stimDiode.params.trials(i).swapTimes, macSwapTimes))
-        break
-    end
-    i = i + 1;
-end
-assert(i <= numel(stim.params.trials), ...
-    ['No trial where all swap times were found in the photodiode signal. ' ...
-    'This indicates that the regression is off by one or more frames!'])
 
 % plot residuals
 figure
-subplot(2, 1, 1)
 res = macSwapTimes(:) - diodeSwapTimes(:);
 plot(diodeSwapTimes, res, '.k');
 rms = sqrt(mean(res.^2));
 assert(rms < params.maxPhotodiodeErr, 'Residuals too large after synchronization to photodiode!');
 fprintf('Residuals on photodiode regression had a range of %g and an RMS of %g ms\n', range(res), rms);
-
-% plot number of matched timestamps per trial
-subplot(2, 1, 2)
-d = diff(find(diff(macSwapTimes) > 100));
-plot(d, '.k');
 
 offset = -1; % irrelevant for these recordings
 
