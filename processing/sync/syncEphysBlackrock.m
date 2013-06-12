@@ -16,9 +16,19 @@ diodeSwapTimes = detectSwaps(key);
 
 % swap times recorded on the Mac
 macSwapTimes = cat(1, stim.params.trials.swapTimes);
-macSwapTimes(1) = []; % for some reason the first swap doesn't seem to happen
 
-% iteratively compute refresh rate
+switch fetch1(acq.Stimulation & key, 'exp_type')
+    case 'AcuteGratingExperiment'
+        % for some reason the first swap doesn't show up
+        macSwapTimes = macSwapTimes(2 : end - 3);
+    case 'SquareMappingExperiment'
+        % swap timer was modified by Wangchen such that it changes polarity
+        % only during the stimulus loop
+        ndx = find(diff(macSwapTimes) > 1, 1);
+        macSwapTimes = macSwapTimes(ndx + 1 : end - 1);
+end
+
+% compute regression iteratively
 N = 50;
 ms = macSwapTimes;
 ds = diodeSwapTimes;
@@ -45,7 +55,7 @@ stimDiode.synchronized = 'diode';
 macSwapTimes = cat(1, stimDiode.params.trials.swapTimes);
 [macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, [0 1]);
 i = 1;
-while i <= numel(stim.params.trials)
+while i <= numel(stimDiode.params.trials)
     if all(ismember(stimDiode.params.trials(i).swapTimes, macSwapTimes))
         break
     end
@@ -97,8 +107,8 @@ params.cropStart = 10; % crop off the first 10 seconds because psychtoolbox
                        % starts up with gray screen and when we set the
                        % background this is detected as a swap
 params.filterOrder = 5;
-params.threshold = 2;
 params.chunkSize = 1e6;
+params.warmup = 1e4;
 params = parseVarArgs(params, varargin{:});
 
 br = getFile(acq.Ephys(key), 'ac');
@@ -112,19 +122,26 @@ totalSamples = length(br) - startSample;
 % process photodiode signal in chunks to detect buffer swaps
 nChunks = ceil(totalSamples / params.chunkSize);
 
+% determine threshold (using a chunk of data in the middle)
+first = startSample + nChunks / 2 * params.chunkSize;
+last = first + params.chunkSize;
+x = br(first+1:last, 1);
+y = filtfilt(b, a, x);
+m = median(y);
+
 fprintf('Detecting photodiode peaks (%u chunks)\n', nChunks);
 swapTimes = [];
+warmup = zeros(params.warmup, 1);
 for i = 1:nChunks
     % read data, lowpass filter, detect local maxima of slope
     first = startSample + (i - 1) * params.chunkSize;
     last = min(startSample + i * params.chunkSize, length(br));
-    x = br(first+1:last, 1);
+    x = [warmup; br(first+1:last, 1)];
     y = filtfilt(b, a, x);
-    dy = abs(diff(y));
-    ddy = diff(dy);
-    yp = find(ddy(1:end-1) > 0 & ddy(2:end) <= 0);
-    yp = yp(dy(yp) > params.threshold);
-    t = br(yp + first - 1, 't');
+    yp = find(sign(y(1 : end - 1) - m) ~= sign(y(2 : end) - m));
+    yp = yp(yp > params.warmup / 2 & yp <= params.chunkSize + params.warmup / 2);
+    warmup = x(end - params.warmup + 1 : end);
+    t = br(yp + first - params.warmup, 't');
     swapTimes = [swapTimes; t(:)];    %#ok<AGROW>
     progress(i, nChunks, 20)
 end
