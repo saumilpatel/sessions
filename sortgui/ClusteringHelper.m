@@ -195,7 +195,7 @@ classdef ClusteringHelper
             color = getClusColor(self, params.clusIds);
             
             % select features to plot
-            if size(X, 2) > 3
+            if size(X, 2) == 12
                 feat = 1 : 3 : 10;      % tetrodes
             else
                 feat = 1 : size(X, 2);  % single channel data

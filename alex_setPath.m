@@ -2,11 +2,7 @@ function alex_setPath
 
 warning off MATLAB:dispatcher:nameConflict
 
-if isequal(computer, 'PCWIN64')
-    addpath(getLocalPath('/lab/users/alex/projects/mym/win64'))
-else
-    addpath(getLocalPath('/lab/users/alex/projects/mym'))
-end
+addpath(getLocalPath('/lab/users/alex/projects/mym'))
 
 base = fileparts(mfilename('fullpath'));
 addpath(base)

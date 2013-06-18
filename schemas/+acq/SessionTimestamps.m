@@ -26,6 +26,8 @@ classdef SessionTimestamps < dj.Relvar
             %   in ms for the tuples in relvar self.
             
             [count, timestamperTime, sessionStartTime] = fetchn(relvar, 'count', 'timestamper_time', 'session_start_time');
+            timestamperTime = double(timestamperTime);
+            sessionStartTime = double(sessionStartTime);
             
             % Rescale to times
             counterRate = 10e6 / 1000; % pulses / ms (should be stored somewhere)

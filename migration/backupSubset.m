@@ -20,7 +20,7 @@ function backupSubset(folder, tables, varargin)
 for iTable = 1 : numel(tables)
     table = tables{iTable};
     fprintf('backing up table %s... ', table)
-    tuples = fetch(eval(table) & varargin, '*');
+    tuples = fetch(eval(table) & varargin, '*'); %#ok
     ndx = find(table == '.', 1);
     subfolder = table(1 : ndx - 1);
     file = table(ndx + 1 : end);
