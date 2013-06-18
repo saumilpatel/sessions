@@ -19,8 +19,9 @@ classdef AodVolumeIgnore < dj.Relvar
     end
     
     methods (Static)
-        function findShortVolumes
-            volumes = fetch(acq.AodVolume - acq.AodVolumeIgnore);
+        function findShortVolumes(key)
+            if nargin < 1; key = struct; end
+            volumes = fetch(acq.AodVolume(key) - acq.AodVolumeIgnore);
             for i = 1:length(volumes)
                 try
                 vol = getFile(acq.AodVolume & volumes(i));
