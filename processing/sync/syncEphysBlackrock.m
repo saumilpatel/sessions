@@ -57,9 +57,11 @@ while N < numel(diodeSwapTimes) || ~isempty(drop)
         inserti(acq.FrameDrops, tuple)
         
         macSwapTimes = getMacSwapTimes(stim);
+        N = drop;
+    else
+        N = min(2 * N, numel(diodeSwapTimes));
     end
     
-    N = min(2 * N, numel(diodeSwapTimes));
     macPar = regress(diodeSwapTimes(1 : N), [ones(N, 1), macSwapTimes(1 : N)]);
     offset = round((diodeSwapTimes - macSwapTimes * macPar(2) - macPar(1)) / period);
     drop = find(offset, 1);
