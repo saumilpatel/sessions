@@ -79,7 +79,7 @@ if ~count(cont.Lfp(key)) && ~isempty(lfpCb)
         muaJob = batch(scheduler, muaCb, 0, {sourceFile, fullfilefs(outDir, muaFile)}, 'PathDependencies', p);
     else
         lfpCb(sourceFile, fullfilefs(outDir, lfpFile));
-        muaCb(sourceFile, fullfilefs(outDir, lfpFile));
+        muaCb(sourceFile, fullfilefs(outDir, muaFile));
     end
 end
 
