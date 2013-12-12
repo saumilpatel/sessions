@@ -2,22 +2,13 @@ function [channels, artifacts] = spikesSiliconProbes(sourceFile, spikesFile)
 % Spike detection callback for silicon probes.
 % AE 2011-10-26
 
-% determine which tetrodes were recorded
-br = baseReader(sourceFile, 's1c*');
-channels = getNbChannels(br);
-close(br);
-
+channels = 1 : 64;
 matlabpool
-
-% for i = 1:numel(tetrodes)
-parfor i = 1:channels
+parfor i = channels
+% for i = channels
     fprintf('Extracting spikes from channel %d\n', i);
     outFile = sprintf(strrep(spikesFile, '\', '\\'), i);
     detectSpikesSP(sourceFile, i, outFile);
 end
-
 matlabpool close
-
-channels = 1:channels;
-
 artifacts = cell(1, numel(channels));
