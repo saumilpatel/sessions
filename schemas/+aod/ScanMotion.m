@@ -8,7 +8,7 @@ y : longblob # y coordinate of the motion trace
 z : longblob # z coordinate of the motion trace
 %}
 
-classdef ScanMotion < dj.Relvar & dj.Automatic
+classdef ScanMotion < dj.Relvar & dj.AutoPopulate
 
 	properties(Constant)
 		table = dj.Table('aod.ScanMotion')

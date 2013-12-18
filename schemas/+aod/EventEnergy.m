@@ -10,7 +10,7 @@ iqr_z_score   : double   # the z-score of the event energy
 iqr_ratio     : double   # p-val versus shuffled data
 %}
 
-classdef EventEnergy < dj.Relvar & dj.Automatic
+classdef EventEnergy < dj.Relvar & dj.AutoPopulate
 
 	properties(Constant)
 		table = dj.Table('aod.EventEnergy')

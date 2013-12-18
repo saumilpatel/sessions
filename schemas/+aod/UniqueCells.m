@@ -5,7 +5,7 @@ aod.UniqueCells (computed) # my newest table
 duplicates : longblob # list of duplicate cells
 %}
 
-classdef UniqueCells < dj.Relvar & dj.Automatic
+classdef UniqueCells < dj.Relvar & dj.AutoPopulate
 	properties(Constant)
 		table = dj.Table('aod.UniqueCells')
         popRel = aod.QualitySet;

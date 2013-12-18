@@ -12,7 +12,7 @@ peak_amp2 : double   # dF/F at opposite direction
 von_base  : double   # dF/F base
 %}
 
-classdef ForwardVonMises < dj.Relvar & dj.Automatic
+classdef ForwardVonMises < dj.Relvar & dj.AutoPopulate
     properties(Constant)
         table = dj.Table('aod.ForwardVonMises');
         popRel = aod.ForwardTuning;

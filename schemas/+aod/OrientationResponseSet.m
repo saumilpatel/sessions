@@ -7,7 +7,7 @@ orientation : longblob # The orientation of each row
 responses   : longblob # The trial responses (rows) for the cells (columns)
 %}
 
-classdef OrientationResponseSet < dj.Relvar & dj.Automatic
+classdef OrientationResponseSet < dj.Relvar & dj.AutoPopulate
     
     properties(Constant)
         table = dj.Table('aod.OrientationResponseSet')
@@ -30,7 +30,7 @@ classdef OrientationResponseSet < dj.Relvar & dj.Automatic
             
             tuple.responses = zeros(1:length(trial_data),count(aod.UniqueCell & key));
             for i = 1:length(trial_data)
-                tuple.responses(i,:) = mean(trial_data(i).traces,1)
+                tuple.responses(i,:) = mean(trial_data(i).traces,1);
             end
             tuple.orientation = cat(1,trial_data.ori);
             self.insert(tuple)
@@ -60,12 +60,18 @@ classdef OrientationResponseSet < dj.Relvar & dj.Automatic
             trial_data = repmat(struct,length(trials) * oriPerTrial,1);
             k = 1;
 
+            if fetch1(stimulation.MultiDimInfo & key, 'block_design') == 0
+                first_sub = 2;
+            else
+                first_sub = 1;
+            end
+
             for i = 1:length(trials)
                 trial_info = fetch1(stimulation.StimTrials(trials(i)), 'trial_params');
                 event = fetch(stimulation.StimTrialEvents(trials(i), 'event_type="showSubStimulus"'),'*');
                 onset = sort([event.event_time]);
                 
-                for j = 1:length(event)
+                for j = first_sub:length(event)
                     cond = trial_info.conditions(j);
                     ori = conditions(cond).condition_info.orientation;
                     condIdx = find(ori == oris);
