@@ -14,7 +14,7 @@ spikes_binned    : longblob # The vector of spike times
 patched_cell_num : int      # The cell number of the patched cell
 %}
 
-classdef DesignMatrix < dj.Relvar & dj.Automatic
+classdef DesignMatrix < dj.Relvar & dj.AutoPopulate
 
 	properties(Constant)
 		table = dj.Table('aod.DesignMatrix')

@@ -12,7 +12,7 @@ skewness   : double   # the skewness fo the trace
 iqr        : double   # interquartile range (in delta F / F)
 %}
 
-classdef ReconstructionAccuracy < dj.Relvar & dj.Automatic
+classdef ReconstructionAccuracy < dj.Relvar & dj.AutoPopulate
     
     properties(Constant)
         table = dj.Table('aod.ReconstructionAccuracy')
