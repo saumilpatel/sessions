@@ -10,7 +10,7 @@ significance           : double # The p-value
 r2                     : double # The rsquared
 %}
 
-classdef CosineTuning < dj.Relvar & dj.Automatic
+classdef CosineTuning < dj.Relvar & dj.AutoPopulate
 
 	properties(Constant)
 		table = dj.Table('aod.CosineTuning')

@@ -21,7 +21,7 @@ tau_fisher              : double      # Fisher information for spike time
 tau_std                 : double      # Expected std of spike time
 %}
 
-classdef PatchedLikelihood < dj.Relvar & dj.Automatic
+classdef PatchedLikelihood < dj.Relvar & dj.AutoPopulate
 
 	properties(Constant)
 		table = dj.Table('aod.PatchedLikelihood')

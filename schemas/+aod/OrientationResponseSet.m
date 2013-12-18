@@ -7,7 +7,7 @@ orientation : longblob # The orientation of each row
 responses   : longblob # The trial responses (rows) for the cells (columns)
 %}
 
-classdef OrientationResponseSet < dj.Relvar & dj.Automatic
+classdef OrientationResponseSet < dj.Relvar & dj.AutoPopulate
     
     properties(Constant)
         table = dj.Table('aod.OrientationResponseSet')
