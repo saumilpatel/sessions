@@ -163,6 +163,19 @@ else
     set(handles.Preprocessing, 'String', 'None');
     set(handles.Preprocessing, 'Value', 1);
 end
+cla(handles.Traces)
+
+if count(aod.ScanMotion & scan) == 1
+    motion = fetch(aod.ScanMotion & scan, '*')
+    plot(handles.Motion, motion.t,motion.x+3,motion.t,motion.y,motion.t,motion.z-3);
+    linkaxes([handles.Traces, handles.Motion], 'x');
+    xlim(motion.t([1 end]));
+    ylim([-6 6]);
+    legend('x','y','z');
+else
+    cla(handles.Motion)
+end
+
 
 
 % --- Executes during object creation, after setting all properties.

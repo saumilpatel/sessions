@@ -41,6 +41,24 @@ classdef Spikes < dj.Relvar & dj.AutoPopulate
             end
         end
     end
+       
+    methods 
+        function plot(self)
+            assert(count(self) == 1, 'Only for one matching relvar');
+            
+            key = fetch(aod.Spikes & self);
+            
+            sp = fetch(self, '*');
+            trace = fetch(aod.TracePreprocess(key) & aod.TracePreprocessMethod('preprocess_method_name="pc20"'), 'trace');
+            times = getTimes(aod.TracePreprocess(key) & aod.TracePreprocessMethod('preprocess_method_name="pc20"'));
+            
+            mid = mean(times);
+            plot((times - mid)/1000,(trace.trace - min(trace.trace)),(sp.times - mid)/1000,zeros(size(sp.times)), 'ok');
+            
+            xlim([0 60]);
+        end
+
+    end
     
     methods (Static)
         
