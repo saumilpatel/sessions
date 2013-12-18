@@ -2,7 +2,7 @@ function alex_setPath
 
 warning off MATLAB:dispatcher:nameConflict
 
-addpath(getLocalPath('/lab/users/alex/projects/mym'))
+run(getLocalPath('/lab/users/alex/projects/mym/mymSetup'))
 
 base = fileparts(mfilename('fullpath'));
 addpath(base)
