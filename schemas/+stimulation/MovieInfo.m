@@ -12,7 +12,7 @@ movie_times    : longblob              # The times of the movies
 movie_length   : int unsigned          # Stimulus length (ms)
 %}
 
-classdef MovieInfo < dj.Relvar & dj.Automatic
+classdef MovieInfo < dj.Relvar & dj.AutoPopulate
 
 	properties(Constant)
 		table = dj.Table('stimulation.MovieInfo')
