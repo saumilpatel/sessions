@@ -39,7 +39,7 @@ ephysKeys = fetch(acq.Ephys(sessKey));
 n = numel(ephysKeys);
 for i = 1:n
     [ts, te] = fetch1(acq.Ephys(ephysKeys(i)), 'ephys_start_time', 'ephys_stop_time');
-    mins = round((te - ts) / 1000 / 60);
+    mins = round(double(te - ts) / 1000 / 60);
     hours = floor(mins / 60);
     mins = rem(mins, 60);
     fprintf('Process session %d of %d (duration: %d:%d h)? [Y/n] ', i, n, hours, mins);
