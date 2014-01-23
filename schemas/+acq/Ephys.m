@@ -4,7 +4,7 @@ acq.Ephys (manual)       # electrophysiology recordings
 ->acq.Sessions
 ephys_start_time       : bigint       # start session timestamp
 ---
-ephys_stop_time = NULL : bigint       # end of session timestamp
+ephys_stop_time        : bigint       # end of session timestamp
 ephys_path             : varchar(255) # path to the ephys data
 -> acq.EphysTypes
 %}

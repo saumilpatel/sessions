@@ -4,7 +4,7 @@ acq.BehaviorTraces (manual) # behavioral data recordings
 -> acq.Stimulation
 beh_start_time       : bigint        # timestamp for recordng start
 ---
-beh_stop_time = NULL : bigint        # end of recording timestamp
+beh_stop_time        : bigint        # end of recording timestamp
 beh_path             : varchar(255)  # path to the behavioral data
 beh_traces_type      : enum('analog','optical_fpga')  # type of recording
 %}
