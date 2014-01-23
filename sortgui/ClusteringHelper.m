@@ -198,7 +198,7 @@ classdef ClusteringHelper
             if size(X, 2) == 12
                 feat = 1 : 3 : 10;      % tetrodes
             else
-                feat = 1 : size(X, 2);  % single channel data
+                feat = 1 : min(size(X, 2), 4);  % single channel data
             end
             c = combnk(feat, 2);
             N = size(c, 1);
