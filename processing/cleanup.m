@@ -24,7 +24,7 @@ for key = aodScansKeys'
     
     % create stop_time entries if missing
     aodStopTime = fetch1(aod, 'aod_scan_stop_time');
-    if ~aodStopTime
+    if isnan(aodStopTime) || ~aodStopTime
         br = getFile(aod,'Temporal');
         duration = 1000 * length(br) / getSamplingRate(br);
         close(br);
@@ -51,7 +51,7 @@ for key = ephysKeys'
     
     % create stop_time entries if missing
     ephysStopTime = fetch1(ephys, 'ephys_stop_time');
-    if ~ephysStopTime
+    if isnan(ephysStopTime) || ~ephysStopTime
         br = getFile(ephys);
         duration = 1000 * length(br) / getSamplingRate(br);
         close(br);
@@ -75,7 +75,7 @@ for key = behKeys'
     
     % create stop_time entries if missing
     behStopTime = fetch1(beh, 'beh_stop_time');
-    if ~behStopTime
+    if isnan(behStopTime) || ~behStopTime
         br = getFile(beh);
         duration = 1000 * length(br) / getSamplingRate(br);
         close(br);
@@ -98,7 +98,7 @@ for key = stimKeys'
     
     % create stop_time entries if missing
     stimStopTime = fetch1(stimulation, 'stim_stop_time');
-    if ~stimStopTime
+    if isnan(stimStopTime) || ~stimStopTime
         stim = getfield(load(stimFile), 'stim');
         if isempty(stim.events)
             stimStopTime = key.stim_start_time;
@@ -125,7 +125,7 @@ end
 
 % create session stop time entry if missing
 sessStopTime = fetch1(acq.Sessions(sessKey), 'session_stop_time');
-if ~sessStopTime
+if isnan(sessStopTime) || ~sessStopTime
     tsKey = sessKey;
     tsKey.timestamper_time = fetch1(acq.Sessions, acq.SessionTimestamps(sessKey), 'MAX(timestamper_time) -> m');
     duration = acq.SessionTimestamps.getRealTimes(acq.SessionTimestamps(tsKey));
