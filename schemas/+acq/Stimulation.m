@@ -4,7 +4,7 @@ acq.Stimulation (manual)       # visual stimulations
 ->acq.Sessions
 stim_start_time         : bigint        # timestamp for stimulation start
 ---
-stim_stop_time = NULL   : bigint        # end of stimulation timestamp
+stim_stop_time          : bigint        # end of stimulation timestamp
 stim_path               : varchar(255)  # path to the stimulation data
 exp_type                : varchar(255)  # type of experiment
 total_trials = NULL     : int unsigned  # total number of trials completed
