@@ -3,6 +3,7 @@ sort.KalmanAutomatic (computed) # my newest table
 
 -> sort.Electrodes
 ---
+-> sort.KalmanParams
 model                       : longblob                      # The fitted model
 git_hash=""                 : varchar(40)                   # git hash of MoKsm package
 kalmanautomatic_ts=CURRENT_TIMESTAMP: timestamp             # automatic timestamp. Do not edit
@@ -23,41 +24,25 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
 
     methods (Access=protected)
         function makeTuples( this, key )
-            % Cluster spikes
+             % Cluster spikes
             
             de_key = fetch(detect.Electrodes(key));
             
             m = MoKsmInterface(de_key);
 
-            % treat references differently
-            detectMethod = fetch1(detect.Methods & de_key, 'detect_method_name');
-            if any(strcmp(detectMethod, {'Tetrodes', 'TetrodesV2'})) && numel(m.tt.w) == 1
-                m = getFeatures(m, 'PCA', 4);
-                m.params.DriftRate = 100 / 3600 / 1000;
-            elseif strcmp(detectMethod, 'SiliconProbes')
-                m = getFeatures(m, 'PCA', 8);
-                m.params.DriftRate = 300 / 3600 / 1000;
-            else
-                m = getFeatures(m, 'PCA', 3);
-                m.params.DriftRate = 400 / 3600 / 1000;
-            end
+            % Obtain detection method dependent parameters
+            params = fetch1(sort.KalmanParams & sort.KalmanDefault(de_key), '*');
+               
+            m = getFeatures(m, params.feature_name, params.feature_num);
             
-            switch detectMethod
-                case {'Tetrodes', 'TetrodesV2'}
-                    % Parameters for sorting. Those were tweaked for tetrode
-                    % recordings. Other types of data may need substantial
-                    % adjustments... [AE]
-                    m.params.ClusterCost = 0.002;
-                    m.params.Df = 5;
-                    m.params.Tolerance = 0.0005;
-                case 'SiliconProbes'
-                    m.params.ClusterCost = 0.0038;
-                    m.params.Df = 8;
-                    m.params.Tolerance = 0.00005;
-            end
+            m.params.DriftRate = params.drift_rate;
+            m.params.ClusterCost = params.cluster_cost;
+            m.params.Df = params.df;
+            m.params.Tolerance = params.tolerance;
+            m.params.CovRidge = params.cov_ridge;
+            m.params.DTmu = params.dt_mu;
             
-            m.params.CovRidge = 1.5;
-            m.params.DTmu = 60 * 1000;
+            fprintf('Fetched sorting parameters\n');
             
             fitted = fit(m);
             plot(fitted);
