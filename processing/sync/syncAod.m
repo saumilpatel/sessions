@@ -4,7 +4,7 @@ function [stimDiode, rms, offset] = syncAod(stim, key)
 
 params.oldFile = false;
 params.maxPhotodiodeErr = 3.00;  % 100 us err allowed
-params.behDiodeOffset = [2 17]; % [min max] in ms
+params.behDiodeOffset = [2 40]; % [min max] in ms
 params.behDiodeSlopeErr = 1e-5;   % max deviation from 1
 params.diodeThreshold = 0.04;
 params.minNegTime = -100;  % 100 ms timing error

@@ -13,9 +13,7 @@ matlabpool
 parfor i = 1:numel(electrodes)
     fprintf('Extracting spikes from electrodes %d\n', electrodes(i));
     outFile = sprintf(strrep(spikesFile, '\', '\\'), electrodes(i));
-    detectSpikes(sourceFile,outFile,'tetrode',[],'channels',electrodes(i));
+    artifacts{i} = detectSpikesUtah(sourceFile, electrodes(i), outFile);
 end
 
 matlabpool close
-
-artifacts = cell(1, numel(electrodes));

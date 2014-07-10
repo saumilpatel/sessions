@@ -62,29 +62,29 @@ for key = ephysKeys'
     sessionStopTime = max(sessionStopTime, ephysStopTime);
 end
 
-behKeys = fetch(acq.BehaviorTraces(sessKey) - acq.BehaviorTracesIgnore);
-for key = behKeys'
-    % update t0 in raw data file
-    beh = acq.BehaviorTraces(key);
-    try
-        updateT0(getFileName(beh), getHardwareStartTime(beh));
-    catch err
-        warning('Could not update t0 in file %s\nError message: %s\n', fetch1(beh, 'beh_path'), err.message) %#ok
-        continue
-    end
-    
-    % create stop_time entries if missing
-    behStopTime = fetch1(beh, 'beh_stop_time');
-    if isnan(behStopTime)
-        br = getFile(beh);
-        duration = 1000 * length(br) / getSamplingRate(br);
-        close(br);
-        behStopTime = key.beh_start_time + fix(duration);
-        update(beh, 'beh_stop_time', behStopTime);
-        fprintf('Updated beh_stop_time field (beh_start_time = %ld)\n', key.beh_start_time)
-    end
-    sessionStopTime = max(sessionStopTime, behStopTime);
-end
+% behKeys = fetch(acq.BehaviorTraces(sessKey) - acq.BehaviorTracesIgnore);
+% for key = behKeys'
+%     % update t0 in raw data file
+%     beh = acq.BehaviorTraces(key);
+%     try
+%         updateT0(getFileName(beh), getHardwareStartTime(beh));
+%     catch err
+%         warning('Could not update t0 in file %s\nError message: %s\n', fetch1(beh, 'beh_path'), err.message) %#ok
+%         continue
+%     end
+%     
+%     % create stop_time entries if missing
+%     behStopTime = fetch1(beh, 'beh_stop_time');
+%     if isnan(behStopTime)
+%         br = getFile(beh);
+%         duration = 1000 * length(br) / getSamplingRate(br);
+%         close(br);
+%         behStopTime = key.beh_start_time + fix(duration);
+%         update(beh, 'beh_stop_time', behStopTime);
+%         fprintf('Updated beh_stop_time field (beh_start_time = %ld)\n', key.beh_start_time)
+%     end
+%     sessionStopTime = max(sessionStopTime, behStopTime);
+% end
 
 stimKeys = fetch(acq.Stimulation(sessKey) - acq.StimulationIgnore);
 for key = stimKeys'
@@ -98,7 +98,7 @@ for key = stimKeys'
     
     % create stop_time entries if missing
     stimStopTime = fetch1(stimulation, 'stim_stop_time');
-    if isnan(stimStopTime)
+    if true || isnan(stimStopTime)
         stim = getfield(load(stimFile), 'stim'); %#ok
         if isempty(stim.events)
             stimStopTime = key.stim_start_time;

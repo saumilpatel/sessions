@@ -17,7 +17,7 @@ mid = mid / 1000;  % sync times are in ms
 
 % to convert from mac time to pc counter use p(2) * mac + p(1)
 i = (e - s) < params.maxRoundtrip;
-assert(sum(i) / numel(i) > 0.8, 'Too many sync packets dropped')
+assert(sum(i) / numel(i) > 0.6, 'Too many sync packets dropped')
 p = myrobustfit(mid(i), r(i));
 rms = sqrt(mean((p(2) * mid + p(1) - r).^2));
 
