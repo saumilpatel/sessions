@@ -31,7 +31,7 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
             m = MoKsmInterface(de_key);
 
             % Obtain detection method dependent parameters
-            params = fetch1(sort.KalmanParams & sort.KalmanDefault(de_key), '*');
+            params = fetch(sort.KalmanParams & sort.KalmanDefault(de_key), '*');
                
             m = getFeatures(m, params.feature_name, params.feature_num);
             
@@ -49,6 +49,7 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
             drawnow
             
             tuple = key;
+            tuple.param_id = params.param_id;
             tuple.model = saveStructure(compress(fitted));
             tuple.git_hash = gitHash('MoKsm');
             insert(this, tuple);
