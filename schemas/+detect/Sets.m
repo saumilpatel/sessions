@@ -44,6 +44,10 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
                     spikesCb = @spikesUtah;
                     spikesFile = 'Sc%03u.Hsp';
                     lfpCb = []; muaCb = []; pathCb = [];
+                case 'UtahV2'  % added by EYW 2014-08-08
+                    spikesCb = @spikesUtahV2;
+                    spikesFile = 'Sc%03u.Hsp';
+                    lfpCb = []; muaCb = []; pathCb = [];
             end
             useTemp = true;
 
