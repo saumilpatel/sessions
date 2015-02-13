@@ -6,7 +6,7 @@ function [channels, artifacts] = spikesSiliconProbesV2(sourceFile, spikesFile)
 channels = 1 : 32;
 
 % Extract the common reference - mean across channels at each timepoint
-extract_common_reference(sourceFile, 'channels', 1:32);
+extract_common_reference(sourceFile, 'channels', channels);
 
 matlabpool
 

@@ -10,7 +10,7 @@ function [electrodes, artifacts] = spikesUtah(sourceFile, spikesFile)
 electrodes = 1:96;
 
 % Extract the common reference
-extract_common_reference(sourceFile, 'channels', 1:96);
+extract_common_reference(sourceFile, 'channels', electrodes);
 
 matlabpool
 
