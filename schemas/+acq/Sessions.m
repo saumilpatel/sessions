@@ -6,7 +6,7 @@ setup           : tinyint unsigned      # setup number
 session_start_time: bigint              # start session timestamp
 ---
 session_stop_time           : bigint                        # end of session timestamp
-experimenter                : enum('James','Alex','Mani','Allison','Tori','Jacob','Dimitri','Cathryn','Manolis','Dennis','George','Shan')# name of person running exp
+experimenter                : enum('James','Alex','Philipp','Mani','Allison','Tori','Jacob','Dimitri','Cathryn','Manolis','Dennis','George','Shan')# name of person running exp
 session_path                : varchar(255)                  # path to the data
 session_datetime=null       : datetime                      # readable format of session start
 hammer=0                    : tinyint                       # recorded by Hammer?
