@@ -80,7 +80,6 @@ figure
 macSwapTimes = cat(1, stimDiode.params.trials.swapTimes);
 diodeSwapTimes = peakTimes(swaps)';
 [macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, 0);
-assert(N == numel(macSwapTimes), 'Error during timestamp conversion. Number of timestamps don''t match!')
 res = macSwapTimes(:) - diodeSwapTimes(:);
 plot(diodeSwapTimes, res, '.k');
 rms = sqrt(mean(res.^2));
