@@ -50,8 +50,8 @@ tuple = key;
 tuple.setup = setup;
 tuple.ephys_task = ephysTask;
 tuple.ephys_type = 'Tetrodes';
-tuple.detect_method_num = fetch1(detect.Methods('detect_method_name = "TetrodesV2"'), 'detect_method_num');
-tuple.sort_method_num = fetch1(sort.Methods('sort_method_name = "MoKsm"'), 'sort_method_num');
+tuple.default_detect_method_num = fetch1(detect.Methods('detect_method_name = "TetrodesV2"'), 'detect_method_num');
+tuple.default_sort_method_num = fetch1(sort.Methods('sort_method_name = "MoKsm"'), 'sort_method_num');
 inserti(acq.EphysTypes, tuple);
 
 % Sessions
