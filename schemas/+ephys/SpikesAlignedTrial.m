@@ -32,7 +32,7 @@ classdef SpikesAlignedTrial < dj.Relvar
                 endTime = fetch1(stimulation.StimTrialEvents(setfield(tuple,'event_type','endStimulus')),'event_time');
                 
                 tuple.spikes_aligned = spikes(spikes > (alignTime - tuple.pre_stim_time) & ...
-                    (spikes < (endTime + tuple.post_stim_time))) - alignTime;
+                    (spikes < (endTime + tuple.post_stim_time))) - double(alignTime);
                 
                 insert(this,tuple);
             end
