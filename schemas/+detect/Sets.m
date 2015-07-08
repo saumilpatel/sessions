@@ -41,9 +41,9 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
                 case 'Utah'
                     spikesFile = 'Sc%03u.Hsp';
                 case 'MultiChannelProbes'
-                    rel = acq.Ephys * acq.EphysTypes * detect.ChannelGroupMembers;
+                    rel = acq.Ephys * acq.EphysTypes * acq.ArrayChannels * detect.ChannelGroupMembers;
                     [channels, electrodes] = fetchn(rel & key, ...
-                        'channel_num', 'electrode_num', 'ORDER BY electrode_num, channel_num');
+                        'channel_num', 'electrode_num', 'ORDER BY electrode_num, y_coord');
                     assert(~isempty(channels), 'No channels found. Channel groups not populated for this array?')
                     electrodes = unique(electrodes);
                     channels = reshape(channels, [], numel(electrodes))';
