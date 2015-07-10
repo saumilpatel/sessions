@@ -33,8 +33,21 @@ classdef KalmanUnits < dj.Relvar
                 
                 % Compute mean waveform
                 spikeIds = getSpikesByClusIds(kalmanModel,i);
-                tuple.mean_waveform = cellfun(@(x) mean(x(:,spikeIds),2), ...
-                    kalmanModel.Waveforms.data, 'UniformOutput', false);
+                w = cellfun(@(x) mean(x(:, spikeIds), 2), kalmanModel.Waveforms.data, 'uni', false);
+                tuple.mean_waveform = w;
+                
+                % For multi-channel probes with overlapping channel groups:
+                % keep only those single units where the maximum amplitude
+                % of the waveform is in the central channel(s)
+                if strcmp(fetch1(detect.Methods & key, 'detect_method_name'), 'MultiChannelProbes')
+                    [count, stride] = fetch1(detect.ChannelGroupParams * acq.EphysTypes * acq.Ephys & key, 'count', 'stride');
+                    n = max(fetchn(detect.ChannelGroups & (acq.EphysTypes * acq.Ephys & key), 'electrode_num'));
+                    [~, peak] = max(cellfun(@(x) max(x) - min(x), w));
+                    if peak <= stride && key.electrode_num > 1 || ...
+                            peak > count - stride && key.electrode_num < n
+                        continue
+                    end
+                end
                 
                 tuple.snr = snr(i);
                 tuple.fp = fp(i);
@@ -52,7 +65,7 @@ classdef KalmanUnits < dj.Relvar
             model = MoKsmInterface(model);
             model = uncompress(model);
             model = updateInformation(model);
-            [cluster_number waveform spikeFile] = fetchn(self * detect.Electrodes,...
+            [cluster_number, waveform, spikeFile] = fetchn(self * detect.Electrodes,...
                 'cluster_number','mean_waveform','detect_electrode_file');
             spikeFile = spikeFile{1};
             
