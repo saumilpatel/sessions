@@ -45,6 +45,16 @@ alterAttribute(acq.EphysTypes, 'detect_method_num', 'default_detect_method_num :
 alterAttribute(acq.EphysTypes, 'sort_method_num', 'default_sort_method_num : tinyint unsigned # default spike sorting method')
 
 
+%% Assign proper array_ids
+[names, ids] = fetchn(acq.ArrayInfo & 'array_id > 0', 'array_name', 'array_id');
+for i = 1 : numel(names)
+    keys = fetch(acq.EphysTypes & struct('ephys_task', names{i}));
+    for k = keys'
+        update(acq.EphysTypes & k, 'array_id', ids(i))
+    end
+end
+
+
 %% Create channel groups
 detect.ChannelGroupParams
 detect.ChannelGroups
