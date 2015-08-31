@@ -203,7 +203,7 @@ classdef ClusteringHelper
             end
             c = combnk(feat, 2);
             if size(c, 1) > 6
-                c = c(abs(c(:, 1) - c(:, 2)) <=6, :);
+                c = c(abs(c(:, 1) - c(:, 2)) <=3, :);
             end
             N = size(c, 1);
             n = fix(sqrt(N));
@@ -244,6 +244,9 @@ classdef ClusteringHelper
                     axis(ax)
                     set(axHdl(ij), 'box', 'on', 'xtick', [], 'ytick', [])
                     ij = ij + 1;
+                    if ij > N
+                        break
+                    end
                 end
             end
             if nargout > 0, varargout{1} = axHdl; end
@@ -342,7 +345,7 @@ classdef ClusteringHelper
             X = self.Features.data;
             
             if size(X, 2) > 3
-                feat = 1 : 3 : 10;
+                feat = 1 : 3 : size(X, 2);
             else
                 feat = 1 : size(X, 2);
             end
