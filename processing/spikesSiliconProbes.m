@@ -2,7 +2,7 @@ function [channels, artifacts] = spikesSiliconProbes(sourceFile, spikesFile)
 % Spike detection callback for silicon probes.
 % AE 2011-10-26
 
-channels = 1 : 32; % GD changed on 2014-11-03
+channels = 1 : 64;
 matlabpool
 parfor i = channels
 % for i = channels
