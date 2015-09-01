@@ -30,19 +30,32 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
             
             m = MoKsmInterface(de_key);
 
-            % Obtain detection method dependent parameters
-            params = fetch(sort.KalmanParams & sort.KalmanDefault(de_key), '*');
-               
-            m = getFeatures(m, params.feature_name, params.feature_num);
-            
-            m.params.DriftRate = params.drift_rate;
-            m.params.ClusterCost = params.cluster_cost;
-            m.params.Df = params.df;
-            m.params.Tolerance = params.tolerance;
-            m.params.CovRidge = params.cov_ridge;
-            m.params.DTmu = params.dt_mu;
-            
-            fprintf('Fetched sorting parameters\n');
+            % Reference electrodes in chronic tetrode drives need to be
+            % treated differently
+            detectMethod = fetch1(detect.Methods & de_key, 'detect_method_name');
+            if any(strcmp(detectMethod, {'Tetrodes', 'TetrodesV2'})) && numel(m.tt.w) == 1
+                m = getFeatures(m, 'PCA', 4);
+                m.params.DriftRate = 100 / 3600 / 1000;
+                m.params.ClusterCost = 0.002;
+                m.params.Df = 5;
+                m.params.Tolerance = 0.0005;
+                m.params.CovRidge = 1.5;
+                m.params.DTmu = 60 * 1000;
+            else
+                % Obtain detection method dependent parameters
+                params = fetch(sort.KalmanParams & sort.KalmanDefault(de_key), '*');
+                
+                m = getFeatures(m, params.feature_name, params.feature_num);
+                
+                m.params.DriftRate = params.drift_rate;
+                m.params.ClusterCost = params.cluster_cost;
+                m.params.Df = params.df;
+                m.params.Tolerance = params.tolerance;
+                m.params.CovRidge = params.cov_ridge;
+                m.params.DTmu = params.dt_mu;
+                
+                fprintf('Fetched sorting parameters\n');
+            end
             
             fitted = fit(m);
             plot(fitted);
