@@ -91,10 +91,13 @@ classdef SpikeSortingHelper
 
                 % By default, assume data was recorded on Tolias lab system and
                 % determine gain automatically
-                if max(mean(self.tt.w{1}, 2)) > 1  % data originally was in raw values
-                    gain = 2^23 / 317000;
-                else % new data is in volts, convert to muV
+                scale = max(mean(self.tt.w{1}, 2));
+                if  scale <= 1  % new data is in volts, convert to muV
                     gain = 1e-6;
+                elseif scale <= 200 % data is likely in muV, do nothing
+                    gain = 1;
+                else
+                    gain = 2^23 / 317000; % data originally was in raw values
                 end
 
                 % with old Neuralynx and newer Blackrock data we need to
