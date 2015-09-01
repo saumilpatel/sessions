@@ -40,10 +40,6 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
 %                     muaCb = @extractMuaSiliconProbes;
 %                     pathCb = @extractPath;
                     lfpCb = []; muaCb = []; pathCb = [];
-                case 'SiliconProbesV2'
-                    spikesCb = @spikesSiliconProbesV2;
-                    spikesFile = 'Sc%d.Htt';
-                    lfpCb = []; muaCb = []; pathCb = [];
                 case 'Utah'
                     spikesCb = @spikesUtah;
                     spikesFile = 'Sc%03u.Hsp';
