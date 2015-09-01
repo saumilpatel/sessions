@@ -1,7 +1,9 @@
 % Migration script for database updates related to spike sorting of
-% multi-channel probes.
+% multi-channel probes. Run this scrtipt to update the database tables
+% after updating the code.
 %
-% AE 2015-08-28
+% AE 2015-09-01
+
 
 %% Create array info tables
 acq.ArrayInfo
@@ -34,6 +36,11 @@ end
 
 
 %% Update acq.EphysTypes table
+
+% NOTE: answer 'no' to all prompts asking whether to update the table
+%       declaration! The changes to the table declaratons are part of this
+%       patch.
+
 addAttribute(acq.EphysTypes, 'array_id : tinyint unsigned # identifier for array', 'AFTER ephys_task')
 
 % Add foreign key. Due to a MySQL bug the following does not work
