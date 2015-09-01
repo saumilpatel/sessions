@@ -30,6 +30,9 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
             
             m = MoKsmInterface(de_key);
 
+            % Obtain detection method dependent parameters
+            params = fetch(sort.KalmanParams & sort.KalmanDefault(de_key), '*');
+            
             % Reference electrodes in chronic tetrode drives need to be
             % treated differently
             detectMethod = fetch1(detect.Methods & de_key, 'detect_method_name');
@@ -42,9 +45,6 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
                 m.params.CovRidge = 1.5;
                 m.params.DTmu = 60 * 1000;
             else
-                % Obtain detection method dependent parameters
-                params = fetch(sort.KalmanParams & sort.KalmanDefault(de_key), '*');
-                
                 m = getFeatures(m, params.feature_name, params.feature_num);
                 
                 m.params.DriftRate = params.drift_rate;
