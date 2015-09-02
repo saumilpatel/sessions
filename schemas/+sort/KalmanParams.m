@@ -1,7 +1,7 @@
 %{
 sort.KalmanParams (lookup) # Association of detection method with Kalman sorting parameters
 
-param_id   : int unsigned # unique identifier for subject
+param_id       : int unsigned     # unique identifier for parameter set
 -----
 feature_name   : varchar(64)      # name of the feature
 feature_num    : int unsigned     # number of features
