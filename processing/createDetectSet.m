@@ -24,10 +24,6 @@ if nargin < 3
 end
 tuple = detectKey;
 ephysFolder = fileparts(fetch1(acq.Ephys(ephysKey), 'ephys_path'));
-if strcmp(getenv('DJ_HOST'), 'at-backupdb')
-    tuple.ephys_processed_path = to(RawPathMap, ephysFolder, '/processedBackupdb');
-else
-    tuple.ephys_processed_path = to(RawPathMap, ephysFolder, '/processed');
-end
+tuple.ephys_processed_path = to(RawPathMap, ephysFolder, '/processed');
 tuple.use_toolchain = useToolchain;
 insert(detect.Params, tuple);
