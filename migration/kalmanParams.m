@@ -64,6 +64,13 @@ insert(sort.KalmanDefault, struct('detect_method_num', 6, 'param_id', 7)) % Mult
 insert(sort.KalmanDefault, struct('detect_method_num', 7, 'param_id', 5)) % Utah arrays
 
 
+%% Insert experimenters
+tuples = struct('experimenter_id', {0 1 2 3}, ...
+    'experimenter_name', {'Edgar Walker', 'George Denfield', 'Alex Ecker', 'James Cotton'}, ...
+    'experimenter_email', {'edgar.walker@gmail.com', 'george.denfield@gmail.com', 'alexander.ecker@uni-tuebingen.de', ''});
+insert(sort.Experimenter, tuples)
+
+
 %% Update sort.KalmanAutomatic table
 addAttribute(sort.KalmanAutomatic, 'param_id : int unsigned # unique identifier for parameter set', 'AFTER electrode_num')
 addForeignKey(sort.KalmanAutomatic, sort.KalmanParams)
