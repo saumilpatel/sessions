@@ -25,8 +25,9 @@ classdef KalmanPractice < dj.Relvar & dj.AutoPopulate
             assert(count(self) == 1, 'relvar must be scalar!')
             disp 'Review only. No changes will take effect!'
             disp 'If you need to change something, delete the tuple and redo it.'
-            title = fetch1(self * detect.Electrodes, 'detect_electrode_file');
-            title = ['|| READ ONLY || ' title ' || READ ONLY ||'];
+            ename = fetch1(sort.Experimenter & key, 'experimenter_name');
+            file = fetch1(detect.Electrodes & key, 'detect_electrode_file');
+            title = sprintf('|| READ ONLY || Operator: %s | File: %s || READ ONLY ||', ename, file);
             model = uncompress(MoKsmInterface(fetch1(self, 'manual_model')));
             ManualClustering(model, title)
         end
@@ -38,7 +39,10 @@ classdef KalmanPractice < dj.Relvar & dj.AutoPopulate
             model.params.Verbose = false;
  
             model = MoKsmInterface(model);
-            [model, comment] = ManualClustering(model, fetch1(detect.Electrodes & key, 'detect_electrode_file'));
+            ename = fetch1(sort.Experimenter & key, 'experimenter_name');
+            file = fetch1(detect.Electrodes & key, 'detect_electrode_file');
+            title = sprintf('Operator: %s | File: %s', ename, file);
+            [model, comment] = ManualClustering(model, title);
             
             if ~isempty(model)
                 tuple = key;
