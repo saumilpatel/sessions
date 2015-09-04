@@ -6,7 +6,7 @@ setup                 : tinyint unsigned   # setup number
 ephys_task            : varchar(63)        # name of the task
 ---
 ->acq.ArrayInfo
-ephys_type            : enum("Utah", "Tetrodes", "SiliconProbes") # type of ephys recording
+ephys_type            : enum("Utah", "Tetrodes", "SiliconProbes", "NonChronic Tetrode", "unknown") # type of ephys recording
 default_detect_method_num     : tinyint unsigned   # default detect method
 default_sort_method_num       : tinyint unsigned   # default spike sorting method
 %}
