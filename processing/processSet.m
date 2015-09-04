@@ -62,7 +62,7 @@ else
 end
 
 if parToolbox
-    matlabpool close force local
+    delete(gcp('nocreate'))
 end
 
 % If we need to process an LFP kick of these jobs now on a thread
@@ -70,7 +70,7 @@ if ~count(cont.Lfp(key)) && ~isempty(lfpCb)
     outDir = fullfilefs(destDir, lfpDir);
     createOrEmpty(outDir)
     if parToolbox
-        scheduler = findResource('scheduler', 'configuration', 'local');
+        scheduler = parcluster;
         if ~isempty(scheduler.Jobs) % cancel jobs that are still running from a crash
             scheduler.Jobs.destroy();
         end

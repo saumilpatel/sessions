@@ -195,12 +195,16 @@ classdef ClusteringHelper
             color = getClusColor(self, params.clusIds);
             
             % select features to plot
-            if size(X, 2) == 12
-                feat = 1 : 3 : 10;      % tetrodes
+            nFeatures = size(X, 2);
+            if nFeatures >= 12
+                feat = 1 : 3 : nFeatures;      % tetrodes
             else
-                feat = 1 : min(size(X, 2), 4);  % single channel data
+                feat = 1 : min(nFeatures, 4);  % single channel data
             end
             c = combnk(feat, 2);
+            if size(c, 1) > 6
+                c = c(abs(c(:, 1) - c(:, 2)) <=3, :);
+            end
             N = size(c, 1);
             n = fix(sqrt(N));
             m = ceil(N / n);
@@ -240,6 +244,9 @@ classdef ClusteringHelper
                     axis(ax)
                     set(axHdl(ij), 'box', 'on', 'xtick', [], 'ytick', [])
                     ij = ij + 1;
+                    if ij > N
+                        break
+                    end
                 end
             end
             if nargout > 0, varargout{1} = axHdl; end
@@ -338,7 +345,7 @@ classdef ClusteringHelper
             X = self.Features.data;
             
             if size(X, 2) > 3
-                feat = 1 : 3 : 10;
+                feat = 1 : 3 : size(X, 2);
             else
                 feat = 1 : size(X, 2);
             end

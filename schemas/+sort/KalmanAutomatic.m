@@ -50,6 +50,10 @@ classdef KalmanAutomatic < dj.Relvar & dj.AutoPopulate
                     m.params.ClusterCost = 0.002;
                     m.params.Df = 5;
                     m.params.Tolerance = 0.0005;
+                case 'MultiChannelProbes'
+                    m.params.ClusterCost = 0.002;
+                    m.params.Df = 5;
+                    m.params.Tolerance = 0.0005;
                 case 'SiliconProbes'
                     m.params.ClusterCost = 0.0038;
                     m.params.Df = 8;

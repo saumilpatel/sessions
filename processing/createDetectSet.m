@@ -11,7 +11,7 @@ function detectKey = createDetectSet(ephysKey, detectMethod, useToolchain)
 
 detectKey = ephysKey;
 if nargin < 2 || isempty(detectMethod)
-    detectKey.detect_method_num = fetch1(acq.Ephys(ephysKey) * acq.EphysTypes, 'detect_method_num');
+    detectKey.detect_method_num = fetch1(acq.Ephys(ephysKey) * acq.EphysTypes, 'default_detect_method_num');
 else
     detectKey.detect_method_num = fetch1(detect.Methods(struct('detect_method_name', detectMethod)), 'detect_method_num');
 end
