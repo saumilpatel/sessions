@@ -26,20 +26,15 @@ addpath(fullfile(base, 'sortgui/lib'))
 % DataJoint library is assumed to be in the same directory as the base
 % diretory
 ndx = find(base == filesep, 1, 'last');
-addpath(fullfile(base(1:ndx-1), 'datajoint'))
+run(fullfile(base(1:ndx-1), 'datajoint/setPath.m'))
 
-% TEMP until updated on /lab/libraries
+% HDF5 utils
 run(fullfile(base(1:ndx-1), 'hdf5matlab/setPath.m'))
 
 % spike detection
-run(fullfile(base(1:ndx-1), 'spikedetection/setPath.m'))
-
-% LFP
-addpath(fullfile(base(1:ndx-1), 'lfp'))
+run(fullfile(base(1:ndx-1), 'ephys-preprocessing/setPath.m'))
 
 % spike sorting
-% addpath(fullfile(base(1:ndx-1), 'clustering'))
-% run(getLocalPath('/lab/libraries/various/spider/use_spider'))
 addpath(fullfile(base(1:ndx-1), 'moksm'))
 
 warning on MATLAB:dispatcher:nameConflict

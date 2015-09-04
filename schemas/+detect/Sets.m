@@ -51,6 +51,10 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
 %                     lfpCb = @extractLfpMultiChannelProbes;
 %                     muaCb = @extractMuaMultiChannelProbes;
 %                     pathCb = @extractPath;
+                case 'UtahV2'  % added by EYW 2014-08-08
+                    spikesCb = @spikesUtahV2;
+                    spikesFile = 'Sc%03u.Hsp';
+                    lfpCb = []; muaCb = []; pathCb = [];
             end
 
             % if not in toolchain mode, don't extract LFP
