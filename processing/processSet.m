@@ -145,6 +145,7 @@ end
 if useTempDir
     % remove raw data files
     delete(fullfilefs(tempDir, dataFilePattern));
+    delete(fullfilefs(tempDir, '*.h5'));
     
     % copy output files to processed folder
     if exist(localProcessedDir, 'file')
