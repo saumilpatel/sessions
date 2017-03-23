@@ -3,7 +3,7 @@ function [x,y,z,t] = trackMotion3D(fn, analysischan)
 
 %% test function computeshifts
 % requires z:\libraries\matlab in path
-run(getLocalPath('/lab/libraries/hdf5matlab/setPath.m')) ;
+%run(getLocalPath('/lab/libraries/hdf5matlab/setPath.m')) ;
 
 downsampleFactor = 1 ; % skip frames if > 1
 numFramesToAverageForRef = 10 ; % frames to average to determine the reference frame against which motion is computed
