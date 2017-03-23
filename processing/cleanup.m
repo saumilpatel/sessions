@@ -23,8 +23,8 @@ for key = aodScansKeys'
     end
     
     % create stop_time entries if missing
-    aodStopTime = fetch1(aod, 'aod_scan_stop_time');
-    if isnan(aodStopTime) || ~aodStopTime
+    stop_time_null_count = count(aod & 'aod_scan_stop_time is null')
+    if stop_time_null_count == 1
         br = getFile(aod,'Temporal');
         duration = 1000 * length(br) / getSamplingRate(br);
         close(br);

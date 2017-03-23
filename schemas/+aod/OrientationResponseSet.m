@@ -28,7 +28,7 @@ classdef OrientationResponseSet < dj.Relvar & dj.AutoPopulate
             disp 'Sorting data';
             [trial_data tuple.cell_nums] = aod.OrientationResponseSet.tracesByOri(key, key.lag, key.bin_duration);
             
-            tuple.responses = zeros(1:length(trial_data),count(aod.UniqueCell & key));
+            tuple.responses = zeros(length(trial_data),count(aod.UniqueCell & key));
             for i = 1:length(trial_data)
                 tuple.responses(i,:) = mean(trial_data(i).traces,1);
             end

@@ -2,8 +2,13 @@ function setPath
 
 warning off MATLAB:dispatcher:nameConflict
 
-% user specific DJ connection parameters (uses Alex' credentials)
-host = 'at-database.neusc.bcm.tmc.edu';
+% user specific DJ connection parameters
+local = false
+if local
+    host = '127.0.0.1:8889' % port is for MAMP server
+else
+    host = 'at-database.ad.bcm.edu';
+end
 user = 'jcotton';
 setenv('DJ_HOST', host)
 setenv('DJ_USER', user)
@@ -26,15 +31,15 @@ addpath(fullfile(base, 'lib/two_photon'))
 
 % DataJoint library is assumed to be in the same directory as the base
 % diretory
-addpath(fullfile(base, '../DataJoint/matlab'));
+addpath(fullfile(base, '../DataJoint'));
 
 addpath(fullfile(base, '../moksm'));
 
 
 if isequal(computer, 'PCWIN64')
-    addpath(fullfile(base, '../DataJoint/mym/win64'));
+    addpath(fullfile(base, '../mym/win64'));
 else
-    addpath(fullfile(base, '../DataJoint/mym'));
+    addpath(fullfile(base, '../mym/distribution/mexmaci64/'));
 end
 
 
