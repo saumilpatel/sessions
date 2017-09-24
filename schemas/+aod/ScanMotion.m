@@ -28,7 +28,7 @@ classdef ScanMotion < dj.Relvar & dj.AutoPopulate
             tuple = key;
             
             fn = char(fetchn(acq.AodScan & key, 'aod_scan_filename')) ; % get the filename from db
-            oldversion = aod.checkFileversion(fn) ; % check if motion data is in old format, i.e. 2 planes or in new format, i.e. a volume
+            oldversion = acq.checkFileversion(fn) ; % check if motion data is in old format, i.e. 2 planes or in new format, i.e. a volume
             if (oldversion)
                 br = getFile(acq.AodScan & key,'Motion');
                 motionData = br(:,:,:);

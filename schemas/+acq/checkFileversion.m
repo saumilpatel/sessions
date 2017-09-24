@@ -1,7 +1,7 @@
 
 function oldversion=checkFileVersion(fn)
 
-oldversion = true ;
+oldversion = false ;
 try
     version = h5readatt(fn,'/','Version') ;
     if (version==2)
