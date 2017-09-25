@@ -4,9 +4,10 @@ function [stimDiode, rms, offset] = syncAod(stim, key)
 
 params.oldFile = false;
 params.maxPhotodiodeErr = 3.00;  % 100 us err allowed
-params.behDiodeOffset = [2 40]; % [min max] in ms
+params.behDiodeOffset = [-40 40]; % [min max] in ms
 params.behDiodeSlopeErr = 1e-5;   % max deviation from 1
 params.diodeThreshold = 0.04;
+params.minFracSwaps = 0.99;       % should find photodiode for almost all mac swap times
 params.minNegTime = -100;  % 100 ms timing error
 
 if isempty(stim.events)
@@ -35,8 +36,8 @@ macSwapTimes = cat(1, stim.params.trials.swapTimes);
 % arithmetic and then smooth the result to account for jitter in the
 % swaptimes
 Fs = 10;        % kHz
-k = 20000;        % max offset (samples) in each direction
-smooth = 10;    % smoothing window for finding the peak (half-width);
+k = 500;        % max offset (samples) in each direction
+smooth = 40;    % smoothing window for finding the peak (half-width);
 c = zeros(2 * k + 1, 1);
 for i = -k:k
     c(i + k + 1) = isectq(round(macSwapTimes * Fs + i), round(diodeSwapTimes * Fs));
@@ -51,6 +52,7 @@ offset = offsets(ndx) * c(ndx) / sum(c(ndx));
 
 % throw out swaps that don't have matches within one ms
 originalDiodeSwapTimes = diodeSwapTimes;
+originalMacSwapTimes = macSwapTimes;
 [macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, offset);
 N = numel(macSwapTimes);
 
@@ -64,8 +66,11 @@ macPar(1) = macPar(1) - (t0 * macPar(2) - t0);
 t = mean(macSwapTimes);
 shift = macPar(2) * t - t + macPar(1);
 
+fracSwaps = numel(macSwapTimes) / numel(originalMacSwapTimes);
+
 if(~(abs(macPar(2) - 1) < params.behDiodeSlopeErr ...
-    && shift > params.behDiodeOffset(1) && shift < params.behDiodeOffset(2)))
+    && shift > params.behDiodeOffset(1) && shift < params.behDiodeOffset(2) ...
+    && fracSwaps > params.minFracSwaps))
 
     originalMacTimes = cat(1, stim.params.trials.swapTimes) + offset;
     
@@ -80,7 +85,7 @@ if(~(abs(macPar(2) - 1) < params.behDiodeSlopeErr ...
     testMacSwapTimes = cat(1, stimDiodeTest.params.trials.swapTimes);
     testDiodeSwapTimes = originalDiodeSwapTimes;
     
-    plot(testMacSwapTimes, zeros(size(testMacSwapTimes))-0.5,'.',testDiodeSwapTimes, zeros(size(testDiodeSwapTimes))+0.5,'.');
+    plot(testMacSwapTimes, zeros(size(testMacSwapTimes))+0.5,'.',testDiodeSwapTimes, zeros(size(testDiodeSwapTimes))-0.5,'.');
     ylim([-5 5]);
     title('Synced times');
     
@@ -91,28 +96,32 @@ if(~(abs(macPar(2) - 1) < params.behDiodeSlopeErr ...
 
     linkaxes(h,'x');
     
-    disp('Sync failed');
+    fprintf('Sync failed. Note only %f of mac swap times were kept', fracSwaps);
     keyboard
 end
 
 assert(abs(macPar(2) - 1) < params.behDiodeSlopeErr ...
     && shift > params.behDiodeOffset(1) && shift < params.behDiodeOffset(2), ...
     'Regression between behavior clock and photodiode clock outside system tolerances');
-
+assert(fracSwaps > params.minFracSwaps, 'Too many swap times could not be aligned')
 % convert times in stim file
 stimDiode = convertStimTimes(stim, macPar, [0 1]);
 stimDiode.synchronized = 'diode';
 
 % plot residuals
 figure
+subplot(211)
 macSwapTimes = cat(1, stimDiode.params.trials.swapTimes);
 diodeSwapTimes = originalDiodeSwapTimes;
 [macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, 0);
 %assert(N == numel(macSwapTimes), 'Error during timestamp conversion. Number of timestamps don''t match!')
 res = macSwapTimes(:) - diodeSwapTimes(:);
 plot(diodeSwapTimes, res, '.k');
-rms = sqrt(mean(res.^2));
+subplot(212)
+plot(macSwapTimes,zeros(size(macSwapTimes))+0.5,'.',diodeSwapTimes,zeros(size(diodeSwapTimes))-0.5,'.')
+ylim([-5 5])
 
+rms = sqrt(mean(res.^2));
 if(rms > params.maxPhotodiodeErr)
     disp('Residuals too large');
     keyboard
