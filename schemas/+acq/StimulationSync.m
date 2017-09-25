@@ -66,8 +66,14 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
                     tuple.sync_network = true;
 
                     % catch old sessions where hardware clocks weren't phase locked
-                    if fetch1(acq.Ephys(ephysKey), 'ephys_start_time') < dateToLabviewTime('2012-02-08 18:00') || ...
-                        fetch1(acq.Ephys(ephysKey),'setup') == 2
+                    % for setup1 and setup3, this applies to sessions prior
+                    % to 2012-02-08 18:00
+                    % for setup2, this applies to sessions prior to
+                    % 2014-08-01 07:00
+                    ephys_start_time = fetch1(acq.Ephys(ephysKey), 'ephys_start_time');
+                    setup = fetch1(acq.Ephys(ephysKey), 'setup');
+                    if ephys_start_time < dateToLabviewTime('2012-02-08 18:00') || ...
+                        (setup == 2 && ephys_start_time < dateToLabviewTime('2014-08-01 07:00'))
                         [stim, rms, offset] = syncEphysProblems(stim, ephysKey); %#ok
                     else
                         [stim, rms, offset] = syncEphys(stim, ephysKey); %#ok

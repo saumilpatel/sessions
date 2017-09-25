@@ -1,12 +1,14 @@
 function processSet(key, spikesCb, spikesFile, lfpCb, muaCb, pathCb, useTempDir)
 % TODO: write documentation
+% key is primary-key from detect.Params, specifying combo of acq.Ephys and
+% detect.Method
 
 if nargin < 7
     useTempDir = true;
 end
 
 maxFiles = 200; % maximum number of files that fit on temp storage right now
-parToolbox = logical(exist('matlabpool', 'file'));
+parToolbox = logical(exist('matlabpool', 'file')); % checks if parallel toolbox is available
 
 assert(isfield(key, 'setup') && isfield(key, 'session_start_time') && isfield(key, 'ephys_start_time'), isfield(key, 'detect_method_num'), 'Incomplete primary key!')
 assert(count(detect.Params(key)) == 1, 'Did not find a detection that matches this key!')
@@ -47,7 +49,7 @@ if useTempDir
         toFile = fullfilefs(tempDir, file.name);
         toFileInfo = dir(toFile);
         if exist(toFile, 'file') && toFileInfo.bytes == file.bytes
-            fprintf('  Skipping file %s\n', file.name)
+            fprintf('  Skipping file %s\n', file.name) % if directory exists and file already there, skip copy
         else
             fprintf('  Copying file %s\n', file.name)
             fromFile = fullfilefs(fromDir, file.name);
@@ -62,7 +64,7 @@ else
 end
 
 if parToolbox
-    matlabpool close force local
+    delete(gcp('nocreate'))
 end
 
 % If we need to process an LFP kick of these jobs now on a thread
@@ -70,7 +72,7 @@ if ~count(cont.Lfp(key)) && ~isempty(lfpCb)
     outDir = fullfilefs(destDir, lfpDir);
     createOrEmpty(outDir)
     if parToolbox
-        scheduler = findResource('scheduler', 'configuration', 'local');
+        scheduler = parcluster;
         if ~isempty(scheduler.Jobs) % cancel jobs that are still running from a crash
             scheduler.Jobs.destroy();
         end
@@ -79,13 +81,13 @@ if ~count(cont.Lfp(key)) && ~isempty(lfpCb)
         muaJob = batch(scheduler, muaCb, 0, {sourceFile, fullfilefs(outDir, muaFile)}, 'PathDependencies', p);
     else
         lfpCb(sourceFile, fullfilefs(outDir, lfpFile));
-        muaCb(sourceFile, fullfilefs(outDir, lfpFile));
+        muaCb(sourceFile, fullfilefs(outDir, muaFile));
     end
 end
 
 % create or clear output directory for spikes
 outDir = fullfilefs(destDir, spikesDir);
-createOrEmpty(outDir)
+createOrEmpty(outDir);
 
 % run callback for spike detection
 outFile = fullfilefs(outDir, spikesFile);
@@ -143,6 +145,7 @@ end
 if useTempDir
     % remove raw data files
     delete(fullfilefs(tempDir, dataFilePattern));
+    delete(fullfilefs(tempDir, '*.h5'));
     
     % copy output files to processed folder
     if exist(localProcessedDir, 'file')

@@ -23,8 +23,8 @@ for key = aodScansKeys'
     end
     
     % create stop_time entries if missing
-    aodStopTime = fetch1(aod, 'aod_scan_stop_time');
-    if isnan(aodStopTime)
+    stop_time_null_count = count(aod & 'aod_scan_stop_time is null')
+    if stop_time_null_count == 1
         br = getFile(aod,'Temporal');
         duration = 1000 * length(br) / getSamplingRate(br);
         close(br);
@@ -51,7 +51,7 @@ for key = ephysKeys'
     
     % create stop_time entries if missing
     ephysStopTime = fetch1(ephys, 'ephys_stop_time');
-    if isnan(ephysStopTime)
+    if isnan(ephysStopTime) || ~ephysStopTime
         br = getFile(ephys);
         duration = 1000 * length(br) / getSamplingRate(br);
         close(br);
@@ -62,29 +62,29 @@ for key = ephysKeys'
     sessionStopTime = max(sessionStopTime, ephysStopTime);
 end
 
-% behKeys = fetch(acq.BehaviorTraces(sessKey) - acq.BehaviorTracesIgnore);
-% for key = behKeys'
-%     % update t0 in raw data file
-%     beh = acq.BehaviorTraces(key);
-%     try
-%         updateT0(getFileName(beh), getHardwareStartTime(beh));
-%     catch err
-%         warning('Could not update t0 in file %s\nError message: %s\n', fetch1(beh, 'beh_path'), err.message) %#ok
-%         continue
-%     end
-%     
-%     % create stop_time entries if missing
-%     behStopTime = fetch1(beh, 'beh_stop_time');
-%     if isnan(behStopTime)
-%         br = getFile(beh);
-%         duration = 1000 * length(br) / getSamplingRate(br);
-%         close(br);
-%         behStopTime = key.beh_start_time + fix(duration);
-%         update(beh, 'beh_stop_time', behStopTime);
-%         fprintf('Updated beh_stop_time field (beh_start_time = %ld)\n', key.beh_start_time)
-%     end
-%     sessionStopTime = max(sessionStopTime, behStopTime);
-% end
+behKeys = fetch(acq.BehaviorTraces(sessKey) - acq.BehaviorTracesIgnore);
+for key = behKeys'
+    % update t0 in raw data file
+    beh = acq.BehaviorTraces(key);
+    try
+        updateT0(getFileName(beh), getHardwareStartTime(beh));
+    catch err
+        warning('Could not update t0 in file %s\nError message: %s\n', fetch1(beh, 'beh_path'), err.message) %#ok
+        continue
+    end
+    
+    % create stop_time entries if missing
+    behStopTime = fetch1(beh, 'beh_stop_time');
+    if isnan(behStopTime)
+        br = getFile(beh);
+        duration = 1000 * length(br) / getSamplingRate(br);
+        close(br);
+        behStopTime = key.beh_start_time + fix(duration);
+        update(beh, 'beh_stop_time', behStopTime);
+        fprintf('Updated beh_stop_time field (beh_start_time = %ld)\n', key.beh_start_time)
+    end
+    sessionStopTime = max(sessionStopTime, behStopTime);
+end
 
 stimKeys = fetch(acq.Stimulation(sessKey) - acq.StimulationIgnore);
 for key = stimKeys'
@@ -124,7 +124,8 @@ for key = stimKeys'
 end
 
 % create session stop time entry if missing
-if isnan(fetch1(acq.Sessions(sessKey), 'session_stop_time'))
+sessStopTime = fetch1(acq.Sessions(sessKey), 'session_stop_time');
+if isnan(sessStopTime) || ~sessStopTime
     tsKey = sessKey;
     tsKey.timestamper_time = fetch1(acq.Sessions, acq.SessionTimestamps(sessKey), 'MAX(timestamper_time) -> m');
     duration = acq.SessionTimestamps.getRealTimes(acq.SessionTimestamps(tsKey));

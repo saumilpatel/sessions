@@ -8,17 +8,23 @@ diodeSwapTimes = detectSwaps(key);
 % swap times recorded on the Mac
 [macSwapTimes, nskip] = getMacSwapTimes(stim);
 
-% for some reason the first swap doesn't show up. We add a fake first swap
-if strcmp(fetch1(acq.Stimulation & key, 'exp_type'), 'AcuteGratingExperiment')
-    d = diff(macSwapTimes);
-    periodMac = mean(d(d < 0.025));
-    periodDiode = median(diff(diodeSwapTimes(1 : 100)));
-    first = round(diff(macSwapTimes(1 : 2)) / periodMac) * periodDiode;
-    k = sum(diff(diodeSwapTimes(end - 4 : end)) > 25);
-    diodeSwapTimes = [diodeSwapTimes(1) - first; diodeSwapTimes(1 : end - k)];
-    N = 50;
-else
-    N = 10;
+N = 50;
+switch fetch1(acq.Stimulation & key, 'exp_type')
+    case 'AcuteGratingExperiment'
+        % for some reason the first swap doesn't show up. We add a fake first swap
+        d = diff(macSwapTimes);
+        periodMac = mean(d(d < 0.025));
+        periodDiode = median(diff(diodeSwapTimes(1 : 100)));
+        first = round(diff(macSwapTimes(1 : 2)) / periodMac) * periodDiode;
+        k = sum(diff(diodeSwapTimes(end - 4 : end)) > 25);
+        diodeSwapTimes = [diodeSwapTimes(1) - first; diodeSwapTimes(1 : end - k)];
+    case 'SquareMappingExperiment'
+        % sometimes we get extra swaps at the end -- remove
+        while diff(diodeSwapTimes(end - 1 : end)) > 1000
+            diodeSwapTimes(end) = [];
+        end
+    case 'FlashingBarExperiment'
+        N = 10;
 end
 assert(numel(macSwapTimes) == numel(diodeSwapTimes), 'Not all swaps found in photodiode signal. Chaos!!!')
 

@@ -52,14 +52,14 @@ classdef StimTrials < dj.Relvar
             % try trial parameter
             trials = fetchn(self, 'trial_params', 1);
             if isfield(trials{1}, field)
-                trials = fetchn(self, 'trial_params');
+                trials = fetchn(self, 'trial_params', 'ORDER BY trial_num');
                 val = cellfun(@(x) x.(field), trials, varargin{:});
                 return
             end
             % try condition parameter
             conditions = fetchn(stimulation.StimConditions & self, 'condition_info');
             if isfield(conditions, field)
-                trials = fetchn(self, 'trial_params');
+                trials = fetchn(self, 'trial_params', 'ORDER BY trial_num');
                 cond = cellfun(@(x) x.condition, trials);
                 val = cellfun(@(x) x.(field), conditions(cond), varargin{:});
                 return

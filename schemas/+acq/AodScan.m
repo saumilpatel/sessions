@@ -4,7 +4,7 @@ acq.AodScan (manual) # Aod scans
 -> acq.Sessions
 aod_scan_start_time: bigint             # start session timestamp
 ---
-aod_scan_stop_time=null     : bigint                        # end of session timestamp
+aod_scan_stop_time          : bigint                        # end of session timestamp
 aod_scan_filename           : varchar(255)                  # path to the ephys data
 x_coordinate                : double                        # X coordinate
 y_coordinate                : double                        # Y coordinate

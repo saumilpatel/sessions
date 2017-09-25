@@ -37,7 +37,7 @@ classdef StimConditions < dj.Relvar
         function val = getConditionParam(self, field, varargin)
             assert(count(stimulation.StimTrialGroup & self) == 1, 'Conditions must be from the same session!')
             % try conditions
-            conditions = fetchn(self, 'condition_info');
+            conditions = fetchn(self, 'condition_info', 'ORDER BY condition_num');
             if isfield(conditions{1}, field)
                 val = cellfun(@(x) x.(field), conditions, varargin{:});
             else % try constants

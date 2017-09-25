@@ -8,7 +8,7 @@ rf   : longblob # the receptive field
 lags : longblob # the lags computed at
 %}
 
-classdef ReceptiveFields < dj.Relvar & dj.Automatic
+classdef ReceptiveFields < dj.Relvar & dj.AutoPopulate
     
     properties(Constant)
         table = dj.Table('ephys.ReceptiveFields')

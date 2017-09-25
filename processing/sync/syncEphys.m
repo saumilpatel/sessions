@@ -4,7 +4,7 @@ function [stimDiode, rms, offset] = syncEphys(stim, key)
 
 params.oldFile = false;
 params.maxPhotodiodeErr = 0.5;    % 0.5 ms err allowed
-params.behDiodeOffset = [3 4];    % [min max] in ms
+params.behDiodeOffset = [2.5 4];    % [min max] in ms
 params.behDiodeSlopeErr = 1e-6;   % max deviation from 1
 params.diodeThreshold = 0.04;
 params.minNegTime = -100;  % 100 ms timing error
@@ -80,7 +80,6 @@ figure
 macSwapTimes = cat(1, stimDiode.params.trials.swapTimes);
 diodeSwapTimes = peakTimes(swaps)';
 [macSwapTimes, diodeSwapTimes] = matchTimes(macSwapTimes, diodeSwapTimes, 0);
-assert(N == numel(macSwapTimes), 'Error during timestamp conversion. Number of timestamps don''t match!')
 res = macSwapTimes(:) - diodeSwapTimes(:);
 plot(diodeSwapTimes, res, '.k');
 rms = sqrt(mean(res.^2));

@@ -43,6 +43,7 @@ classdef ReconstructionAccuracy < dj.Relvar & dj.AutoPopulate
             end
             
             ds = round(trace.fs / 100);
+            ds = 1;
             dt = 1 / trace.fs;
             ds_trace = decimate(trace.trace,ds);
             highPass = 0.1;

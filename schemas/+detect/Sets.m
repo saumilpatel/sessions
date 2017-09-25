@@ -20,32 +20,42 @@ classdef Sets < dj.Relvar & dj.AutoPopulate
     
     methods (Access=protected)        
         function makeTuples(~, key)
-            switch fetch1(detect.Params(key) * detect.Methods, 'detect_method_name')
+            method = fetch1(detect.Params(key) * detect.Methods, 'detect_method_name');
+            spikesCb = eval(['@spikes' upper(method(1)) method(2 : end)]);
+            spikesFile = 'Sc%d.Htt';
+            lfpCb = []; muaCb = []; pathCb = [];
+            useTemp = true;
+            switch method
                 case 'Tetrodes'
-                    spikesCb = @spikesTetrodes;
-                    spikesFile = 'Sc%d.Htt';
                     lfpCb = @extractLfpTetrodes;
                     muaCb = @extractMuaTetrodes;
                     pathCb = @extractPath;
                 case 'TetrodesV2'
-                    spikesCb = @spikesTetrodesV2;
-                    spikesFile = 'Sc%d.Htt';
                     lfpCb = @extractLfpTetrodes;
                     muaCb = @extractMuaTetrodes;
                     pathCb = @extractPath;
                 case 'SiliconProbes'
-                    spikesCb = @spikesSiliconProbes;
-                    spikesFile = 'Sc%d.Htt';
-%                     lfpCb = @extractLfpSiliconProbes;
-%                     muaCb = @extractMuaSiliconProbes;
-%                     pathCb = @extractPath;
-                    lfpCb = []; muaCb = []; pathCb = [];
+                    % defaults
+                case 'SiliconProbesV2'
+                    % defaults
                 case 'Utah'
-                    spikesCb = @spikesUtah;
+                    spikesFile = 'Sc%03u.Hsp';
+                case 'MultiChannelProbes'
+                    rel = acq.Ephys * acq.EphysTypes * acq.ArrayChannels * detect.ChannelGroupMembers;
+                    [channels, electrodes] = fetchn(rel & key, ...
+                        'channel_num', 'electrode_num', 'ORDER BY electrode_num, y_coord');
+                    assert(~isempty(channels), 'No channels found. Channel groups not populated for this array?')
+                    electrodes = unique(electrodes);
+                    channels = reshape(channels, [], numel(electrodes))';
+                    spikesCb = @(sourceFile, spikesFile) spikesMultiChannelProbes(sourceFile, spikesFile, channels);
+%                     lfpCb = @extractLfpMultiChannelProbes;
+%                     muaCb = @extractMuaMultiChannelProbes;
+%                     pathCb = @extractPath;
+                case 'UtahV2'  % added by EYW 2014-08-08
+                    spikesCb = @spikesUtahV2;
                     spikesFile = 'Sc%03u.Hsp';
                     lfpCb = []; muaCb = []; pathCb = [];
             end
-            useTemp = true;
 
             % if not in toolchain mode, don't extract LFP
             if ~fetch1(detect.Params(key), 'use_toolchain')

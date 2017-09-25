@@ -24,7 +24,7 @@ classdef KalmanFinalize < dj.Relvar & dj.AutoPopulate
             % Cluster spikes
             %
             % JC 2011-10-21
-            close all
+            
             tuple = key;
             
             model = fetch1(sort.KalmanManual & key,'manual_model');

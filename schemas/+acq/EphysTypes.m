@@ -5,9 +5,10 @@ acq.EphysTypes (lookup)       # contains valid configurations of task, setup and
 setup                 : tinyint unsigned   # setup number
 ephys_task            : varchar(63)        # name of the task
 ---
-ephys_type            : enum("Utah", "Tetrodes", "SiliconProbes") # type of ephys recording
-detect_method_num     : tinyint unsigned   # default detect method
-sort_method_num       : tinyint unsigned   # default spike sorting method
+->acq.ArrayInfo
+ephys_type            : enum("Utah", "Tetrodes", "SiliconProbes", "NonChronic Tetrode", "unknown") # type of ephys recording
+default_detect_method_num     : tinyint unsigned   # default detect method
+default_sort_method_num       : tinyint unsigned   # default spike sorting method
 %}
 
 classdef EphysTypes < dj.Relvar

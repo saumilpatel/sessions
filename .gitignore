@@ -1,3 +1,7 @@
 initDJ.m
 getHost.m
 *.mex*
+.*
+*~
+~*
+startup*.*
