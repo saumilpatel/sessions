@@ -147,12 +147,13 @@ if useTempDir
     delete(fullfilefs(tempDir, dataFilePattern));
     delete(fullfilefs(tempDir, '*.h5'));
     
+    localSpikesDir = fullfilefs(localProcessedDir, spikesDir);
     % copy output files to processed folder
-    if exist(localProcessedDir, 'file')
-        rmdir(localProcessedDir, 's');
+    if exist(localSpikesDir, 'file')
+        rmdir(localSpikesDir, 's');
     end
-    mkdir(localProcessedDir);
-    copyfile(destDir, localProcessedDir);
+    mkdir(localSpikesDir);
+    copyfile(outDir, localSpikesDir);
     
     % delete temp data
     try
