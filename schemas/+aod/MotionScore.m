@@ -10,7 +10,7 @@ std_z      : double     # Noise in z motion
 trace_corr : double     # PC1 and motion correlation
 %}
 
-classdef MotionScore < dj.Relvar & dj.Automatic
+classdef MotionScore < dj.Relvar & dj.AutoPopulate
 
 	properties(Constant)
 		table = dj.Table('aod.MotionScore')

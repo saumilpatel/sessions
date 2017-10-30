@@ -18,7 +18,10 @@ assert(exist(tsFile, 'file') > 0, 'Not a valid acquisition folder: %s', folder)
 % mapping from subject ids to setup and experimenter
 setups = [2 2 2 3 3 2 3 3];
 experimenters = {'Allison', 'Allison', 'Allison', 'Mani', 'Tori', 'Mani', 'Tori', 'Tori'};
-ephysTasks = {'UtahArray', 'UtahArray', 'UtahArray', 'Charles Chronic Left Tetrodes', 'Claude Chronic Left Tetrodes', 'UtahArray', 'SiliconProbes', 'SiliconProbes'};
+ephysTasks = {'UtahArray', 'UtahArray', 'UtahArray', 'Charles Chronic Left Tetrodes', 'Claude Chronic Left Tetrodes', 'UtahArray', 'SiliconProbes', 'SiliconProbes', 'Fuckyourface'};
+
+setups(16) = 4;
+experimenters(16) = {'Manolis'};
 
 % read timestamps
 tsFileId = fopen(tsFile, 'r');
@@ -51,7 +54,8 @@ timestamperTime = cellfun(msgToLabview, tsData{3}, 'UniformOutput', false);
 % sessionStartTime = timestamperTime{1} - 1;
 sessionStartTime = toLabview(sessionDatetime);
 subjectName = tsFile(splitNdx(end-2)+1:splitNdx(end-1)-1);
-subjectId = fetch1(acq.Subjects(struct('subject_name', subjectName)), 'subject_id');
+
+subjectId = fetch1(acq.Subjects(struct('subject_name', subjectName)), 'subject_id')
 setup = setups(subjectId);
 
 sessKey.subject_id = subjectId;

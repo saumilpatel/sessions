@@ -25,8 +25,8 @@ classdef QualitySet < dj.Relvar & dj.AutoPopulate
             pre_vol = pro(acq.AodScan & key, (acq.AodScan * pro(acq.AodVolume)) & 'aod_volume_start_time <  aod_scan_start_time', 'MAX(aod_volume_start_time)->aod_volume_start_time');
             post_vol = pro(acq.AodScan & key, (acq.AodScan * pro(acq.AodVolume)) & '(aod_volume_start_time >  aod_scan_stop_time)', 'MIN(aod_volume_start_time)->aod_volume_start_time');
             
-            pre = fetch(acq.AodVolume & pre_vol, '*');
-            post = fetch(acq.AodVolume(post_vol), '*');
+            pre = fetch(acq.AodVolume & pre_vol, 'x_coordinate', 'y_coordinate', 'z_coordinate');
+            post = fetch(acq.AodVolume(post_vol), 'x_coordinate', 'y_coordinate', 'z_coordinate');
             
             as = fetch(acq.AodScan(key), '*');
 

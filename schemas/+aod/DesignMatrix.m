@@ -14,7 +14,7 @@ spikes_binned    : longblob # The vector of spike times
 patched_cell_num : int      # The cell number of the patched cell
 %}
 
-classdef DesignMatrix < dj.Relvar & dj.Automatic
+classdef DesignMatrix < dj.Relvar & dj.AutoPopulate
 
 	properties(Constant)
 		table = dj.Table('aod.DesignMatrix')
@@ -28,7 +28,7 @@ classdef DesignMatrix < dj.Relvar & dj.Automatic
 			self.restrict(varargin)
         end
         
-        function traces = removeStimulus(self)
+        function [traces regressors] = removeStimulus(self)
             % Remove any component that can be predicted from teh stimulus
             % from the traces
             
@@ -37,7 +37,7 @@ classdef DesignMatrix < dj.Relvar & dj.Automatic
             x = [ones(size(dat.stimuli_matrix,1),1) dat.stimuli_matrix];
             traces = zeros(size(dat.traces_matrix));
             for i = 1:size(dat.traces_matrix,2);
-                [~,~,resid] = regress(dat.traces_matrix(:,i), x);
+                [regressors(:,i),~,resid] = regress(dat.traces_matrix(:,i), x);
                 traces(:,i) = resid;
             end
         end
@@ -54,9 +54,6 @@ classdef DesignMatrix < dj.Relvar & dj.Automatic
             % Create a matrix of the traces
             [traces, tuple.cell_nums] = fetchn(aod.TracePreprocess & aod.UniqueCell & key, 'trace', 'cell_num');
             tuple.traces_matrix = cat(2,traces{:});
-            % Normalize the energy
-            tuple.traces_matrix = bsxfun(@rdivide, tuple.traces_matrix, ...
-                std(tuple.traces_matrix,[],1));
             
             % Get the stimulus design matrix
             [tuple.stimuli_matrix startTime endTime] = ...
@@ -67,6 +64,10 @@ classdef DesignMatrix < dj.Relvar & dj.Automatic
             tuple.times(delBins) = [];
             tuple.traces_matrix(delBins,:) = [];
             tuple.stimuli_matrix(delBins,:) = [];
+            
+            % Normalize the energy
+            tuple.traces_matrix = bsxfun(@rdivide, tuple.traces_matrix, ...
+                std(tuple.traces_matrix,[],1));
             
             if count(aod.Spikes & key) == 1
                 spikes = fetch1(aod.Spikes & key, 'times');
