@@ -23,8 +23,8 @@ for key = aodScansKeys'
     end
     
     % create stop_time entries if missing
-    aodStopTime = fetch1(aod, 'aod_scan_stop_time');
-    if isnan(aodStopTime) || ~aodStopTime
+    stop_time_null_count = count(aod & 'aod_scan_stop_time is null')
+    if stop_time_null_count == 1
         br = getFile(aod,'Temporal');
         duration = 1000 * length(br) / getSamplingRate(br);
         close(br);
@@ -75,7 +75,7 @@ for key = behKeys'
     
     % create stop_time entries if missing
     behStopTime = fetch1(beh, 'beh_stop_time');
-    if isnan(behStopTime) || ~behStopTime
+    if isnan(behStopTime)
         br = getFile(beh);
         duration = 1000 * length(br) / getSamplingRate(br);
         close(br);
@@ -98,8 +98,8 @@ for key = stimKeys'
     
     % create stop_time entries if missing
     stimStopTime = fetch1(stimulation, 'stim_stop_time');
-    if isnan(stimStopTime) || ~stimStopTime
-        stim = getfield(load(stimFile), 'stim');
+    if true || isnan(stimStopTime)
+        stim = getfield(load(stimFile), 'stim'); %#ok
         if isempty(stim.events)
             stimStopTime = key.stim_start_time;
             totalTrials = 0;

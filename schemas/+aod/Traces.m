@@ -14,7 +14,7 @@ fs              : double            # Sampling rate
 
 classdef Traces < dj.Relvar
     properties(Constant)
-        table = dj.Table('aod.Traces');
+%        table = dj.Table('aod.Traces');
         offset = -800 * 600;
     end
     

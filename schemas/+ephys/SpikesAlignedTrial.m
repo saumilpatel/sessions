@@ -28,15 +28,14 @@ classdef SpikesAlignedTrial < dj.Relvar
             tuples = dj.struct.join(key,trials);
             
             for tuple = tuples'
-                alignTime = fetchn(stimulation.StimTrialEvents(tuple),'event_time');
+                alignTime = double(fetchn(stimulation.StimTrialEvents(tuple),'event_time'));
                 try
-                    endTime = fetch1(stimulation.StimTrialEvents(setfield(tuple,'event_type','endStimulus')),'event_time');
+                    endTime = double(fetch1(stimulation.StimTrialEvents(setfield(tuple,'event_type','endStimulus')),'event_time'));
                 catch
                     
-                    ev_times = fetchn(stimulation.StimTrialEvents(setfield(tuple,'event_type','showSubStimulus')),'event_time');
+                    ev_times = double(fetchn(stimulation.StimTrialEvents(setfield(tuple,'event_type','showSubStimulus')),'event_time'));
                     endTime = max(ev_times) + 60;
                 end
-                    
                 
                 tuple.spikes_aligned = spikes(spikes > (alignTime - tuple.pre_stim_time) & ...
                     (spikes < (endTime + tuple.post_stim_time))) - double(alignTime);

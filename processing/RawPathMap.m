@@ -24,7 +24,7 @@ classdef RawPathMap < handle
             %   the search path (map.search) is used, then the temporary
             %   location (map.temp), and finally at_scratch.
             assert(~isempty(regexp(file, '^(/|\\)raw', 'once')), 'Not a raw data file: %s', file)
-            loc = [self.search, {getLocalPath('/at_scratch')}];
+            loc = [self.search, {getLocalPath('/at_scratch')}, '/Volumes/M$'];
             for i = 1:numel(loc)
                 outFile = strrep([loc{i}, file(5:end)], '\', '/');
                 if numel(dir(sprintf(strrep(outFile, filesep, '/'), 0)))  % sprintf in case of HDF5 family file

@@ -82,7 +82,7 @@ classdef ForwardTuning < dj.Relvar & dj.AutoPopulate
             for i = 1:length(trials)
                 trial_info = fetch1(stimulation.StimTrials(trials(i)), 'trial_params');
                 event = fetch(stimulation.StimTrialEvents(trials(i), 'event_type="showSubStimulus"'),'*');
-                onsets = sort([event.event_time]);
+                onsets = double(sort([event.event_time]));
                 for j = 1:length(onsets)
                     cond = trial_info.conditions(j);
                     onset = onsets(j);

@@ -3,8 +3,17 @@ function [xpos ypos zpos details] = trackMotion(mot, t, coordinates)
 %
 % [xpos ypos zpos t details] = trackMotion(fn)
 %
+% mot is a 4-D matrix.  The first index is the channel
+% for either red or green.  The second and third index
+% are spatial with the multiple planes being concatenated
+% in the third dimension. The fourth dimension is time.
+%
+% t is the index of time stamps for the frames
+%
+% coordinates are the locations of the pixels
+%
+%
 % JC 2010-07-12
-
 
 %% load and normalize stack
 

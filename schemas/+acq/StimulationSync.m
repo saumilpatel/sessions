@@ -84,7 +84,7 @@ classdef StimulationSync < dj.Relvar & dj.AutoPopulate
                 else % nothing to sync against
                     % network sync
                     if numel(stim.params.trials) <= 10
-                        disp 'Few trials'
+                        disp 'Few trials and no recording. Not synchronizing.'
                         return;
                     end
 

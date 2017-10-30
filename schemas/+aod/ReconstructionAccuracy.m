@@ -12,7 +12,7 @@ skewness   : double   # the skewness fo the trace
 iqr        : double   # interquartile range (in delta F / F)
 %}
 
-classdef ReconstructionAccuracy < dj.Relvar & dj.Automatic
+classdef ReconstructionAccuracy < dj.Relvar & dj.AutoPopulate
     
     properties(Constant)
         table = dj.Table('aod.ReconstructionAccuracy')
@@ -43,6 +43,7 @@ classdef ReconstructionAccuracy < dj.Relvar & dj.Automatic
             end
             
             ds = round(trace.fs / 100);
+            ds = 1;
             dt = 1 / trace.fs;
             ds_trace = decimate(trace.trace,ds);
             highPass = 0.1;
@@ -54,10 +55,11 @@ classdef ReconstructionAccuracy < dj.Relvar & dj.Automatic
 
             gam = 1 - dt / 2;
             lam = 10;
+            sigma = sqrt(var(diff(filtered_trace)) / 2 / ds);
             
             fr = fast_oopsi(filtered_trace, ...
                 struct('dt',dt,'est_lam',0,'est_gam',0,'fast_iter_max',0),...
-                struct('gam',gam,'lam',lam));
+                struct('gam',gam,'lam',lam,'sig',sigma));
             
             tuple.trace = fr;
             tuple.trace_t = trace.t0 + (0:length(fr)-1) / fs * 1000;

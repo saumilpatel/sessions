@@ -13,7 +13,7 @@ motion_z  : longblob # The kalman z position
 resid     : longblob # The residual traces
 %}
 
-classdef MotionKalman < dj.Relvar & dj.Automatic
+classdef MotionKalman < dj.Relvar & dj.AutoPopulate
 
 	properties(Constant)
 		table = dj.Table('aod.MotionKalman')
