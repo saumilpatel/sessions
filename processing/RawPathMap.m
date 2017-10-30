@@ -13,6 +13,8 @@ classdef RawPathMap < handle
     
     methods
         function self = RawPathMap(varargin)
+            self.search = self.getSearchPath();
+            self.temp = self.getTempPath();
         end
         
         function outFile = findFile(self, file)
@@ -40,8 +42,8 @@ classdef RawPathMap < handle
         end
         
         function file = toTemp(self, file)
-            % Map /raw to the temporary location (typically on local drive)
-            %   file = toTemp(RawPathMap, file)
+           % Map /raw to the temporary location (typically on local drive)
+             % file = toTemp(RawPathMap, file)
             assert(~isempty(regexp(file, '^(/|\\)raw', 'once')), 'Not a raw data file: %s', file)
             file = strrep([self.temp file(5:end)], '\', '/');
         end
@@ -52,7 +54,7 @@ classdef RawPathMap < handle
             if exist('rawmap.mat', 'file')
                 search = getfield(load('rawmap'), 'search'); %#ok
             else
-                search = {'M:', 'N:', 'O:', 'P:', getLocalPath('/at_scratch')};
+                search = {'M:', 'N:', 'O:', 'P:', 'F:', getLocalPath('/at_scratch')};
             end
         end
             
