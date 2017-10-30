@@ -4,7 +4,16 @@ function [stimDiode, rms, offset] = syncEphys(stim, key)
 
 params.oldFile = false;
 params.maxPhotodiodeErr = 0.5;    % 0.5 ms err allowed
-params.behDiodeOffset = [2.5 4];    % [min max] in ms
+
+% CAUTION: this min has been modified from 2.5 to 2.0 on 
+% June 8, 2017 by Edgar Y. Walker encountering cases of offset ~2.4951
+% reliably when processing
+%            subject_id: 34
+%                 setup: 1
+%    session_start_time: 3579798609122
+%       stim_start_time: 3579798640685
+%
+params.behDiodeOffset = [2.0 4];    % [min max] in ms
 params.behDiodeSlopeErr = 1e-6;   % max deviation from 1
 params.diodeThreshold = 0.04;
 params.minNegTime = -100;  % 100 ms timing error
@@ -18,14 +27,18 @@ end
 
 assert(strcmp(stim.synchronized, 'network'), 'Run network sync first!')
 
-% Get photodiode swap times
+% Get photodiode swap times from Mac Psychtoolbox time
+% Mac event times are (most likely) relative to program start time
+% swap times are stored in milli seconds
 tstart = stim.params.trials(1).swapTimes(1) - 500;
 tend = stim.params.trials(end).swapTimes(end) + 500;
+
+% reading the photodiode signal from Ephys and detect photodiode peak times
 br = getFile(acq.Ephys(key), 'Photodiode');
 [peakTimes, peakAmps] = detectPhotodiodePeaks(br, tstart, tend);
 close(br);
 
-% detect swaps
+% detect swaps from the photodiode peak times
 da = abs(diff(peakAmps));
 [mu, v] = MoG1(da(:), 2, 'cycles', 50, 'mu', [0 median(da)]);
 sd = sqrt(v);
@@ -69,7 +82,7 @@ diodeSlopeErr = macPar(2) - 1;
 diodeOffset = macPar(1) + macSwapTimes(1) * diodeSlopeErr;
 assert(abs(diodeSlopeErr) < params.behDiodeSlopeErr ...
     && diodeOffset > params.behDiodeOffset(1) && diodeOffset < params.behDiodeOffset(2), ...
-    'Regression between behavior clock and photodiode clock outside system tolerances');
+    'Regression between behavior clock and photodiode clock outside system tolerances: diodeSlopeErr = %f and diodeOffset = %f', diodeSlopeErr, diodeOffset);
 
 % convert times in stim file
 stimDiode = convertStimTimes(stim, macPar, [0 1]);
