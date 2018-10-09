@@ -20,6 +20,7 @@ classdef SessionsCleanup < dj.Relvar & dj.AutoPopulate
     methods (Access=protected)        
         function makeTuples(self, key)
             if count(acq.Sessions(key) & 'recording_software = "Acquisition2.0"')
+                key
                 cleanup(key);
             end
             insert(self, key);
