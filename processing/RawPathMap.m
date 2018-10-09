@@ -54,7 +54,7 @@ classdef RawPathMap < handle
             if exist('rawmap.mat', 'file')
                 search = getfield(load('rawmap'), 'search'); %#ok
             else
-                search = {'M:', 'N:', 'O:', 'P:', 'F:', getLocalPath('/at_scratch')};
+                search = {'M:', 'N:', 'O:', 'P:', 'F:', getLocalPath('/at_scratch'), getLocalPath('/raw')};
             end
         end
             
