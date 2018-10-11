@@ -1,6 +1,6 @@
 %{
 # table to record results notification to slack
-->acq.Stimulation
+-> stimulation.PerSectorStats
 -----
 msg = ''                    : varchar(1024) # message for the notification
 sent_ts = CURRENT_TIMESTAMP : timestamp
